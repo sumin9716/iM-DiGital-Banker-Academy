@@ -11,12 +11,65 @@
 
 ---
 
-## 📈 0) Gantt Chart
+## 📈 Gantt Chart
 
 <div>
   <img src="./img/gantt.png"/>
 </div>
 
+---
+
+## 👨🏻‍💻 Members
+
+<table align="center"?
+    <tr>
+        <td align="center">김수민</td>
+        <td align="center">나효상</td>
+        <td align="center">배수원</td>
+        <td align="center">서범창</td>    
+    </tr>
+    <tr height="160px">
+        <td align="center">
+            <img height="120px" weight="120px" src="https://avatars.githubusercontent.com/u/221969214?v=4"/>
+        </td>
+        <td align="center">
+            <img height="120px" weight="120px" src="https://avatars.githubusercontent.com/u/131345223?v=4"/>
+        </td>
+        <td align="center">
+            <img height="120px" weight="120px" src=""/>
+        </td>
+        <td align="center">
+            <img height="120px" weight="120px" src="https://avatars.githubusercontent.com/u/70587328?v=4"/>
+        </td>
+    </tr>
+    <tr>
+        <td align="center"><a href="https://github.com/sumin9716">🔗Github</a></td>
+        <td align="center"><a href="https://github.com/TimePise">🔗Github</a></td>
+        <td align="center"><a href="https://github.com/">🔗Github</a></td>
+        <td align="center"><a href="https://github.com/SeoBamm">🔗Github</a></td>
+    </tr>
+    <tr>
+        <td align="center"><code>역할 1</code></td>
+        <td align="center"><code>역할 2</code></td>
+        <td align="center"><code>역할 3</code></td>
+        <td align="center"><code>역할 4</code></td>
+    </tr>
+    <tr>
+        <td align="center">
+            <code>상세 1</code>
+        </td>
+        <td align="center">
+            <code>상세 2</code>
+        </td>
+        <td align="center">
+            <code>상세 3</code>
+        </td>
+        <td align="center">
+            <code>상세 4</code>
+        </td>
+    </tr>
+</table>
+    
 ---
 
 ## 📝 1) 매일 공통 체크리스트 (Daily)
