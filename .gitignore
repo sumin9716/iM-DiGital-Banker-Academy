@@ -1,0 +1,15 @@
+### Data Files ###
+*.csv
+*.xlsx
+
+### Image/Presentation Files ###
+*.pptx
+*.png
+*.jpg
+*.jpeg
+
+### Compressed Files ###
+*.zip
+
+### Code Files ###
+*.pyc
