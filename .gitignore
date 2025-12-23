@@ -2,11 +2,8 @@
 *.csv
 *.xlsx
 
-### Image/Presentation Files ###
+### Presentation Files ###
 *.pptx
-*.png
-*.jpg
-*.jpeg
 
 ### Compressed Files ###
 *.zip

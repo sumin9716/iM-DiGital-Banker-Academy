@@ -1,5 +1,5 @@
 <div>
-  <img src="./img/imdigitalbanker.png"/>
+  <img src="./img/iM_DiGital_Banker.png"/>
 </div>
 
 # 💲 금융 데이터 기반 최종 프로젝트 체크리스트 💲
