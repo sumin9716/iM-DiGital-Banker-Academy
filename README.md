@@ -36,7 +36,7 @@
             <img height="120px" weight="120px" src="https://avatars.githubusercontent.com/u/131345223?v=4"/>
         </td>
         <td align="center">
-            <img height="120px" weight="120px" src=""/>
+            <img height="120px" weight="120px" src="./img/pear.png"/>
         </td>
         <td align="center">
             <img height="120px" weight="120px" src="https://avatars.githubusercontent.com/u/70587328?v=4"/>
@@ -45,28 +45,14 @@
     <tr>
         <td align="center"><a href="https://github.com/sumin9716">🔗Github</a></td>
         <td align="center"><a href="https://github.com/TimePise">🔗Github</a></td>
-        <td align="center"><a href="https://github.com/">🔗Github</a></td>
+        <td align="center"><a href="https://github.com/">🔗N/A</a></td>
         <td align="center"><a href="https://github.com/SeoBamm">🔗Github</a></td>
     </tr>
     <tr>
-        <td align="center"><code>역할 1</code></td>
-        <td align="center"><code>역할 2</code></td>
-        <td align="center"><code>역할 3</code></td>
-        <td align="center"><code>역할 4</code></td>
-    </tr>
-    <tr>
-        <td align="center">
-            <code>상세 1</code>
-        </td>
-        <td align="center">
-            <code>상세 2</code>
-        </td>
-        <td align="center">
-            <code>상세 3</code>
-        </td>
-        <td align="center">
-            <code>상세 4</code>
-        </td>
+        <td align="center"><code>Product Manager</code>, <code>모델 개발</code>, <code>Insight</code></td>
+        <td align="center"><code>데이터 수집</code>, <code>EDA</code>, <code>Full-Stack</code></td>
+        <td align="center"><code>문서화</code>, <code>시각화</code></td>
+        <td align="center"><code>모델 개발</code>, <code>EDA</code>, <code>Full-Stack</code></td>
     </tr>
 </table>
     
@@ -90,11 +76,11 @@
 ## 🧭 2) 구간별 체크리스트 (프로젝트 진행용)
 
 ### 📅 1 - 2일차 (12/23 - 12/24) — 기획 / 주제 선정
-- [ ] 주제 확정 (단일 심화 / 복합)
-- [ ] 연구 목적·범위·성과지표(KPI) 확정
-- [ ] 팀 역할 분담 확정
-- [ ] 프로젝트 기획서 초안 → 최종본 완료
-- [ ] 기획서 제출 완료 (**변경 불가**)
+- [x] 주제 확정 (단일 심화 / 복합)
+- [x] 연구 목적·범위·성과지표(KPI) 확정
+- [x] 팀 역할 분담 확정
+- [x] 프로젝트 기획서 초안 → 최종본 완료
+- [x] 기획서 제출 완료 (**변경 불가**)
 
 **📄 산출물**
 - [x] 프로젝트 기획서  
