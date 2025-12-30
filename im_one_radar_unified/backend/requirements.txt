@@ -1,10 +1,13 @@
-# Backend dependencies
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-pydantic>=2.0.0
+# Django Backend Requirements
+django>=5.0
+djangorestframework>=3.14
+django-cors-headers>=4.3
 pandas>=2.0.0
 numpy>=1.24.0
-python-multipart>=0.0.6
 
 # Optional: for parquet support
 pyarrow>=14.0.0
+
+# Optional: for production
+gunicorn>=21.0
+whitenoise>=6.6
