@@ -93,6 +93,13 @@ class RadarConfig:
     lgbm_subsample: float = 0.9
     lgbm_colsample_bytree: float = 0.9
     lgbm_random_state: int = 42
+    
+    # Regularization parameters (NEW)
+    lgbm_min_child_samples: int = 20
+    lgbm_reg_alpha: float = 0.1  # L1 regularization
+    lgbm_reg_lambda: float = 0.1  # L2 regularization
+    lgbm_early_stopping_rounds: int = 50
+    lgbm_max_depth: int = -1  # -1 means no limit
 
     # ============== Alert Thresholds ==============
     alert_down_threshold_pct: float = -0.20
