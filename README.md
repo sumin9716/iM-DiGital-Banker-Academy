@@ -49,7 +49,7 @@
         <td align="center"><a href="https://github.com/SeoBamm">🔗Github</a></td>
     </tr>
     <tr>
-        <td align="center"><code>Product Manager</code>, <code>모델 개발</code>, <code>Insight</code></td>
+        <td align="center"><code>Project Manager</code>, <code>모델 개발</code>, <code>Insight</code></td>
         <td align="center"><code>데이터 수집</code>, <code>EDA</code>, <code>Full-Stack</code></td>
         <td align="center"><code>문서화</code>, <code>시각화</code></td>
         <td align="center"><code>모델 개발</code>, <code>EDA</code>, <code>Full-Stack</code></td>
