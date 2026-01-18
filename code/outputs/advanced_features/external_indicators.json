@@ -1,0 +1,21 @@
+{
+  "ESI_year": 2025.0,
+  "ESI_month": 6.0,
+  "ESI_ym": 202506.0,
+  "KASI_ym": 202506.0,
+  "KASI_holiday_cnt": 2.0,
+  "KASI_weekend_cnt": 9.0,
+  "fed_rate_fed_rate": 4.33,
+  "fed_rate_fed_rate_eom": 4.33,
+  "fed_rate_fed_rate_mom_diff": 0.0,
+  "oil_wti_price": 62.17,
+  "oil_brent_price": 64.45,
+  "oil_wti_mom_pct": -2.156122127793514,
+  "housing_WRTTIME_IDTFR_ID": 202511.0,
+  "housing_GRP_ID": null,
+  "housing_GRP_NM": null,
+  "trade_export_amt": 334671675855.0,
+  "trade_import_amt": 307051051131.0,
+  "trade_trade_balance": 27620624724.0,
+  "fx_rate": 1356.4
+}

@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+.DS_Store
+outputs/segment_panel.csv
+outputs/segment_panel.parquet
+outputs/models/
+outputs/deep_learning/*.pt
+catboost_info/

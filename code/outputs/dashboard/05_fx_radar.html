@@ -1,0 +1,892 @@
+
+    <html>
+    <head>
+        <meta charset='utf-8'>
+        <style>
+            body { font-family: 'Malgun Gothic', Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+            .container { max-width: 1400px; margin: 0 auto; }
+            h1 { color: #1a237e; border-bottom: 3px solid #3f51b5; padding-bottom: 10px; }
+            h2 { color: #303f9f; margin-top: 30px; }
+            .regime-panel { 
+                display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0;
+            }
+            .regime-card {
+                background: white; border-radius: 12px; padding: 20px; 
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex: 1; min-width: 200px;
+            }
+            .regime-card h3 { margin: 0 0 10px 0; color: #666; font-size: 14px; }
+            .regime-card .value { font-size: 28px; font-weight: bold; color: #1a237e; }
+            .regime-card .subvalue { font-size: 14px; color: #888; margin-top: 5px; }
+            .uptrend { color: #d32f2f !important; }
+            .downtrend { color: #388e3c !important; }
+            .highvol { background: #fff3e0 !important; }
+            .score-table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
+            .score-table th { background: #3f51b5; color: white; padding: 12px; text-align: left; }
+            .score-table td { padding: 10px; border-bottom: 1px solid #eee; }
+            .score-table tr:hover { background: #f5f5f5; }
+            .grade-A { background: #ffcdd2; font-weight: bold; }
+            .grade-B { background: #fff9c4; }
+            .grade-C { background: #e3f2fd; }
+            .action-card {
+                background: white; border-left: 4px solid #3f51b5; padding: 15px;
+                margin: 10px 0; border-radius: 0 8px 8px 0;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .action-card .segment { font-weight: bold; color: #1a237e; font-size: 16px; }
+            .action-card .meta { color: #888; font-size: 12px; margin: 5px 0; }
+            .action-card .actions { color: #333; margin-top: 10px; line-height: 1.6; }
+            .action-card .actions .action-item { 
+                background: #f8f9fa; padding: 8px 12px; margin: 5px 0; 
+                border-radius: 4px; display: flex; align-items: center;
+            }
+            .action-card .actions .action-item .urgency { 
+                display: inline-block; padding: 2px 8px; border-radius: 10px; 
+                font-size: 11px; margin-right: 10px; font-weight: bold;
+            }
+            .action-card .actions .urgency-critical { background: #ffcdd2; color: #c62828; }
+            .action-card .actions .urgency-high { background: #fff3e0; color: #e65100; }
+            .action-card .actions .urgency-medium { background: #e3f2fd; color: #1565c0; }
+            .action-card .actions .urgency-low { background: #e8f5e9; color: #2e7d32; }
+            .action-card .reason { 
+                color: #666; font-size: 13px; margin-top: 10px; padding: 10px;
+                background: #fafafa; border-radius: 4px; border-left: 3px solid #9e9e9e;
+            }
+            .action-card .cause { 
+                color: #555; font-size: 12px; margin-top: 8px; font-style: italic;
+            }
+            .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        </style>
+    </head>
+    <body>
+    <div class="container">
+        <h1>📈 FX Opportunity & Risk Radar</h1>
+    <h2>🌐 현재 환율 레짐</h2><div class='regime-panel'>
+            <div class='regime-card'>
+                <h3>USD/KRW 환율</h3>
+                <div class='value'>1,366.9</div>
+                <div class='subvalue'>월 평균</div>
+            </div>
+            
+            <div class='regime-card'>
+                <h3>트렌드</h3>
+                <div class='value uptrend'>📈 Uptrend</div>
+                <div class='subvalue'>원화 약세</div>
+            </div>
+            
+            <div class='regime-card '>
+                <h3>변동성</h3>
+                <div class='value'>〰️ MedVol</div>
+                <div class='subvalue'>보통</div>
+            </div>
+            
+            <div class='regime-card'>
+                <h3>월간 변동</h3>
+                <div class='value'>⬇️ -1.98%</div>
+                <div class='subvalue'>전월 대비</div>
+            </div>
+            </div><h2>🎯 FX Opportunity TOP 세그먼트</h2><table class='score-table'>
+        <tr>
+            <th>순위</th>
+            <th>세그먼트</th>
+            <th>FX총액</th>
+            <th>기회점수</th>
+            <th>리스크점수</th>
+            <th>등급</th>
+            <th>추천 액션</th>
+        </tr>
+        
+            <tr class='grade-A'>
+                <td>1</td>
+                <td>가구 제조업|경상북도|최우수|Y...</td>
+                <td>1백만</td>
+                <td><b>84.0</b></td>
+                <td>56.0</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; ⚠️ 자금흐름 이상 감지 - RM 우선 컨택 및 원인 파악 필요; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; ⚠️ 자금흐름 이상 감지 - RM 우선 컨택 및 원인 파악 필요; 🔴 여신한도 소진 임박 - 긴급 한도 점...</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>2</td>
+                <td>도매 및 상품 중개업|부산광역시|우수|Y...</td>
+                <td>1백만</td>
+                <td><b>83.7</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>3</td>
+                <td>1차 금속 제조업|경상북도|최우수|Y...</td>
+                <td>34백만</td>
+                <td><b>82.3</b></td>
+                <td>40.2</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>4</td>
+                <td>전문직별 공사업|대구광역시|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>82.2</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>5</td>
+                <td>기타 운송장비 제조업|부산광역시|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>82.0</b></td>
+                <td>52.5</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 ...</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>6</td>
+                <td>도매 및 상품 중개업|경상남도|최우수|Y...</td>
+                <td>4백만</td>
+                <td><b>81.8</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>7</td>
+                <td>기타 제품 제조업|경상북도|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>81.8</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>8</td>
+                <td>고무 및 플라스틱제품 제조업|경상북도|최우수|Y...</td>
+                <td>1백만</td>
+                <td><b>80.8</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>9</td>
+                <td>목재 및 나무제품 제조업; 가구 제외|경상북도|최우수|...</td>
+                <td>1백만</td>
+                <td><b>80.8</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>10</td>
+                <td>도매 및 상품 중개업|대구광역시|일반|N...</td>
+                <td>0백만</td>
+                <td><b>80.5</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>11</td>
+                <td>전자부품, 컴퓨터, 영상, 음향 및 통신장비 제조업|경...</td>
+                <td>0백만</td>
+                <td><b>80.3</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>12</td>
+                <td>의료, 정밀, 광학기기 및 시계 제조업|대구광역시|최우...</td>
+                <td>2백만</td>
+                <td><b>79.5</b></td>
+                <td>70.0</td>
+                <td><b>A</b></td>
+                <td title='💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>13</td>
+                <td>기타 운송장비 제조업|대구광역시|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>79.2</b></td>
+                <td>52.5</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; ⚠️ 자금흐름 이상 감지 - RM 우선 컨택 및 원인 파악 필요'>💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; ⚠️ 자금흐름 이상 감지 - RM 우선 컨택 및 원인...</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>14</td>
+                <td>1차 금속 제조업|경상남도|최우수|Y...</td>
+                <td>2백만</td>
+                <td><b>79.1</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>15</td>
+                <td>1차 금속 제조업|미상|최우수|Y...</td>
+                <td>1백만</td>
+                <td><b>79.0</b></td>
+                <td>38.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 ...</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>16</td>
+                <td>가죽, 가방 및 신발 제조업|부산광역시|최우수|Y...</td>
+                <td>24백만</td>
+                <td><b>78.7</b></td>
+                <td>40.2</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 ...</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>17</td>
+                <td>펄프, 종이 및 종이제품 제조업|서울특별시|최우수|Y...</td>
+                <td>3백만</td>
+                <td><b>78.6</b></td>
+                <td>35.0</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공'>💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>18</td>
+                <td>1차 금속 제조업|경상북도|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>78.5</b></td>
+                <td>52.5</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>19</td>
+                <td>1차 금속 제조업|부산광역시|우수|Y...</td>
+                <td>1백만</td>
+                <td><b>78.3</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>20</td>
+                <td>도매 및 상품 중개업|대구광역시|우수|Y...</td>
+                <td>3백만</td>
+                <td><b>78.1</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>21</td>
+                <td>식료품 제조업|부산광역시|최우수|Y...</td>
+                <td>2백만</td>
+                <td><b>77.8</b></td>
+                <td>56.0</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>22</td>
+                <td>화학물질 및 화학제품 제조업; 의약품 제외|경상북도|최...</td>
+                <td>3백만</td>
+                <td><b>77.5</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>23</td>
+                <td>화학물질 및 화학제품 제조업; 의약품 제외|경상북도|우...</td>
+                <td>1백만</td>
+                <td><b>77.5</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>24</td>
+                <td>자동차 및 트레일러 제조업|경상남도|최우수|Y...</td>
+                <td>2백만</td>
+                <td><b>77.3</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>25</td>
+                <td>창고 및 운송관련 서비스업|부산광역시|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>77.2</b></td>
+                <td>28.0</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공'>💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>26</td>
+                <td>자동차 및 트레일러 제조업|경상북도|최우수|Y...</td>
+                <td>60백만</td>
+                <td><b>76.8</b></td>
+                <td>40.2</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>27</td>
+                <td>전자부품, 컴퓨터, 영상, 음향 및 통신장비 제조업|대...</td>
+                <td>1백만</td>
+                <td><b>76.3</b></td>
+                <td>50.8</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>28</td>
+                <td>섬유제품 제조업; 의복제외|미상|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>76.2</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>29</td>
+                <td>화학물질 및 화학제품 제조업; 의약품 제외|서울특별시|...</td>
+                <td>12백만</td>
+                <td><b>75.8</b></td>
+                <td>47.2</td>
+                <td><b>A</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>30</td>
+                <td>섬유제품 제조업; 의복제외|서울특별시|최우수|Y...</td>
+                <td>1백만</td>
+                <td><b>75.8</b></td>
+                <td>31.5</td>
+                <td><b>B</b></td>
+                <td title='💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토'>💱 중소기업 환율우대 프로그램 안내; 📱 FX 거래 디지털 채널 1:1 안내 서비스 제공; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 ...</td>
+            </tr>
+            </table><h2>⚠️ FX Risk TOP 세그먼트</h2><table class='score-table'>
+        <tr>
+            <th>순위</th>
+            <th>세그먼트</th>
+            <th>FX총액</th>
+            <th>리스크점수</th>
+            <th>기회점수</th>
+            <th>등급</th>
+            <th>리스크 요인</th>
+        </tr>
+        
+            <tr class='grade-A'>
+                <td>1</td>
+                <td>폐기물 수집, 운반, 처리 및 원료 재생업|경상북도|최...</td>
+                <td>1백만</td>
+                <td><b>87.5</b></td>
+                <td>65.8</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-38.4%); FX 연간 급감 (-30.4%); 순유입 급락'>FX 월간 급감 (-38.4%); FX 연간 급감 (-30.4%); 순유입 급락</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>2</td>
+                <td>산업용 기계 및 장비 수리업|부산광역시|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>87.5</b></td>
+                <td>49.7</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-82.5%); FX 연간 급감 (-79.2%); 순유입 급락'>FX 월간 급감 (-82.5%); FX 연간 급감 (-79.2%); 순유입 급락</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>3</td>
+                <td>도매 및 상품 중개업|경기도|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>80.5</b></td>
+                <td>52.3</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-90.4%); FX 연간 급감 (-90.9%); 한도소진율 위험 (1171%)'>FX 월간 급감 (-90.4%); FX 연간 급감 (-90.9%); 한도소진율 위험 (1171%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>4</td>
+                <td>식료품 제조업|경상북도|최우수|Y...</td>
+                <td>2백만</td>
+                <td><b>75.2</b></td>
+                <td>68.4</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 감소 (-17.6%); FX 연간 급감 (-42.7%); 한도소진율 위험 (362%)'>FX 월간 감소 (-17.6%); FX 연간 급감 (-42.7%); 한도소진율 위험 (362%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>5</td>
+                <td>도매 및 상품 중개업|인천광역시|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>59.8</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-53.2%); FX 연간 급감 (-74.4%); 한도소진율 위험 (307%)'>FX 월간 급감 (-53.2%); FX 연간 급감 (-74.4%); 한도소진율 위험 (307%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>6</td>
+                <td>금속가공제품 제조업; 기계 및 가구 제외|경기도|최우수...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>53.8</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-69.0%); FX 연간 급감 (-39.4%); 한도소진율 위험 (535%)'>FX 월간 급감 (-69.0%); FX 연간 급감 (-39.4%); 한도소진율 위험 (535%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>7</td>
+                <td>비금속 광물제품 제조업|경상북도|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>50.6</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-61.6%); FX 연간 급감 (-39.4%); 한도소진율 위험 (466%)'>FX 월간 급감 (-61.6%); FX 연간 급감 (-39.4%); 한도소진율 위험 (466%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>8</td>
+                <td>컴퓨터 프로그래밍, 시스템 통합 및 관리업|경상북도|우...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>50.5</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-66.0%); 순유입 급락; 한도소진율 위험 (504%)'>FX 월간 급감 (-66.0%); 순유입 급락; 한도소진율 위험 (504%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>9</td>
+                <td>의료, 정밀, 광학기기 및 시계 제조업|대구광역시|우수...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>47.5</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-49.5%); FX 연간 급감 (-79.2%); 한도소진율 위험 (2767%)'>FX 월간 급감 (-49.5%); FX 연간 급감 (-79.2%); 한도소진율 위험 (2767%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>10</td>
+                <td>전기장비 제조업|대구광역시|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>45.7</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-78.0%); FX 연간 급감 (-87.7%); 한도소진율 위험 (633%)'>FX 월간 급감 (-78.0%); FX 연간 급감 (-87.7%); 한도소진율 위험 (633%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>11</td>
+                <td>도매 및 상품 중개업|경기도|최우수|N...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>45.0</td>
+                <td><b>A</b></td>
+                <td title='FX 연간 급감 (-92.9%); 순유입 급락; 한도소진율 위험 (361%)'>FX 연간 급감 (-92.9%); 순유입 급락; 한도소진율 위험 (361%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>12</td>
+                <td>비금속 광물제품 제조업|대구광역시|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>44.1</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-90.5%); FX 연간 급감 (-90.5%); 한도소진율 위험 (998%)'>FX 월간 급감 (-90.5%); FX 연간 급감 (-90.5%); 한도소진율 위험 (998%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>13</td>
+                <td>자동차 및 부품 판매업|대구광역시|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>73.5</b></td>
+                <td>43.6</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-66.3%); FX 연간 급감 (-92.9%); 한도소진율 위험 (1358%)'>FX 월간 급감 (-66.3%); FX 연간 급감 (-92.9%); 한도소진율 위험 (1358%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>14</td>
+                <td>섬유제품 제조업; 의복제외|대구광역시|일반|N...</td>
+                <td>0백만</td>
+                <td><b>71.8</b></td>
+                <td>53.8</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-27.9%); 한도소진율 위험 (564%); 예금 감소 (-34.2%)'>FX 월간 급감 (-27.9%); 한도소진율 위험 (564%); 예금 감소 (-34.2%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>15</td>
+                <td>의료, 정밀, 광학기기 및 시계 제조업|대구광역시|최우...</td>
+                <td>2백만</td>
+                <td><b>70.0</b></td>
+                <td>79.5</td>
+                <td><b>A</b></td>
+                <td title='FX 연간 급감 (-31.6%); 순유입 급락; 한도소진율 위험 (447%)'>FX 연간 급감 (-31.6%); 순유입 급락; 한도소진율 위험 (447%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>16</td>
+                <td>1차 금속 제조업|부산광역시|최우수|Y...</td>
+                <td>1백만</td>
+                <td><b>70.0</b></td>
+                <td>75.4</td>
+                <td><b>A</b></td>
+                <td title='FX 연간 급감 (-78.0%); 순유입 급락; 한도소진율 위험 (3600%)'>FX 연간 급감 (-78.0%); 순유입 급락; 한도소진율 위험 (3600%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>17</td>
+                <td>자동차 및 트레일러 제조업|미상|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>70.0</b></td>
+                <td>62.7</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-33.4%); 순유입 급락; 한도소진율 위험 (505%)'>FX 월간 급감 (-33.4%); 순유입 급락; 한도소진율 위험 (505%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>18</td>
+                <td>펄프, 종이 및 종이제품 제조업|대구광역시|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>70.0</b></td>
+                <td>59.5</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-20.4%); 순유입 급락; 한도소진율 위험 (951%)'>FX 월간 급감 (-20.4%); 순유입 급락; 한도소진율 위험 (951%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>19</td>
+                <td>도매 및 상품 중개업|경상북도|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>70.0</b></td>
+                <td>58.6</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-47.7%); 순유입 급락; 한도소진율 위험 (456%)'>FX 월간 급감 (-47.7%); 순유입 급락; 한도소진율 위험 (456%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>20</td>
+                <td>기타 제품 제조업|경상남도|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>70.0</b></td>
+                <td>50.1</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-49.5%); 순유입 급락; 한도소진율 위험 (1959%)'>FX 월간 급감 (-49.5%); 순유입 급락; 한도소진율 위험 (1959%)</td>
+            </tr>
+            
+            <tr class='grade-A'>
+                <td>21</td>
+                <td>종합 건설업|대구광역시|최우수|Y...</td>
+                <td>0백만</td>
+                <td><b>70.0</b></td>
+                <td>45.1</td>
+                <td><b>A</b></td>
+                <td title='FX 월간 급감 (-74.6%); 순유입 급락; 한도소진율 위험 (156%)'>FX 월간 급감 (-74.6%); 순유입 급락; 한도소진율 위험 (156%)</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>22</td>
+                <td>도매 및 상품 중개업|경상남도|일반|Y...</td>
+                <td>0백만</td>
+                <td><b>66.5</b></td>
+                <td>59.1</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 감소 (-11.9%); 순유입 급락; 한도소진율 위험 (12420%)'>FX 월간 감소 (-11.9%); 순유입 급락; 한도소진율 위험 (12420%)</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>23</td>
+                <td>화학물질 및 화학제품 제조업; 의약품 제외|서울특별시|...</td>
+                <td>0백만</td>
+                <td><b>66.5</b></td>
+                <td>53.5</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 급감 (-24.7%); 순유입 급락; 예금 감소 (-47.8%)'>FX 월간 급감 (-24.7%); 순유입 급락; 예금 감소 (-47.8%)</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>24</td>
+                <td>1차 금속 제조업|경기도|최우수|N...</td>
+                <td>0백만</td>
+                <td><b>66.5</b></td>
+                <td>43.2</td>
+                <td><b>B</b></td>
+                <td title='FX 연간 급감 (-67.7%); 순유입 급락; 예금 감소 (-10.9%)'>FX 연간 급감 (-67.7%); 순유입 급락; 예금 감소 (-10.9%)</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>25</td>
+                <td>전자부품, 컴퓨터, 영상, 음향 및 통신장비 제조업|경...</td>
+                <td>0백만</td>
+                <td><b>66.5</b></td>
+                <td>41.0</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 급감 (-38.9%); 순유입 급락; 예금 감소 (-21.0%)'>FX 월간 급감 (-38.9%); 순유입 급락; 예금 감소 (-21.0%)</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>26</td>
+                <td>도매 및 상품 중개업|대구광역시|최우수|Y...</td>
+                <td>4백만</td>
+                <td><b>64.8</b></td>
+                <td>69.2</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 급감 (-20.7%); 한도소진율 위험 (93%); 복합 스트레스 신호'>FX 월간 급감 (-20.7%); 한도소진율 위험 (93%); 복합 스트레스 신호</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>27</td>
+                <td>금속가공제품 제조업; 기계 및 가구 제외|대구광역시|최...</td>
+                <td>1백만</td>
+                <td><b>64.8</b></td>
+                <td>66.9</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 급감 (-25.8%); 한도소진율 위험 (473%); 복합 스트레스 신호'>FX 월간 급감 (-25.8%); 한도소진율 위험 (473%); 복합 스트레스 신호</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>28</td>
+                <td>도매 및 상품 중개업|부산광역시|최우수|N...</td>
+                <td>1백만</td>
+                <td><b>64.8</b></td>
+                <td>66.1</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 급감 (-24.6%); 한도소진율 위험 (367%); 복합 스트레스 신호'>FX 월간 급감 (-24.6%); 한도소진율 위험 (367%); 복합 스트레스 신호</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>29</td>
+                <td>고무 및 플라스틱제품 제조업|대구광역시|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>64.8</b></td>
+                <td>64.5</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 급감 (-38.5%); 한도소진율 위험 (1333%); 복합 스트레스 신호'>FX 월간 급감 (-38.5%); 한도소진율 위험 (1333%); 복합 스트레스 신호</td>
+            </tr>
+            
+            <tr class='grade-B'>
+                <td>30</td>
+                <td>고무 및 플라스틱제품 제조업|경상북도|우수|Y...</td>
+                <td>0백만</td>
+                <td><b>64.8</b></td>
+                <td>56.9</td>
+                <td><b>B</b></td>
+                <td title='FX 월간 급감 (-52.0%); 한도소진율 위험 (593%); 복합 스트레스 신호'>FX 월간 급감 (-52.0%); 한도소진율 위험 (593%); 복합 스트레스 신호</td>
+            </tr>
+            </table><h2>💡 레짐 기반 추천 액션 (TOP 10)</h2>
+            <div class='action-card'>
+                <div class='segment'>🏢 폐기물 수집, 운반, 처리 및 원료 재생업|경상북도|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>66</b> | 리스크점수: <b>88</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>🔴 긴급: 담당 RM 즉시 컨택 - 환리스크 긴급 점검 필요; 💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 월간 급감 (-38.4%); FX 연간 급감 (-30.4%); 순유입 급락
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 의료, 정밀, 광학기기 및 시계 제조업|대구광역시|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>80</b> | 리스크점수: <b>70</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 연간 급감 (-31.6%); 순유입 급락; 한도소진율 위험 (447%)
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 식료품 제조업|경상북도|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>68</b> | 리스크점수: <b>75</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 월간 감소 (-17.6%); FX 연간 급감 (-42.7%); 한도소진율 위험 (362%)
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 산업용 기계 및 장비 수리업|부산광역시|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>50</b> | 리스크점수: <b>88</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>🔴 긴급: 담당 RM 즉시 컨택 - 환리스크 긴급 점검 필요; 💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 월간 급감 (-82.5%); FX 연간 급감 (-79.2%); 순유입 급락
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 1차 금속 제조업|부산광역시|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>75</b> | 리스크점수: <b>70</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 연간 급감 (-78.0%); 순유입 급락; 한도소진율 위험 (3600%)
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 도매 및 상품 중개업|경기도|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>52</b> | 리스크점수: <b>80</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>🔴 긴급: 담당 RM 즉시 컨택 - 환리스크 긴급 점검 필요; 💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 월간 급감 (-90.4%); FX 연간 급감 (-90.9%); 한도소진율 위험 (1171%)
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 도매 및 상품 중개업|인천광역시|우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>60</b> | 리스크점수: <b>74</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 월간 급감 (-53.2%); FX 연간 급감 (-74.4%); 한도소진율 위험 (307%)
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 가구 제조업|경상북도|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>84</b> | 리스크점수: <b>56</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-high'>높음</span>
+                        <span>💱 중소기업 환율우대 프로그램 안내; ⚠️ 자금흐름 이상 감지 - RM 우선 컨택 및 원인 파악 필요; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> 순유입 급락; 한도소진율 위험 (696%); 예금 감소 (-11.9%)
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 자동차 및 트레일러 제조업|미상|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>63</b> | 리스크점수: <b>70</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-low'>낮음</span>
+                        <span>💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; 🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> FX 월간 급감 (-33.4%); 순유입 급락; 한도소진율 위험 (505%)
+                    </div>
+                </div></div>
+            <div class='action-card'>
+                <div class='segment'>🏢 도매 및 상품 중개업|경상북도|최우수|Y</div>
+                <div class='meta'>
+                    📊 기회점수: <b>75</b> | 리스크점수: <b>61</b> | 등급: <b>A</b>
+                </div>
+                <div class='actions'>
+            
+                    <div class='action-item'>
+                        <span class='urgency urgency-high'>높음</span>
+                        <span>💰 운영자금 여유 점검 - 환율 부담 증가 대비; 💱 중소기업 환율우대 프로그램 안내; ⚠️ 자금흐름 이상 감지 - RM 우선 컨택 및 원인 파악 필요</span>
+                    </div>
+                
+                    <div class='reason'>
+                        <b>📋 핵심 사유:</b> 순유입 급락; 한도소진율 위험 (222%); 복합 스트레스 신호
+                    </div>
+                </div></div><h2>📊 FX 세그먼트 요약</h2><div class='stat-grid'>
+        <div class='regime-card'>
+            <h3>총 FX 활성 세그먼트</h3>
+            <div class='value'>189</div>
+        </div>
+        <div class='regime-card'>
+            <h3>A등급 (최우선)</h3>
+            <div class='value' style='color: #d32f2f;'>46</div>
+        </div>
+        <div class='regime-card'>
+            <h3>B등급 (우선)</h3>
+            <div class='value' style='color: #f57c00;'>75</div>
+        </div>
+        <div class='regime-card'>
+            <h3>고기회 (70+)</h3>
+            <div class='value' style='color: #388e3c;'>56</div>
+        </div>
+        <div class='regime-card'>
+            <h3>고리스크 (70+)</h3>
+            <div class='value' style='color: #d32f2f;'>21</div>
+        </div>
+        </div>
+    </div>
+    </body>
+    </html>
+    

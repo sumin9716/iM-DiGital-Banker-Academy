@@ -1,0 +1,35 @@
+{
+  "best": {
+    "name": "Best Case (낙관적)",
+    "probability": 0.2,
+    "assumptions": {
+      "경기": "회복세 지속",
+      "금리": "하락 50bp",
+      "환율": "안정 (1,300원대)",
+      "유가": "하락 ($70 이하)"
+    },
+    "kpi_multiplier": 1.2
+  },
+  "base": {
+    "name": "Base Case (기준)",
+    "probability": 0.6,
+    "assumptions": {
+      "경기": "현 수준 유지",
+      "금리": "동결",
+      "환율": "현 수준 유지",
+      "유가": "현 수준 유지"
+    },
+    "kpi_multiplier": 1.0
+  },
+  "worst": {
+    "name": "Worst Case (비관적)",
+    "probability": 0.2,
+    "assumptions": {
+      "경기": "침체 진입",
+      "금리": "상승 50bp",
+      "환율": "급등 (1,450원 이상)",
+      "유가": "급등 ($100 이상)"
+    },
+    "kpi_multiplier": 0.8
+  }
+}

@@ -1,5 +1,7 @@
 # 프로젝트 명세 (요약)
 
+> 최종 업데이트: 2025-01-19
+
 ## 1. Problem Statement
 - 월별(2022-01~2024-12) 세그먼트(업종×지역×등급×전담) 단위 금융지표 기반  
   1) 다음 1~3개월 KPI 예측  
@@ -13,18 +15,26 @@
 - 의사결정 단위: 고객 1명이 아니라 **세그먼트 1개**(업종_중분류×사업장_시도×법인_고객등급×전담고객여부)
 
 ## 3. KPI
-### 메인 5개
-- 예금총잔액, 대출총잔액, 카드총사용, 디지털거래금액, 순유입
+### 메인 6개
+- 예금총잔액, 대출총잔액, 카드총사용, 디지털거래금액, 순유입, FX총액
 
-### FX 2개(확장)
-- FX총액, FX성장률
+| KPI | LightGBM R² | SMAPE | 등급 |
+|-----|-------------|-------|------|
+| 카드총사용 | 86.3% | 1.17% | A |
+| 예금총잔액 | 83.1% | 1.04% | A |
+| FX총액 | 82.9% | 1.88% | A |
+| 대출총잔액 | 81.3% | 0.87% | A |
+| 디지털거래금액 | 81.3% | 1.13% | A |
+| 순유입 | 13.4% | 1.75% | C |
 
 ## 4. 엔진 구성
-- Forecasting: LightGBM/CatBoost + lag/rolling/exogenous (MVP), 딥러닝(TFT) 확장
-- Risk Radar: 예측 대비 잔차(residual) 기반 + 변화점 탐지(선택)
-- Explainability: 로컬 드라이버(기여도) 요약
-- Next Best Action: 룰 기반 후보 생성 + 스코어링(기대효과/방어필요/실행제약)
+- **Forecasting**: LightGBM + lag/rolling/exogenous (R² 81~86%)
+- **Risk Radar**: 예측 대비 잔차(residual) 기반 + 4단계 severity
+- **Explainability**: SHAP 기반 로컬 드라이버 요약
+- **Next Best Action**: 6개 유형 룰 기반 + 스코어링 (2,582개 액션)
 
 ## 5. 산출물
-- 대시보드: Overview / Growth / Risk / FX(확장)
-- 월간 운영 리포트(1-page): 경보/기회/FX/실행 리스트
+- **대시보드**: Overview / Growth / Risk / FX / Actions (6개 HTML)
+- **Watchlist**: 44개 알림, 21개 업종, 4개 severity 레벨
+- **Actions**: 2,582개 맞춤형 추천 (6개 유형)
+- **Forecasts**: 6,114개 예측 (2,038 세그먼트 × 3 horizon)

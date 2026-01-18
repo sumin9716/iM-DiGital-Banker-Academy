@@ -1,0 +1,9 @@
+{
+  "n_columns": 373,
+  "psi_warn": 0.1,
+  "psi_crit": 0.25,
+  "warn_count": 186,
+  "crit_count": 179,
+  "current_month": "2024-12-01",
+  "reference_start": "2024-06-01"
+}

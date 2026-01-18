@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iM Digital Banker - Actions</title>
+    
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+        font-family: 'Malgun Gothic', 'Noto Sans KR', Arial, sans-serif; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header {
+        background: rgba(255,255,255,0.95);
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .header h1 { 
+        color: #1a1a2e; 
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .header .logo { font-size: 32px; }
+    .header .subtitle { color: #666; margin-top: 8px; font-size: 14px; }
+    .nav {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+    }
+    .nav a {
+        padding: 8px 20px;
+        background: #f0f0f0;
+        border-radius: 20px;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .nav a:hover, .nav a.active {
+        background: #667eea;
+        color: white;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .stat-card .label { color: #666; font-size: 12px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 28px; font-weight: bold; color: #1a1a2e; }
+    .stat-card .change { font-size: 12px; margin-top: 4px; }
+    .stat-card .change.up { color: #10b981; }
+    .stat-card .change.down { color: #ef4444; }
+    .card {
+        background: rgba(255,255,255,0.95);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .card h2 { 
+        color: #1a1a2e; 
+        font-size: 18px; 
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    th { 
+        background: #f8f9fa; 
+        font-weight: 600; 
+        color: #333;
+        font-size: 13px;
+    }
+    td { font-size: 13px; }
+    tr:hover { background: #f8f9fa; }
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .badge.critical { background: #fee2e2; color: #dc2626; }
+    .badge.high { background: #fef3c7; color: #d97706; }
+    .badge.medium { background: #dbeafe; color: #2563eb; }
+    .badge.low { background: #d1fae5; color: #059669; }
+    .badge.surge { background: #dcfce7; color: #16a34a; }
+    .badge.drop { background: #fee2e2; color: #dc2626; }
+    .badge.risk-up { background: #fef3c7; color: #d97706; }
+    .badge.risk-down { background: #fee2e2; color: #dc2626; }
+    .footer {
+        text-align: center;
+        color: rgba(255,255,255,0.8);
+        padding: 24px;
+        font-size: 12px;
+    }
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="logo">🎯</span> iM Digital Banker - Next Best Actions</h1>
+            <div class="subtitle">세그먼트별 추천 액션</div>
+            <div class="nav">
+                <a href="01_overview.html">Overview</a>
+                <a href="02_growth_forecast.html">Growth Forecast</a>
+                <a href="03_risk_watchlist.html">Risk Radar</a>
+                <a href="04_actions.html" class="active">Actions</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📋 추천 액션 목록</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>순위</th>
+                        <th>세그먼트</th>
+                        <th>액션 유형</th>
+                        <th>액션 제목</th>
+                        <th>타겟 KPI</th>
+                        <th>우선순위</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>1</td>
+                        <td>화학물질 및 화학제품 제조업; 의약품 제외|대구광역시|</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+                        <td>교육 서비스업|서울특별시|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>전문직별 공사업|부산광역시|일반|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>4</td>
+                        <td>의료, 정밀, 광학기기 및 시계 제조업|서울특별시|최우</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>5</td>
+                        <td>부동산업|경기도|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>6</td>
+                        <td>기타 개인 서비스업|서울특별시|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>7</td>
+                        <td>협회 및 단체|서울특별시|일반|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>8</td>
+                        <td>폐기물 수집, 운반, 처리 및 원료 재생업|경상북도|일</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>9</td>
+                        <td>전기장비 제조업|경상북도|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>10</td>
+                        <td>임대업; 부동산 제외|서울특별시|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>11</td>
+                        <td>자동차 및 트레일러 제조업|인천광역시|최우수|N</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>12</td>
+                        <td>음료 제조업|서울특별시|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>13</td>
+                        <td>전기장비 제조업|대구광역시|일반|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>14</td>
+                        <td>컴퓨터 프로그래밍, 시스템 통합 및 관리업|서울특별시|</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>15</td>
+                        <td>음료 제조업|서울특별시|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>16</td>
+                        <td>도매 및 상품 중개업|서울특별시|일반|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>17</td>
+                        <td>소매업; 자동차 제외|서울특별시|우수|N</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>18</td>
+                        <td>화학물질 및 화학제품 제조업; 의약품 제외|대구광역시|</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>19</td>
+                        <td>부동산업|대구광역시|일반|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                    <tr>
+                        <td>20</td>
+                        <td>음료 제조업|서울특별시|최우수|Y</td>
+                        <td><span class="badge medium">CROSS_SELL</span></td>
+                        <td>대출 상품 교차 판매</td>
+                        <td>대출총잔액</td>
+                        <td>⭐⭐⭐⭐⭐</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            iM Digital Banker - Segment Radar MVP | © 2025 iM Bank
+        </div>
+    </div>
+</body>
+</html>

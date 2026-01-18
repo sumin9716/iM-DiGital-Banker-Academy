@@ -1,7 +1,133 @@
 from __future__ import annotations
 
 import re
+import logging
 from typing import Optional
+
+import numpy as np
+import pandas as pd
+
+# ============== Logging Setup ==============
+logger = logging.getLogger("imradar")
+
+
+def setup_logging(level: int = logging.INFO) -> None:
+    """Configure logging for the imradar package."""
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+
+# ============== Device Selection (MPS/CUDA/CPU) ==============
+def get_device(verbose: bool = True) -> "torch.device":
+    """
+    최적의 가속 디바이스 선택
+    
+    우선순위:
+    1. CUDA (NVIDIA GPU)
+    2. MPS (Apple Silicon GPU)
+    3. CPU
+    
+    Returns:
+        torch.device
+    """
+    try:
+        import torch
+    except ImportError:
+        raise ImportError("PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요")
+    
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+        if verbose:
+            print(f"🚀 CUDA 가속 활성화: {torch.cuda.get_device_name(0)}")
+    elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
+        device = torch.device("mps")
+        if verbose:
+            print("🍎 MPS (Apple Silicon) 가속 활성화")
+    else:
+        device = torch.device("cpu")
+        if verbose:
+            print("💻 CPU 모드로 실행")
+    
+    return device
+
+
+def get_device_str() -> str:
+    """디바이스 문자열 반환 (PyTorch import 없이)"""
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return "cuda"
+        elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
+            return "mps"
+        else:
+            return "cpu"
+    except ImportError:
+        return "cpu"
+
+
+# ============== Date/Time Utilities ==============
+def to_month_start(yyyymm: int) -> pd.Timestamp:
+    """
+    Convert YYYYMM integer to month-start Timestamp.
+    
+    Example:
+        >>> to_month_start(202412)
+        Timestamp('2024-12-01 00:00:00')
+    """
+    y = int(yyyymm) // 100
+    m = int(yyyymm) % 100
+    return pd.Timestamp(year=y, month=m, day=1)
+
+
+def month_add(m: pd.Timestamp, k: int) -> pd.Timestamp:
+    """
+    Add k months to a timestamp.
+    
+    Example:
+        >>> month_add(pd.Timestamp('2024-12-01'), 3)
+        Timestamp('2025-03-01 00:00:00')
+    """
+    return (m.to_period("M") + k).to_timestamp()
+
+
+def yyyymm_to_ts(yyyymm: str) -> pd.Timestamp:
+    """
+    Convert YYYYMM string to Timestamp.
+    
+    Example:
+        >>> yyyymm_to_ts("202412")
+        Timestamp('2024-12-01 00:00:00')
+    """
+    y = int(yyyymm) // 100
+    m = int(yyyymm) % 100
+    return pd.Timestamp(year=y, month=m, day=1)
+
+
+# ============== Value Transformations ==============
+def signed_log1p(x: np.ndarray) -> np.ndarray:
+    """Signed log1p transformation for values that can be negative."""
+    return np.sign(x) * np.log1p(np.abs(x))
+
+
+def inverse_signed_log1p(y: np.ndarray) -> np.ndarray:
+    """Inverse of signed log1p transformation."""
+    return np.sign(y) * np.expm1(np.abs(y))
+
+
+def safe_log1p(x: np.ndarray) -> np.ndarray:
+    """Log1p with clipping for non-negative values."""
+    return np.log1p(np.maximum(x, 0.0))
+
+
+def inverse_log1p(y: np.ndarray) -> np.ndarray:
+    """Inverse log1p transformation."""
+    return np.expm1(np.maximum(y, 0.0))
+
+
+# ============== Korean Bucket Parsing ==============
 
 
 def parse_bucket_kor_to_number(s: str) -> Optional[float]:

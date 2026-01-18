@@ -1,0 +1,755 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Summary - 2024년 12월</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Malgun Gothic', 'Noto Sans KR', Arial, sans-serif; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        
+        .header {
+            background: rgba(255,255,255,0.98);
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { 
+            color: #1a1a2e; 
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header .date { 
+            color: #666; 
+            font-size: 16px;
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: #1a1a2e;
+            font-size: 18px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .kpi-card .label { color: #666; font-size: 12px; margin-bottom: 8px; }
+        .kpi-card .value { font-size: 24px; font-weight: bold; color: #1a1a2e; }
+        .kpi-card .change { font-size: 12px; margin-top: 4px; }
+        .kpi-card .change.up { color: #10b981; }
+        .kpi-card .change.down { color: #ef4444; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            font-size: 12px;
+        }
+        tr:hover { background: #f8f9fa; }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge.critical { background: #fee2e2; color: #dc2626; }
+        .badge.high { background: #fef3c7; color: #d97706; }
+        .badge.opportunity { background: #d1fae5; color: #059669; }
+        .badge.action { background: #dbeafe; color: #2563eb; }
+        
+        .segment-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 16px;
+        }
+        .segment-card.risk {
+            border-left-color: #ef4444;
+        }
+        .segment-card .seg-name {
+            font-weight: bold;
+            color: #1a1a2e;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+        .segment-card .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .segment-card .metric {
+            text-align: center;
+        }
+        .segment-card .metric .label { font-size: 11px; color: #666; }
+        .segment-card .metric .value { font-size: 16px; font-weight: bold; color: #1a1a2e; }
+        .segment-card .actions-list {
+            background: #f0f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        .segment-card .actions-list li {
+            margin-bottom: 6px;
+            color: #1e40af;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        .fx-panel {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .fx-item {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .fx-item .label { font-size: 11px; color: #666; }
+        .fx-item .value { font-size: 20px; font-weight: bold; color: #1a1a2e; }
+        
+        .nav {
+            display: flex;
+            gap: 12px;
+        }
+        .nav a {
+            padding: 8px 16px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #333;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .nav a:hover { background: #3b82f6; color: white; }
+        
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📊 Executive Summary - Segment Radar</h1>
+        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div class="date">📅 기준: 2024년 12월</div>
+            <div class="date" style="background: #e8f4fd; color: #1e40af;">📊 세그먼트: 업종×지역×등급×전담</div>
+            <div class="date" style="background: #f0fdf4; color: #166534;">🔮 예측: 1~3개월</div>
+            <div class="date" style="background: #fefce8; color: #854d0e;">⚙️ v1.0 (LightGBM)</div>
+            <nav class="nav">
+                <a href="index.html">🏠 홈</a>
+                <a href="01_overview.html">📈 Overview</a>
+                <a href="02_growth_forecast.html">🚀 Growth</a>
+                <a href="03_risk_watchlist.html">⚠️ Risk</a>
+                <a href="05_fx_radar.html">💱 FX</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="label">📦 전체 예금 총잔액</div>
+            <div class="value">6.42조원</div>
+            <div class="change up">
+                ▲ 4.0% MoM
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="label">🏦 전체 대출 총잔액</div>
+            <div class="value">16.62조원</div>
+            <div class="change down">
+                ▼ 4.1% MoM
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="label">📈 예금 예측 (2025년 01월)</div>
+            <div class="value">5.43조원</div>
+            <div class="change down">
+                예상 ▼ 9,913억원
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="label">📈 대출 예측 (2025년 01월)</div>
+            <div class="value">13.25조원</div>
+            <div class="change down">
+                예상 ▼ 33,639억원
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2>📈 예금 총잔액 추이 및 예측</h2>
+            <div id="deposit-chart" class="chart-container"></div>
+        </div>
+        <div class="card">
+            <h2>📈 대출 총잔액 추이 및 예측</h2>
+            <div id="loan-chart" class="chart-container"></div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h2>🚨 이번 달 핵심 이슈 (경보 TOP 5)</h2>
+            <table>
+                <tr>
+                    <th>세그먼트</th>
+                    <th>경보</th>
+                    <th>KPI</th>
+                    <th>잔차%</th>
+                    <th>원인 요약</th>
+                    <th>추천 액션</th>
+                </tr>
+
+                <tr>
+                    <td title="1차 금속 제조업|경기도|우수|N">1차 금속 제조업|경기도|우수|N...</td>
+                    <td><span class="badge critical">SPIKE</span></td>
+                    <td>예금총잔액</td>
+                    <td>5.0%</td>
+                    <td style="font-size:11px; max-width:150px; overflow:hidden;">상승 요인: 예금총잔액, 요구불예금잔액:sum, 적립식예금잔액:sum /</td>
+                    <td style="font-size:11px; color:#1e40af;">신규 잔액 확보 + 관계 강화</td>
+                </tr>
+
+                <tr>
+                    <td title="육상운송 및 파이프라인 운송업|울산광역시|우수|N">육상운송 및 파이프라인 운송업|울산광역시|우수|N...</td>
+                    <td><span class="badge critical">SPIKE</span></td>
+                    <td>디지털거래금액</td>
+                    <td>5.0%</td>
+                    <td style="font-size:11px; max-width:150px; overflow:hidden;">상승 요인: usd_krw_range_pct(2개월전), s순유입(1개월</td>
+                    <td style="font-size:11px; color:#1e40af;">신규 잔액 확보 + 관계 강화</td>
+                </tr>
+
+                <tr>
+                    <td title="음료 제조업|경상북도|우수|Y">음료 제조업|경상북도|우수|Y...</td>
+                    <td><span class="badge critical">SPIKE</span></td>
+                    <td>디지털거래금액</td>
+                    <td>5.0%</td>
+                    <td style="font-size:11px; max-width:150px; overflow:hidden;">상승 요인: segment_age, customer_count, 사업장_</td>
+                    <td style="font-size:11px; color:#1e40af;">신규 잔액 확보 + 관계 강화</td>
+                </tr>
+
+                <tr>
+                    <td title="음료 제조업|경상남도|일반|Y">음료 제조업|경상남도|일반|Y...</td>
+                    <td><span class="badge critical">SPIKE</span></td>
+                    <td>디지털거래금액</td>
+                    <td>5.0%</td>
+                    <td style="font-size:11px; max-width:150px; overflow:hidden;">상승 요인: 대출총잔액(1개월전), 대출총잔액(2개월전), wti_pri</td>
+                    <td style="font-size:11px; color:#1e40af;">신규 잔액 확보 + 관계 강화</td>
+                </tr>
+
+                <tr>
+                    <td title="음료 제조업|경상남도|우수|Y">음료 제조업|경상남도|우수|Y...</td>
+                    <td><span class="badge critical">SPIKE</span></td>
+                    <td>디지털거래금액</td>
+                    <td>4.7%</td>
+                    <td style="font-size:11px; max-width:150px; overflow:hidden;">상승 요인: 디지털비중, 업종_중분류, 디지털비중(6개월변동) / 하락 </td>
+                    <td style="font-size:11px; color:#1e40af;">신규 잔액 확보 + 관계 강화</td>
+                </tr>
+
+            </table>
+        </div>
+        <div class="card">
+            <h2>🚀 다음달 기회 (예측 상승 TOP 5)</h2>
+            <p style="font-size:11px; color:#666; margin-bottom:10px;">💡 금액 단위: 백만원</p>
+            <table>
+                <tr>
+                    <th>세그먼트</th>
+                    <th>현재 예금</th>
+                    <th>예측 예금</th>
+                    <th>Δ (예상)</th>
+                    <th>증가율</th>
+                </tr>
+
+                <tr>
+                    <td title="금융업|서울특별시|최우수|N">금융업|서울특별시|최우수|N...</td>
+                    <td>255,520</td>
+                    <td>683,238</td>
+                    <td style="color: #059669; font-weight: bold;">+427,718</td>
+                    <td><span class="badge opportunity">+167.4%</span></td>
+                </tr>
+
+                <tr>
+                    <td title="금융 및 보험 관련 서비스업|서울특별시|최우수|N">금융 및 보험 관련 서비스업|서울특별시|최우수|N...</td>
+                    <td>29,230</td>
+                    <td>101,919</td>
+                    <td style="color: #059669; font-weight: bold;">+72,689</td>
+                    <td><span class="badge opportunity">+248.7%</span></td>
+                </tr>
+
+                <tr>
+                    <td title="협회 및 단체|대구광역시|최우수|Y">협회 및 단체|대구광역시|최우수|Y...</td>
+                    <td>6,631</td>
+                    <td>55,085</td>
+                    <td style="color: #059669; font-weight: bold;">+48,454</td>
+                    <td><span class="badge opportunity">+730.7%</span></td>
+                </tr>
+
+                <tr>
+                    <td title="육상운송 및 파이프라인 운송업|서울특별시|최우수|Y">육상운송 및 파이프라인 운송업|서울특별시|최우수|Y...</td>
+                    <td>5,280</td>
+                    <td>23,239</td>
+                    <td style="color: #059669; font-weight: bold;">+17,959</td>
+                    <td><span class="badge opportunity">+340.1%</span></td>
+                </tr>
+
+                <tr>
+                    <td title="수상 운송업|서울특별시|최우수|Y">수상 운송업|서울특별시|최우수|Y...</td>
+                    <td>0</td>
+                    <td>13,334</td>
+                    <td style="color: #059669; font-weight: bold;">+13,334</td>
+                    <td><span class="badge opportunity">+1333400.3%</span></td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>💱 FX Radar 요약</h2>
+        <div class="fx-panel">
+            <div class="fx-item">
+                <div class="label">USD/KRW</div>
+                <div class="value">1,366.9</div>
+            </div>
+            <div class="fx-item">
+                <div class="label">트렌드</div>
+                <div class="value">Uptrend</div>
+            </div>
+            <div class="fx-item">
+                <div class="label">변동성</div>
+                <div class="value">MedVol</div>
+            </div>
+            <div class="fx-item">
+                <div class="label">MoM 변화</div>
+                <div class="value">-1.98%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🎯 실행 리스트 (우선순위 TOP 10)</h2>
+        <table>
+            <tr>
+                <th style="width:50px;">순위</th>
+                <th style="width:100px;">구분</th>
+                <th>세그먼트</th>
+                <th style="width:250px;">핵심사유</th>
+                <th style="width:280px;">추천액션</th>
+                <th style="width:80px;">담당</th>
+                <th style="width:100px;">기대효과</th>
+                <th style="width:50px;">점수</th>
+            </tr>
+
+            <tr>
+                <td><strong>1</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="창고 및 운송관련 서비스업|경상남도|최우수|Y">창고 및 운송관련 서비스업|경상남도|최우수|Y...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 경상남도 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 경상남도 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>2</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="식료품 제조업|대전광역시|최우수|Y">식료품 제조업|대전광역시|최우수|Y...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 대전광역시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 대전광역시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>3</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="금속가공제품 제조업; 기계 및 가구 제외|울산광역시|최우수|Y">금속가공제품 제조업; 기계 및 가구 제외|울산...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 울산광역시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 울산광역시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>4</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="음료 제조업|서울특별시|최우수|Y">음료 제조업|서울특별시|최우수|Y...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>5</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="의료, 정밀, 광학기기 및 시계 제조업|서울특별시|최우수|Y">의료, 정밀, 광학기기 및 시계 제조업|서울특...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>6</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="수상 운송업|부산광역시|최우수|Y">수상 운송업|부산광역시|최우수|Y...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 부산광역시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 부산광역시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>7</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="가구 제조업|서울특별시|최우수|Y">가구 제조업|서울특별시|최우수|Y...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>8</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="비금속 광물제품 제조업|부산광역시|최우수|Y">비금속 광물제품 제조업|부산광역시|최우수|Y...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 부산광역시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 부산광역시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>9</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="전자부품, 컴퓨터, 영상, 음향 및 통신장비 제조업|서울특별시|최우수|Y">전자부품, 컴퓨터, 영상, 음향 및 통신장비 ...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 서울특별시 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+            <tr>
+                <td><strong>10</strong></td>
+                <td><span class="badge action">DEPOSIT_DEFENSE</span></td>
+                <td title="펄프, 종이 및 종이제품 제조업|미상|최우수|Y">펄프, 종이 및 종이제품 제조업|미상|최우수|...</td>
+                <td style="font-size:12px;" title="예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 미상 지점 RM 긴급 접촉 필요">예금 유출 위험 감지 (예측대비 -100.0% 이탈) (▼0.0억원 예상) → 미상 지점 RM 긴급 접촉 필요</td>
+                <td style="font-size:12px;" title="⚠️ 예금 유출 방어 (긴급)">⚠️ 예금 유출 방어 (긴급)</td>
+                <td style="font-size:11px; color:#7c3aed;">RM/영업</td>
+                <td style="font-size:11px; color:#059669;">방어 (이탈차단)</td>
+                <td><strong>380</strong></td>
+            </tr>
+
+        </table>
+    </div>
+
+    <div class="grid-2">
+
+        <div class="card">
+            <h2>✨ 세그먼트 카드 A: 성장/기회 예시</h2>
+            <div class="segment-card">
+                <div class="seg-name">🏢 금융업|서울특별시|최우수|N</div>
+                <p style="font-size:10px; color:#666; margin:5px 0;">💡 금액 단위: 백만원</p>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="label">현재 예금</div>
+                        <div class="value">255,520</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">예측 예금</div>
+                        <div class="value" style="color: #059669;">683,238</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">예상 증가</div>
+                        <div class="value" style="color: #059669;">+427,718</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">최근 6개월 추이</div>
+                        <div class="value"><svg width="100" height="30" style="vertical-align: middle;">
+        <polyline points="0.0,0.0 20.0,0.0 40.0,0.1 60.0,18.3 80.0,20.1 100.0,30.0" fill="none" stroke="#ef4444" stroke-width="2"/>
+        <circle cx="100" cy="30.0" r="3" fill="#ef4444"/>
+    </svg></div>
+                    </div>
+                </div>
+                <div class="actions-list">
+                    <strong>추천 액션 (TOP 3):</strong>
+                    <ul>
+                        <li>예금 유치 우대/패키지 제안 (전담/RM 연계)</li>
+                        <li>환전/정산 프로세스 자동화 (기업뱅킹) + 환전 우대</li>
+                        <li>디지털 채널 온보딩 프로모션</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>⚠️ 세그먼트 카드 B: 리스크/경보 예시</h2>
+            <div class="segment-card risk">
+                <div class="seg-name">🚨 1차 금속 제조업|경기도|우수|N</div>
+                <p style="font-size:10px; color:#666; margin:5px 0;">💡 금액 단위: 백만원</p>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="label">예금총잔액 (실제)</div>
+                        <div class="value">837</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">예측 대비 잔차</div>
+                        <div class="value" style="color: #ef4444;">5.0%</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">경보 유형</div>
+                        <div class="value" style="color: #ef4444;">SPIKE</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">최근 6개월 추이</div>
+                        <div class="value"><svg width="100" height="30" style="vertical-align: middle;">
+        <polyline points="0.0,23.8 20.0,30.0 40.0,27.0 60.0,29.6 80.0,19.3 100.0,0.0" fill="none" stroke="#10b981" stroke-width="2"/>
+        <circle cx="100" cy="0.0" r="3" fill="#10b981"/>
+    </svg></div>
+                    </div>
+                </div>
+                <div class="actions-list" style="background: #fef2f2;">
+                    <strong>원인 요약:</strong>
+                    <p style="margin: 8px 0; color: #7f1d1d;">상승 요인: 예금총잔액, 요구불예금잔액:sum, 적립식예금잔액:sum / 하락 요인: 예금총잔액(3개월전), 신용카드개수:sum, 자동이체거래건수:sum...</p>
+                    <strong>추천 액션 (TOP 3):</strong>
+                    <ul style="color: #dc2626;">
+                        <li>운영자금 구조 재점검 (한도/조건 리뷰)</li>
+                        <li>요구불 예금 유출 원인 분석 및 방어 제안</li>
+                        <li>FX 변동성 확대 국면: 헤지 옵션 안내</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="grid-2" style="margin-top: 24px;">
+        <div class="card">
+            <h2>💰 FX 기회 TOP 3 세그먼트</h2>
+            <p style="font-size:11px; color:#666; margin-bottom:10px;">💡 FX총액 단위: 백만원</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>순위</th>
+                        <th>세그먼트</th>
+                        <th>기회 점수</th>
+                        <th>FX총액</th>
+                        <th>추천 액션</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><span class="badge success">#1</span></td>
+                        <td>가구 제조업|경상북도|최우수|Y</td>
+                        <td style="color: #059669; font-weight: bold;">84.0</td>
+                        <td>1</td>
+                        <td>환전우대/헤지 패키지 제안</td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="badge success">#2</span></td>
+                        <td>도매 및 상품 중개업|부산광역시|우수|Y</td>
+                        <td style="color: #059669; font-weight: bold;">83.7</td>
+                        <td>1</td>
+                        <td>환전우대/헤지 패키지 제안</td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="badge success">#3</span></td>
+                        <td>1차 금속 제조업|경상북도|최우수|Y</td>
+                        <td style="color: #059669; font-weight: bold;">82.3</td>
+                        <td>34</td>
+                        <td>환전우대/헤지 패키지 제안</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <h2>🚨 FX 리스크 TOP 3 세그먼트</h2>
+            <p style="font-size:11px; color:#666; margin-bottom:10px;">💡 FX총액 단위: 백만원</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>순위</th>
+                        <th>세그먼트</th>
+                        <th>리스크 점수</th>
+                        <th>FX총액</th>
+                        <th>추천 액션</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td><span class="badge danger">#1</span></td>
+                        <td>폐기물 수집, 운반, 처리 및 원료 재생업|경상북도|최우수|Y</td>
+                        <td style="color: #ef4444; font-weight: bold;">87.5</td>
+                        <td>1</td>
+                        <td>환 리스크 헤지 권고</td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="badge danger">#2</span></td>
+                        <td>산업용 기계 및 장비 수리업|부산광역시|최우수|Y</td>
+                        <td style="color: #ef4444; font-weight: bold;">87.5</td>
+                        <td>0</td>
+                        <td>환 리스크 헤지 권고</td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="badge danger">#3</span></td>
+                        <td>도매 및 상품 중개업|경기도|최우수|Y</td>
+                        <td style="color: #ef4444; font-weight: bold;">80.5</td>
+                        <td>0</td>
+                        <td>환 리스크 헤지 권고</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 예금 차트
+        var depositTrace1 = {
+            x: ['2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06', '2022-07', '2022-08', '2022-09', '2022-10', '2022-11', '2022-12', '2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06', '2023-07', '2023-08', '2023-09', '2023-10', '2023-11', '2023-12', '2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06', '2024-07', '2024-08', '2024-09', '2024-10', '2024-11', '2024-12'],
+            y: [7944708.6899999995, 7493512.79, 7122284.33, 6832761.54, 6651100.34, 6306233.21, 6306112.68, 6266344.71, 6042206.93, 6089792.2, 6743363.849999999, 7759358.680000001, 6963684.84, 6460190.7299999995, 5790716.42, 6548888.26, 6574793.24, 7378340.12, 8141398.42, 7696080.37, 8722861.08, 9628603.06, 9786433.49, 10578093.690000001, 10144416.18, 9693648.12, 9004265.98, 7872858.55, 7867600.11, 7571178.6899999995, 7456841.02, 7212532.459999999, 6978261.91, 7460927.65, 6168863.819999999, 6417034.7],
+            mode: 'lines+markers',
+            name: '실제',
+            line: {color: '#3b82f6', width: 3},
+            marker: {size: 6}
+        };
+        var depositTrace2 = {
+            x: ['2024-12', '2025-01', '2025-02', '2025-03'],
+            y: [6417034.7, 6513290.2205, 6610989.573807498, 6710154.41741461],
+            mode: 'lines+markers',
+            name: '예측',
+            line: {color: '#ef4444', width: 3, dash: 'dash'},
+            marker: {size: 8, symbol: 'diamond'}
+        };
+        Plotly.newPlot('deposit-chart', [depositTrace1, depositTrace2], {
+            margin: {t: 20, b: 40, l: 80, r: 20},
+            xaxis: {title: ''},
+            yaxis: {title: '예금총잔액 (백만원)'},
+            showlegend: true,
+            legend: {x: 0.02, y: 0.98}
+        });
+        
+        // 대출 차트
+        var loanTrace1 = {
+            x: ['2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06', '2022-07', '2022-08', '2022-09', '2022-10', '2022-11', '2022-12', '2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06', '2023-07', '2023-08', '2023-09', '2023-10', '2023-11', '2023-12', '2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06', '2024-07', '2024-08', '2024-09', '2024-10', '2024-11', '2024-12'],
+            y: [14300431.06, 14305384.62, 14201987.05, 14510197.0, 14713718.5, 14602754.42, 14977586.99, 14981242.46, 14934034.99, 15495302.14, 15588793.77, 15033499.55, 15418332.28, 15197057.03, 14812418.62, 15298356.99, 15495397.28, 15399103.28, 16192983.32, 16260872.28, 15564298.26, 16440411.45, 16280992.9, 15744909.129999999, 16191099.72, 16406215.97, 15832637.63, 16567427.88, 16873114.76, 15989978.89, 17310056.05, 17135676.72, 16767097.03, 17230708.15, 17329012.24, 16616886.92],
+            mode: 'lines+markers',
+            name: '실제',
+            line: {color: '#10b981', width: 3},
+            marker: {size: 6}
+        };
+        var loanTrace2 = {
+            x: ['2024-12', '2025-01', '2025-02', '2025-03'],
+            y: [16616886.92, 16699971.354599997, 16783471.211372994, 16867388.56742986],
+            mode: 'lines+markers',
+            name: '예측',
+            line: {color: '#f59e0b', width: 3, dash: 'dash'},
+            marker: {size: 8, symbol: 'diamond'}
+        };
+        Plotly.newPlot('loan-chart', [loanTrace1, loanTrace2], {
+            margin: {t: 20, b: 40, l: 80, r: 20},
+            xaxis: {title: ''},
+            yaxis: {title: '대출총잔액 (백만원)'},
+            showlegend: true,
+            legend: {x: 0.02, y: 0.98}
+        });
+    </script>
+
+    <div class="footer">
+        생성: 2026-01-18 00:45:15 | iM Digital Banker - Segment Radar | © 2025 iM Bank
+    </div>
+</div>
+</body>
+</html>

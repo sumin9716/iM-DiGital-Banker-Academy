@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iM Digital Banker - Dashboard</title>
+    
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+        font-family: 'Malgun Gothic', 'Noto Sans KR', Arial, sans-serif; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    .header {
+        background: rgba(255,255,255,0.95);
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .header h1 { 
+        color: #1a1a2e; 
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .header .logo { font-size: 32px; }
+    .header .subtitle { color: #666; margin-top: 8px; font-size: 14px; }
+    .nav {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+    }
+    .nav a {
+        padding: 8px 20px;
+        background: #f0f0f0;
+        border-radius: 20px;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .nav a:hover, .nav a.active {
+        background: #667eea;
+        color: white;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .stat-card .label { color: #666; font-size: 12px; margin-bottom: 8px; }
+    .stat-card .value { font-size: 28px; font-weight: bold; color: #1a1a2e; }
+    .stat-card .change { font-size: 12px; margin-top: 4px; }
+    .stat-card .change.up { color: #10b981; }
+    .stat-card .change.down { color: #ef4444; }
+    .card {
+        background: rgba(255,255,255,0.95);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    .card h2 { 
+        color: #1a1a2e; 
+        font-size: 18px; 
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    th { 
+        background: #f8f9fa; 
+        font-weight: 600; 
+        color: #333;
+        font-size: 13px;
+    }
+    td { font-size: 13px; }
+    tr:hover { background: #f8f9fa; }
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .badge.critical { background: #fee2e2; color: #dc2626; }
+    .badge.high { background: #fef3c7; color: #d97706; }
+    .badge.medium { background: #dbeafe; color: #2563eb; }
+    .badge.low { background: #d1fae5; color: #059669; }
+    .badge.surge { background: #dcfce7; color: #16a34a; }
+    .badge.drop { background: #fee2e2; color: #dc2626; }
+    .badge.risk-up { background: #fef3c7; color: #d97706; }
+    .badge.risk-down { background: #fee2e2; color: #dc2626; }
+    .footer {
+        text-align: center;
+        color: rgba(255,255,255,0.8);
+        padding: 24px;
+        font-size: 12px;
+    }
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="logo">🎯</span> iM Digital Banker - Segment Radar</h1>
+            <div class="subtitle">세그먼트 단위 예측 → 조기경보 → 원인설명 → 액션추천 통합 대시보드</div>
+        </div>
+        
+        <!-- Executive Summary 메인 카드 -->
+        <a href="00_executive_summary.html" class="stat-card" style="text-decoration: none; display: block; margin-bottom: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="label" style="color: rgba(255,255,255,0.9);">⭐ Executive Summary</div>
+            <div class="value" style="font-size: 22px; color: white;">경영진 원페이저</div>
+            <div style="color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 8px;">핵심 이슈 TOP5 | 기회 TOP5 | 실행 리스트 TOP10 | 세그먼트 카드</div>
+        </a>
+        
+        <div class="stats-grid" style="grid-template-columns: repeat(6, 1fr);">
+            <a href="01_overview.html" class="stat-card" style="text-decoration: none;">
+                <div class="label">📊 Overview</div>
+                <div class="value" style="font-size: 18px;">전체 현황</div>
+                <div style="color: #666; font-size: 12px; margin-top: 8px;">KPI 요약 및 상위 세그먼트</div>
+            </a>
+            <a href="02_growth_forecast.html" class="stat-card" style="text-decoration: none;">
+                <div class="label">📈 Growth Forecast</div>
+                <div class="value" style="font-size: 18px;">성장 기회</div>
+                <div style="color: #666; font-size: 12px; margin-top: 8px;">예금 성장 TOP 세그먼트</div>
+            </a>
+            <a href="03_risk_watchlist.html" class="stat-card" style="text-decoration: none;">
+                <div class="label">⚠️ Risk Radar</div>
+                <div class="value" style="font-size: 18px;">워치리스트</div>
+                <div style="color: #666; font-size: 12px; margin-top: 8px;">이상 탐지 알림</div>
+            </a>
+            <a href="04_actions.html" class="stat-card" style="text-decoration: none;">
+                <div class="label">🎯 Actions</div>
+                <div class="value" style="font-size: 18px;">추천 액션</div>
+                <div style="color: #666; font-size: 12px; margin-top: 8px;">Next Best Action</div>
+            </a>
+            <a href="05_fx_radar.html" class="stat-card" style="text-decoration: none;">
+                <div class="label">💱 FX Radar</div>
+                <div class="value" style="font-size: 18px;">외환 레이더</div>
+                <div style="color: #666; font-size: 12px; margin-top: 8px;">FX 기회/리스크 점수</div>
+            </a>
+            <a href="06_performance_summary.html" class="stat-card" style="text-decoration: none; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white;">
+                <div class="label" style="color: rgba(255,255,255,0.8);">🏆 성과 종합</div>
+                <div class="value" style="font-size: 18px; color: white;">모델 성능</div>
+                <div style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 8px;">ML/DL 성과 분석</div>
+            </a>
+        </div>
+        
+        <div class="card">
+            <h2>📖 프로젝트 개요</h2>
+            <ul style="line-height: 2; padding-left: 20px;">
+                <li><strong>목표:</strong> 세그먼트(업종×지역×등급×전담) 단위 예측 및 조기경보 시스템</li>
+                <li><strong>핵심 KPI:</strong> 예금총잔액, 대출총잔액, 카드총사용, 디지털거래금액, 순유입, FX총액</li>
+                <li><strong>ML 모델:</strong> LightGBM 기반 1~3개월 멀티호라이즌 예측 (R² 85~94%)</li>
+                <li><strong>DL 모델:</strong> LSTM (R² 97.3%), TFT (R² 99.0%) 딥러닝 예측</li>
+                <li><strong>추천 시스템:</strong> ALS 임베딩 + 코사인 유사도 협업 필터링</li>
+                <li><strong>리스크:</strong> Residual 기반 z-score 이상탐지</li>
+                <li><strong>설명:</strong> SHAP 기반 드라이버 분석 + 자연어 원인요약</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            생성: 2026-01-08 13:35:30 | iM Digital Banker - Segment Radar MVP | © 2025 iM Bank
+        </div>
+    </div>
+</body>
+</html>

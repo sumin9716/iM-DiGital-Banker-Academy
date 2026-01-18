@@ -1,0 +1,16 @@
+{
+  "status": "ready",
+  "top_features": [
+    "log1p_예금총잔액",
+    "log1p_대출총잔액",
+    "log1p_카드총사용",
+    "log1p_디지털거래금액",
+    "log1p_FX총액",
+    "slog1p_순유입",
+    "log1p_예금총잔액__lag1",
+    "log1p_예금총잔액__lag2",
+    "log1p_예금총잔액__lag3",
+    "log1p_예금총잔액__lag6"
+  ],
+  "note": "SHAP 계산은 모델 로드 후 실행 필요"
+}
