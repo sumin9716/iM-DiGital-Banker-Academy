@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./img/iM_DiGital_Banker.png" width="600"/>
+  <img src="../img/iM_DiGital_Banker.png" width="600"/>
 </div>
 
 <br/>
@@ -44,7 +44,7 @@
 ### 💡 프로젝트를 왜 시작하게 되었나요?
 
 <div align="center">
-  <img src="./img/gantt.png" width="700"/>
+  <img src="../img/gantt.png" width="700"/>
 </div>
 
 <br/>
