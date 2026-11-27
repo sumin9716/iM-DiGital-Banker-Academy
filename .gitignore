@@ -8,5 +8,21 @@
 ### Compressed Files ###
 *.zip
 
-### Code Files ###
-*.pyc
+### Python ###
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+catboost_info/
+
+### Secrets ###
+.env
+
+### OS / Editor ###
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
