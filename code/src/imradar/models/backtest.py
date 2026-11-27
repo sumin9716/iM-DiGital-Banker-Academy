@@ -9,8 +9,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple, Callable
-from pathlib import Path
+from typing import List, Dict, Optional, Callable
 import warnings
 
 import numpy as np
@@ -19,7 +18,7 @@ import pandas as pd
 warnings.filterwarnings('ignore')
 
 
-# ============== 평가 지표 함수 ==============
+# 평가 지표 함수
 
 def smape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
@@ -29,15 +28,15 @@ def smape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     y_true = np.asarray(y_true).flatten()
     y_pred = np.asarray(y_pred).flatten()
-    
+
     denominator = (np.abs(y_true) + np.abs(y_pred)) / 2
     diff = np.abs(y_pred - y_true)
-    
+
     # 0으로 나누기 방지
     mask = denominator > 0
     if mask.sum() == 0:
         return 0.0
-    
+
     return float(np.mean(diff[mask] / denominator[mask]) * 100)
 
 
@@ -49,11 +48,11 @@ def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     y_true = np.asarray(y_true).flatten()
     y_pred = np.asarray(y_pred).flatten()
-    
+
     mask = np.abs(y_true) > 0
     if mask.sum() == 0:
         return 0.0
-    
+
     return float(np.mean(np.abs((y_pred[mask] - y_true[mask]) / y_true[mask])) * 100)
 
 
@@ -65,11 +64,11 @@ def wmape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     y_true = np.asarray(y_true).flatten()
     y_pred = np.asarray(y_pred).flatten()
-    
+
     total_true = np.sum(np.abs(y_true))
     if total_true == 0:
         return 0.0
-    
+
     return float(np.sum(np.abs(y_pred - y_true)) / total_true * 100)
 
 
@@ -84,13 +83,13 @@ def r2_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """R² (Coefficient of Determination)"""
     y_true = np.asarray(y_true).flatten()
     y_pred = np.asarray(y_pred).flatten()
-    
+
     ss_res = np.sum((y_true - y_pred) ** 2)
     ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
-    
+
     if ss_tot == 0:
         return 0.0
-    
+
     return float(1 - ss_res / ss_tot)
 
 
@@ -114,19 +113,19 @@ def hit_rate_top_n(
     """
     y_true_delta = np.asarray(y_true_delta).flatten()
     y_pred_delta = np.asarray(y_pred_delta).flatten()
-    
+
     n = len(y_pred_delta)
     if n == 0:
         return 0.0
-    
+
     top_n = min(top_n, n)
-    
+
     # 예측 상승 TOP N 인덱스
     pred_top_idx = np.argsort(y_pred_delta)[-top_n:]
-    
+
     # 실제 상승 여부
     actual_increased = y_true_delta[pred_top_idx] > 0
-    
+
     return float(np.mean(actual_increased))
 
 
@@ -138,17 +137,17 @@ def directional_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     y_true = np.asarray(y_true).flatten()
     y_pred = np.asarray(y_pred).flatten()
-    
+
     true_direction = np.sign(np.diff(y_true))
     pred_direction = np.sign(np.diff(y_pred))
-    
+
     if len(true_direction) == 0:
         return 0.0
-    
+
     return float(np.mean(true_direction == pred_direction))
 
 
-# ============== 경보 평가 함수 ==============
+# 경보 평가 함수
 
 def compute_alert_precision_recall(
     alerts_df: pd.DataFrame,
@@ -176,40 +175,40 @@ def compute_alert_precision_recall(
     """
     if alerts_df.empty:
         return {"precision": 0, "recall": 0, "f1": 0, "n_alerts": 0, "n_actual_events": 0}
-    
+
     # 경보 세그먼트-월 집합
     alert_keys = set(
         zip(alerts_df[segment_col], alerts_df[month_col].astype(str))
     )
-    
+
     # 실제 급변 세그먼트-월 집합 (정답 라벨)
     actual_events = set()
-    
+
     if not actual_df.empty and kpi_col in actual_df.columns:
         # MoM 변화율 계산
         actual_sorted = actual_df.sort_values([segment_col, month_col])
         actual_sorted["pct_change"] = actual_sorted.groupby(segment_col)[kpi_col].pct_change()
-        
+
         # 급변 이벤트
         drop_events = actual_sorted[actual_sorted["pct_change"] <= threshold_pct]
         surge_events = actual_sorted[actual_sorted["pct_change"] >= abs(threshold_pct)]
-        
+
         for _, row in pd.concat([drop_events, surge_events]).iterrows():
             actual_events.add((row[segment_col], str(row[month_col])))
-    
+
     n_alerts = len(alert_keys)
     n_actual = len(actual_events)
-    
+
     if n_alerts == 0 and n_actual == 0:
         return {"precision": 1.0, "recall": 1.0, "f1": 1.0, "n_alerts": 0, "n_actual_events": 0}
-    
+
     # True Positives: 경보 AND 실제 급변
     tp = len(alert_keys & actual_events)
-    
+
     precision = tp / n_alerts if n_alerts > 0 else 0
     recall = tp / n_actual if n_actual > 0 else 0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
-    
+
     return {
         "precision": round(precision, 4),
         "recall": round(recall, 4),
@@ -240,37 +239,37 @@ def compute_alert_lead_time(
     """
     if alerts_df.empty or actual_df.empty:
         return {"avg_lead_time_months": 0, "max_lead_time": 0, "pct_early_warning": 0}
-    
+
     lead_times = []
-    
+
     # 각 경보에 대해
     for _, alert in alerts_df.iterrows():
         seg_id = alert[segment_col]
         alert_month = pd.to_datetime(alert[month_col])
-        
+
         # 해당 세그먼트의 이후 급변 이벤트 찾기
         seg_actual = actual_df[actual_df[segment_col] == seg_id].copy()
         if seg_actual.empty or kpi_col not in seg_actual.columns:
             continue
-        
+
         seg_actual = seg_actual.sort_values(month_col)
         seg_actual["pct_change"] = seg_actual[kpi_col].pct_change()
-        
+
         # 경보 이후 급변 이벤트
         future_events = seg_actual[
             (pd.to_datetime(seg_actual[month_col]) > alert_month) &
             ((seg_actual["pct_change"] <= threshold_pct) | (seg_actual["pct_change"] >= abs(threshold_pct)))
         ]
-        
+
         if not future_events.empty:
             first_event = future_events.iloc[0]
             event_month = pd.to_datetime(first_event[month_col])
             lead_time = (event_month - alert_month).days / 30  # 월 단위
             lead_times.append(lead_time)
-    
+
     if not lead_times:
         return {"avg_lead_time_months": 0, "max_lead_time": 0, "pct_early_warning": 0}
-    
+
     return {
         "avg_lead_time_months": round(np.mean(lead_times), 2),
         "max_lead_time": round(max(lead_times), 2),
@@ -278,7 +277,7 @@ def compute_alert_lead_time(
     }
 
 
-# ============== 추천 평가 함수 ==============
+# 추천 평가 함수
 
 def compute_recommendation_uplift(
     actions_df: pd.DataFrame,
@@ -311,38 +310,38 @@ def compute_recommendation_uplift(
     """
     if actions_df.empty or panel_df.empty:
         return {"target_avg_improvement": 0, "random_avg_improvement": 0, "uplift": 0, "success_rate": 0}
-    
+
     # 추천 월 (가장 최근)
     action_month = actions_df[month_col].max()
     next_month = (pd.to_datetime(action_month).to_period("M") + 1).to_timestamp()
-    
+
     # TOP N 추천 세그먼트
     top_actions = actions_df.nlargest(top_n, "score") if "score" in actions_df.columns else actions_df.head(top_n)
     target_segments = set(top_actions[segment_col])
-    
+
     # 현재 월과 다음 월 KPI
     current = panel_df[panel_df[month_col] == action_month][[segment_col, kpi_col]]
     future = panel_df[panel_df[month_col] == next_month][[segment_col, kpi_col]]
-    
+
     if current.empty or future.empty:
         return {"target_avg_improvement": 0, "random_avg_improvement": 0, "uplift": 0, "success_rate": 0}
-    
+
     merged = current.merge(future, on=segment_col, suffixes=("_now", "_next"))
     merged["improvement"] = (merged[f"{kpi_col}_next"] - merged[f"{kpi_col}_now"]) / (merged[f"{kpi_col}_now"].abs() + 1e-9)
-    
+
     # 타깃 세그먼트 개선률
     target_mask = merged[segment_col].isin(target_segments)
     target_improvement = merged[target_mask]["improvement"]
-    
+
     # 랜덤 (비타깃) 세그먼트 개선률
     random_improvement = merged[~target_mask]["improvement"]
-    
+
     target_avg = float(target_improvement.mean()) if len(target_improvement) > 0 else 0
     random_avg = float(random_improvement.mean()) if len(random_improvement) > 0 else 0
-    
+
     # 성공률: 개선된 세그먼트 비중
     success_rate = float((target_improvement > 0).mean()) if len(target_improvement) > 0 else 0
-    
+
     return {
         "target_avg_improvement": round(target_avg * 100, 2),  # %
         "random_avg_improvement": round(random_avg * 100, 2),  # %
@@ -353,7 +352,7 @@ def compute_recommendation_uplift(
     }
 
 
-# ============== 롤링 백테스트 ==============
+# 롤링 백테스트
 
 @dataclass
 class BacktestConfig:
@@ -406,66 +405,66 @@ def run_rolling_backtest(
     """
     panel = panel.copy()
     panel[month_col] = pd.to_datetime(panel[month_col])
-    
+
     # 테스트 기간 월 리스트
     all_months = sorted(panel[month_col].unique())
     test_months = [m for m in all_months if config.test_start <= m <= config.test_end]
-    
+
     all_predictions = []
     all_metrics = []
-    
+
     for i, test_month in enumerate(test_months):
         if i % config.retrain_frequency != 0:
             continue
-        
+
         if verbose:
             print(f"  Rolling backtest: {test_month.strftime('%Y-%m')}")
-        
+
         # 학습 데이터 범위 결정
         if config.expanding_window:
             train_start = config.train_start if config.train_start else all_months[0]
         else:
             train_start = test_month - pd.DateOffset(months=config.window_size)
-        
+
         train_end = test_month - pd.DateOffset(months=1)
-        
+
         # 학습 데이터
         train_mask = (panel[month_col] >= train_start) & (panel[month_col] <= train_end)
         train_df = panel[train_mask]
-        
+
         # 테스트 데이터
         test_df = panel[panel[month_col] == test_month]
-        
+
         if train_df.empty or test_df.empty:
             continue
-        
+
         try:
             # 모델 학습
             for h in config.horizons:
                 model = train_func(train_df, kpi_col, h, train_end)
-                
+
                 # 예측
                 preds = predict_func(model, test_df)
-                
+
                 # 실제값
                 future_month = test_month + pd.DateOffset(months=h)
                 future_df = panel[panel[month_col] == future_month]
-                
+
                 if future_df.empty:
                     continue
-                
+
                 # 결과 저장
                 merged = test_df[[segment_col, month_col]].copy()
                 merged["prediction"] = preds
                 merged["horizon"] = h
                 merged["pred_month"] = future_month
-                
+
                 # 실제값 병합
                 actual = future_df[[segment_col, kpi_col]].rename(columns={kpi_col: "actual"})
                 merged = merged.merge(actual, on=segment_col, how="left")
-                
+
                 all_predictions.append(merged)
-                
+
                 # 월별 메트릭 계산
                 valid = merged.dropna(subset=["actual", "prediction"])
                 if len(valid) > 0:
@@ -478,16 +477,16 @@ def run_rolling_backtest(
                         "n_samples": len(valid),
                     }
                     all_metrics.append(metrics)
-        
+
         except Exception as e:
             if verbose:
                 print(f"    Error: {e}")
             continue
-    
+
     # 결과 정리
     predictions_df = pd.concat(all_predictions, ignore_index=True) if all_predictions else pd.DataFrame()
     metrics_df = pd.DataFrame(all_metrics) if all_metrics else pd.DataFrame()
-    
+
     # 전체 요약 메트릭
     summary = {}
     if not metrics_df.empty:
@@ -497,7 +496,7 @@ def run_rolling_backtest(
                 summary[f"h{h}_avg_rmse"] = round(h_metrics["rmse"].mean(), 4)
                 summary[f"h{h}_avg_smape"] = round(h_metrics["smape"].mean(), 4)
                 summary[f"h{h}_avg_r2"] = round(h_metrics["r2"].mean(), 4)
-    
+
     return BacktestResult(
         predictions=predictions_df,
         metrics_by_month=metrics_df,
@@ -529,7 +528,7 @@ def evaluate_all_metrics(
         "alerts": {},
         "recommendations": {},
     }
-    
+
     # 1. 예측 평가
     if not predictions.empty and "actual" in predictions.columns and "prediction" in predictions.columns:
         valid = predictions.dropna(subset=["actual", "prediction"])
@@ -542,27 +541,27 @@ def evaluate_all_metrics(
                 "r2": round(r2_score(valid["actual"].values, valid["prediction"].values), 4),
                 "n_samples": len(valid),
             }
-            
+
             # Hit Rate (변화량 기준)
             if "delta_pred" in valid.columns and "delta_actual" in valid.columns:
                 results["forecast"]["hit_rate_top50"] = round(
                     hit_rate_top_n(valid["delta_actual"].values, valid["delta_pred"].values, 50), 4
                 )
-    
+
     # 2. 경보 평가
     if not alerts.empty and not panel.empty:
         pr_result = compute_alert_precision_recall(
             alerts, panel, segment_col, month_col, kpi_col
         )
         results["alerts"] = pr_result
-    
+
     # 3. 추천 평가
     if not actions.empty and not panel.empty:
         uplift_result = compute_recommendation_uplift(
             actions, panel, segment_col, month_col, kpi_col
         )
         results["recommendations"] = uplift_result
-    
+
     return results
 
 
@@ -586,7 +585,7 @@ def generate_evaluation_report(
         "=" * 60,
         "",
     ]
-    
+
     # 예측 평가
     if results.get("forecast"):
         fc = results["forecast"]
@@ -597,7 +596,7 @@ def generate_evaluation_report(
         if "hit_rate_top50" in fc:
             lines.append(f"  - Hit Rate (TOP 50): {fc['hit_rate_top50']:.1%}")
         lines.append("")
-    
+
     # 경보 평가
     if results.get("alerts"):
         al = results["alerts"]
@@ -608,7 +607,7 @@ def generate_evaluation_report(
         lines.append(f"  - 경보 수: {al.get('n_alerts', 0)}")
         lines.append(f"  - 실제 이벤트 수: {al.get('n_actual_events', 0)}")
         lines.append("")
-    
+
     # 추천 평가
     if results.get("recommendations"):
         rec = results["recommendations"]
@@ -618,11 +617,11 @@ def generate_evaluation_report(
         lines.append(f"  - Uplift: {rec.get('uplift', 0):+.2f}%p")
         lines.append(f"  - 성공률: {rec.get('success_rate', 0):.1f}%")
         lines.append("")
-    
+
     report = "\n".join(lines)
-    
+
     if output_path:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(report)
-    
+
     return report

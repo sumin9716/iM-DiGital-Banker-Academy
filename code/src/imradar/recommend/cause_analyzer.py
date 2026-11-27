@@ -10,9 +10,8 @@ Features:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 import pandas as pd
-import numpy as np
 
 
 # 피처명 → 비즈니스 용어 매핑
@@ -24,24 +23,24 @@ FEATURE_DISPLAY_NAMES = {
     "카드총사용": "카드사용",
     "디지털거래금액": "디지털거래",
     "FX총액": "외환거래",
-    
+
     # Lag 피처
     "lag1": "전월",
     "lag2": "2개월전",
     "lag3": "3개월전",
     "lag6": "6개월전",
     "lag12": "전년동월",
-    
+
     # Rolling 피처
     "roll3_mean": "3개월평균",
     "roll6_mean": "6개월평균",
     "roll12_mean": "연평균",
-    
+
     # 변화율
     "pct_chg": "변화율",
     "mom": "전월비",
     "yoy": "전년비",
-    
+
     # 거시경제
     "fed_rate": "미국기준금리",
     "fed_diff": "금리차",
@@ -54,7 +53,7 @@ FEATURE_DISPLAY_NAMES = {
     "apt_vol": "부동산거래량",
     "jeonse": "전세지수",
     "trade_balance": "무역수지",
-    
+
     # 세그먼트
     "연령대": "연령대",
     "직업군": "직업군",
@@ -79,14 +78,14 @@ class CauseAnalysis:
 def format_feature_name(feature: str) -> str:
     """피처명을 비즈니스 용어로 변환"""
     result = feature
-    
+
     # log1p 접두사 제거
     result = result.replace("log1p_", "")
-    
+
     # 언더스코어 처리
     parts = result.split("_")
     formatted_parts = []
-    
+
     for part in parts:
         # 매핑된 이름 사용
         if part in FEATURE_DISPLAY_NAMES:
@@ -95,7 +94,7 @@ def format_feature_name(feature: str) -> str:
             continue  # 숫자는 건너뜀
         else:
             formatted_parts.append(part)
-    
+
     return " ".join(formatted_parts).strip()
 
 
@@ -118,7 +117,7 @@ def interpret_contribution(
     display_name = format_feature_name(feature)
     direction = "상승" if contribution > 0 else "하락"
     strength = abs(contribution)
-    
+
     # 강도 표현
     if strength > 0.5:
         intensity = "크게"
@@ -128,7 +127,7 @@ def interpret_contribution(
         intensity = ""
     else:
         intensity = "소폭"
-    
+
     # Lag/Rolling 피처 해석
     if "lag" in feature.lower() or "roll" in feature.lower():
         if "lag1" in feature:
@@ -141,18 +140,18 @@ def interpret_contribution(
             time_ref = "전년 동기 대비"
         else:
             time_ref = "과거 추세"
-        
+
         return f"{display_name}의 {time_ref}가 {direction} 방향으로 {intensity} 기여"
-    
+
     # 거시경제 피처 해석
     macro_keywords = ["fed", "usd", "krw", "brent", "esi", "kasi", "apt", "jeonse", "trade"]
     if any(kw in feature.lower() for kw in macro_keywords):
         return f"거시요인({display_name}) {direction} 영향"
-    
+
     # 변화율 피처
     if "pct_chg" in feature or "mom" in feature or "yoy" in feature:
         return f"{display_name} 변화율이 {direction} 기여"
-    
+
     # 일반 피처
     return f"{display_name}이(가) {intensity} {direction} 영향"
 
@@ -191,36 +190,36 @@ def analyze_cause(
         direction = "감소"
     else:
         direction = "변동"
-    
+
     # 기여도 정렬
     sorted_contribs = sorted(
         feature_contributions.items(),
         key=lambda x: abs(x[1]),
         reverse=True
     )
-    
+
     # 주요 원인 (동일 방향 기여)
     if residual_pct > 0:
         primary_contribs = [(f, v) for f, v in sorted_contribs if v > 0][:top_k]
     else:
         primary_contribs = [(f, v) for f, v in sorted_contribs if v < 0][:top_k]
-    
+
     primary_causes = [
-        interpret_contribution(f, v) 
+        interpret_contribution(f, v)
         for f, v in primary_contribs
     ]
-    
+
     # 부가 원인 (반대 방향 기여)
     if residual_pct > 0:
         secondary_contribs = [(f, v) for f, v in sorted_contribs if v < 0][:3]
     else:
         secondary_contribs = [(f, v) for f, v in sorted_contribs if v > 0][:3]
-    
+
     secondary_causes = [
         interpret_contribution(f, v)
         for f, v in secondary_contribs
     ]
-    
+
     # 거시경제 요인 분리
     macro_keywords = ["fed", "usd", "krw", "brent", "esi", "kasi", "apt", "jeonse", "trade"]
     macro_factors = []
@@ -228,7 +227,7 @@ def analyze_cause(
         if any(kw in feature.lower() for kw in macro_keywords):
             macro_factors.append(interpret_contribution(feature, contrib))
     macro_factors = macro_factors[:3]
-    
+
     # 종합 요약 생성
     summary = generate_cause_summary(
         kpi=kpi,
@@ -238,7 +237,7 @@ def analyze_cause(
         macro_factors=macro_factors,
         segment_data=segment_data,
     )
-    
+
     # 신뢰도 (기여도 집중도 기반)
     if sorted_contribs:
         top_contrib_sum = sum(abs(v) for _, v in sorted_contribs[:3])
@@ -246,7 +245,7 @@ def analyze_cause(
         confidence = min(top_contrib_sum / (total_contrib + 1e-9), 1.0)
     else:
         confidence = 0.5
-    
+
     return CauseAnalysis(
         kpi=kpi,
         direction=direction,
@@ -282,10 +281,10 @@ def generate_cause_summary(
         종합 요약 문장
     """
     parts = []
-    
+
     # 도입부
     parts.append(f"{kpi}이(가) 예측 대비 {magnitude:.1f}% {direction}하였습니다.")
-    
+
     # 주요 원인
     if primary_causes:
         if len(primary_causes) == 1:
@@ -293,17 +292,17 @@ def generate_cause_summary(
         else:
             top_causes = ", ".join(primary_causes[:2])
             parts.append(f"주요 원인: {top_causes}.")
-    
+
     # 거시경제 요인
     if macro_factors:
         parts.append(f"외부 요인: {macro_factors[0]}.")
-    
+
     # 세그먼트 맥락
     if segment_data is not None:
         age_group = segment_data.get("연령대", "")
         job_group = segment_data.get("직업군", "")
         activity = segment_data.get("거래활성도", "")
-        
+
         context_parts = []
         if age_group:
             context_parts.append(age_group)
@@ -311,10 +310,10 @@ def generate_cause_summary(
             context_parts.append(job_group)
         if activity:
             context_parts.append(f"{activity} 고객")
-        
+
         if context_parts:
             segment_desc = " ".join(context_parts)
-            
+
             # 세그먼트 맥락 해석
             if direction in ["급락", "감소"]:
                 if activity == "저활성":
@@ -326,7 +325,7 @@ def generate_cause_summary(
             elif direction in ["급등", "증가"]:
                 if "VIP" in str(segment_data.get("자산규모", "")):
                     parts.append(f"({segment_desc}: 자산이동 또는 거래확대)")
-    
+
     return " ".join(parts)
 
 
@@ -345,25 +344,25 @@ def generate_watchlist_driver_summary(
         드라이버 요약 문자열
     """
     drivers = []
-    
+
     # 알림 유형 기반
     alert_type = str(row.get("alert_type", ""))
     severity = str(row.get("severity", ""))
     residual_pct = float(row.get("residual_pct", 0) or 0)
-    
+
     if alert_type == "DROP":
         drivers.append(f"예측 대비 {abs(residual_pct)*100:.1f}% 하락")
     elif alert_type == "SPIKE":
         drivers.append(f"예측 대비 {abs(residual_pct)*100:.1f}% 상승")
     elif alert_type == "INFLECTION":
         drivers.append("추세 전환점 감지")
-    
+
     # 심각도 기반
     if severity == "CRITICAL":
         drivers.append("위험 수준 심각")
     elif severity == "HIGH":
         drivers.append("주의 필요")
-    
+
     # 피처 기여도 기반
     if feature_contributions:
         sorted_contribs = sorted(
@@ -371,19 +370,19 @@ def generate_watchlist_driver_summary(
             key=lambda x: abs(x[1]),
             reverse=True
         )[:3]
-        
+
         for feature, contrib in sorted_contribs:
             drivers.append(interpret_contribution(feature, contrib))
-    
+
     # 기타 컬럼 기반 정보
     risk_factors = str(row.get("risk_factors", ""))
     if risk_factors and risk_factors != "nan":
         factors = risk_factors.split(";")[:2]
         drivers.extend([f.strip() for f in factors if f.strip()])
-    
+
     if not drivers:
         return "상세 분석 필요"
-    
+
     return " | ".join(drivers[:4])
 
 
@@ -398,7 +397,7 @@ def generate_risk_factor_summary(row: pd.Series) -> str:
         리스크 요인 요약 문자열
     """
     factors = []
-    
+
     # 리스크 점수
     risk_score = float(row.get("risk_score", 0) or 0)
     if risk_score >= 80:
@@ -407,7 +406,7 @@ def generate_risk_factor_summary(row: pd.Series) -> str:
         factors.append("🟠 중위험")
     elif risk_score >= 40:
         factors.append("🟡 관찰필요")
-    
+
     # 순유입 상태
     net_inflow = float(row.get("순유입", 0) or 0)
     if net_inflow < -1000:
@@ -416,27 +415,27 @@ def generate_risk_factor_summary(row: pd.Series) -> str:
         factors.append("순유출 중")
     elif net_inflow < 0:
         factors.append("소폭 순유출")
-    
+
     # 잔차 상태
     residual_pct = float(row.get("residual_pct", 0) or 0)
     if residual_pct < -0.3:
         factors.append("예측 대비 급락")
     elif residual_pct < -0.1:
         factors.append("예측 하회")
-    
+
     # 변동성
     volatility = str(row.get("volatility_regime", ""))
     if "HighVol" in volatility:
         factors.append("환율 변동성↑")
-    
+
     # 환율 레짐
     regime = str(row.get("regime", row.get("current_regime", "")))
     if "Uptrend" in regime:
         factors.append("원화약세")
-    
+
     if not factors:
         return "특이사항 없음"
-    
+
     return " | ".join(factors)
 
 
@@ -455,7 +454,7 @@ def enrich_watchlist_with_drivers(
         드라이버 정보가 추가된 DataFrame
     """
     result = watchlist.copy()
-    
+
     # 드라이버 요약 컬럼 추가
     driver_summaries = []
     for _, row in result.iterrows():
@@ -463,10 +462,10 @@ def enrich_watchlist_with_drivers(
         contribs = contributions_dict.get(segment_id) if contributions_dict else None
         summary = generate_watchlist_driver_summary(row, contribs)
         driver_summaries.append(summary)
-    
+
     result["driver_summary"] = driver_summaries
-    
+
     # 리스크 요인 요약
     result["risk_summary"] = result.apply(generate_risk_factor_summary, axis=1)
-    
+
     return result

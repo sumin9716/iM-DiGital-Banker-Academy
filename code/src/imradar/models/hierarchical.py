@@ -63,13 +63,12 @@ def build_summing_matrix(
         agg_index: 집계 수준별 인덱스
         level_names: 각 행의 수준명
     """
-    bottom_keys = hierarchy_levels[-1].keys
     n_bottom = len(bottom_segments)
-    
+
     # 각 수준별 고유 조합 추출
     all_rows = []
     level_names = []
-    
+
     for level in hierarchy_levels:
         if not level.keys:  # Total
             # 모든 하위 세그먼트를 합산
@@ -88,12 +87,12 @@ def build_summing_matrix(
                 all_rows.append(row)
                 combo_str = "_".join(str(v) for v in combo.values)
                 level_names.append((level.name, combo_str))
-    
+
     S = np.vstack(all_rows)
-    
+
     # 집계 인덱스 DataFrame
     agg_index = pd.DataFrame(level_names, columns=["level", "combo"])
-    
+
     return S, agg_index, [ln[0] for ln in level_names]
 
 
@@ -146,29 +145,29 @@ def reconcile_top_down(
         조정된 예측
     """
     result = base_forecasts.copy()
-    
+
     # 과거 데이터에서 세그먼트별 비율 계산
     recent = historical_data.sort_values("month").groupby(segment_col).tail(lookback_months)
     seg_avg = recent.groupby(segment_col)[kpi_col].mean()
     total_avg = seg_avg.sum()
-    
+
     if total_avg == 0:
         return result
-    
+
     # 비율
     proportions = seg_avg / total_avg
-    
+
     # 각 월별 조정
     for month in result[month_col].unique():
         month_mask = result[month_col] == month
         month_total = result.loc[month_mask, kpi_col].sum()
-        
+
         # 비율에 따라 분배
         for seg_id in result.loc[month_mask, segment_col].unique():
             if seg_id in proportions.index:
                 seg_mask = month_mask & (result[segment_col] == seg_id)
                 result.loc[seg_mask, kpi_col] = month_total * proportions[seg_id]
-    
+
     return result
 
 
@@ -190,57 +189,57 @@ def _compute_mint_weights(
         W: 가중치 행렬 (n_bottom x n_bottom)
     """
     n_samples, n_bottom = residuals.shape
-    
+
     if method == "ols":
         return np.eye(n_bottom)
-    
+
     elif method == "wls":
         # 대각 분산
         var = np.var(residuals, axis=0, ddof=1)
         var = np.maximum(var, 1e-8)  # 0 방지
         return np.diag(var)
-    
+
     elif method == "mint_shrink":
         # Ledoit-Wolf Shrinkage 추정
         # 샘플 공분산
         if n_samples < 2:
             return np.eye(n_bottom)
-        
+
         sample_cov = np.cov(residuals.T, ddof=1)
         if sample_cov.ndim == 0:
             sample_cov = np.array([[sample_cov]])
-        
+
         # Shrinkage target: 대각 행렬
         diag_var = np.diag(np.diag(sample_cov))
-        
+
         # Shrinkage intensity 계산 (간소화된 버전)
         # Ledoit-Wolf optimal shrinkage
         n = n_samples
         p = n_bottom
-        
+
         if n < 4 or p == 1:
             return sample_cov
-        
+
         # Frobenius norm 기반 shrinkage
         trace_s2 = np.trace(sample_cov @ sample_cov)
         trace_s = np.trace(sample_cov)
-        
+
         # Shrinkage intensity
         sum_sq_diag = np.sum(np.diag(sample_cov) ** 2)
-        
+
         numerator = (1 - 2 / p) * trace_s2 + trace_s ** 2
         denominator = (n + 1 - 2 / p) * (trace_s2 - sum_sq_diag / p)
-        
+
         if denominator == 0:
             shrinkage = 1.0
         else:
             shrinkage = max(0, min(1, numerator / denominator))
-        
+
         # Shrunk covariance
         W = shrinkage * diag_var + (1 - shrinkage) * sample_cov
-        
+
         return W
-    
+
     else:
         raise ValueError(f"Unknown method: {method}")
 
@@ -277,24 +276,24 @@ def reconcile_mint(
         조정된 예측
     """
     result = base_forecasts.copy()
-    
+
     # 세그먼트 메타와 조인
     if segment_col not in segment_meta.columns:
         segment_meta = segment_meta.reset_index()
-    
+
     bottom_segs = segment_meta.copy()
     # Align to segments present in forecasts to avoid dimension mismatch
     present_segs = result[segment_col].unique()
     bottom_segs = bottom_segs[bottom_segs[segment_col].isin(present_segs)].reset_index(drop=True)
-    
+
     # 필요한 키 컬럼 확인
     required_keys = ["업종_중분류", "사업장_시도", "법인_고객등급", "전담고객여부"]
     available_keys = [k for k in required_keys if k in bottom_segs.columns]
-    
+
     if len(available_keys) < 2:
         # 계층 구조 불충분 - 조정 없이 반환
         return result
-    
+
     # Summing Matrix 구축
     try:
         S, agg_index, level_names = build_summing_matrix(
@@ -303,9 +302,9 @@ def reconcile_mint(
         )
     except Exception:
         return result
-    
+
     n_agg, n_bottom = S.shape
-    
+
     # 가중치 행렬 계산
     if historical_residuals is not None and len(historical_residuals) > 1:
         # 잔차로부터 가중치 추정 (bottom-level only)
@@ -316,13 +315,13 @@ def reconcile_mint(
     else:
         # 기본 OLS 가중치 (bottom-level)
         W = np.eye(n_bottom)
-    
+
     # MinT 조정 행렬 계산
     # G = (S'W^-1 S)^-1 S'W^-1
     # P = S @ G (투영 행렬)
     # y_reconciled = P @ y_base (상위 예측 포함)
     # 또는 하위만 조정: y_bottom_reconciled = y_bottom + G @ (y_agg - S @ y_bottom)
-    
+
     try:
         W_inv = np.linalg.pinv(W)
         if W_inv.shape[0] != n_agg:
@@ -335,41 +334,42 @@ def reconcile_mint(
     except np.linalg.LinAlgError:
         # 역행렬 계산 실패 - 조정 없이 반환
         return result
-    
+
     # 각 월별 조정
     for month in result[month_col].unique():
         month_mask = result[month_col] == month
         month_forecasts = result.loc[month_mask, [segment_col, kpi_col]].copy()
-        
+
         # 하위 예측 벡터 (bottom_segs 순서에 맞춤)
         y_bottom = np.zeros(n_bottom)
         seg_to_idx = {seg: i for i, seg in enumerate(bottom_segs[segment_col])}
-        
+
         for _, row in month_forecasts.iterrows():
             seg_id = row[segment_col]
             if seg_id in seg_to_idx:
                 y_bottom[seg_to_idx[seg_id]] = row[kpi_col]
-        
+
         # 현재 집계값
         y_agg_current = S @ y_bottom
-        
-        # 상위 수준 예측이 있다면 사용, 없으면 현재 집계값 사용
+
+        # 상위 수준의 별도 예측을 받지 않으므로 목표값이 현재 하위 합계와 같다. 따라서 아래 조정량은
+        # 항상 0이고, 실제 효과는 음수 예측을 0으로 바꾸는 것뿐이다.
         y_agg_target = y_agg_current.copy()
-        
+
         # 조정
         adjustment = G @ (y_agg_target - y_agg_current)
         y_bottom_reconciled = y_bottom + adjustment
-        
+
         # 음수 방지 (예금/대출 등)
         if kpi_col not in ["순유입"]:  # 순유입은 음수 가능
             y_bottom_reconciled = np.maximum(y_bottom_reconciled, 0)
-        
+
         # 결과 반영
         for seg_id, idx in seg_to_idx.items():
             seg_mask = month_mask & (result[segment_col] == seg_id)
             if seg_mask.any():
                 result.loc[seg_mask, kpi_col] = y_bottom_reconciled[idx]
-    
+
     return result
 
 
@@ -398,11 +398,11 @@ def reconcile_forecasts(
         조정된 예측
     """
     result = base_forecasts.copy()
-    
+
     for kpi_col in kpi_cols:
         if kpi_col not in result.columns:
             continue
-        
+
         if method == "bottom_up":
             result = reconcile_bottom_up(
                 result, segment_meta, kpi_col, month_col, segment_col
@@ -416,7 +416,8 @@ def reconcile_forecasts(
         elif method in ["mint", "mint_shrink"]:
             result = reconcile_mint(
                 result, segment_meta, kpi_col,
-                historical_residuals=None,  # TODO: 잔차 전달
+                # 과거 잔차를 넘기지 않아 W가 단위행렬(OLS 가중치)이 된다. 조정량 자체는 reconcile_mint 참고.
+                historical_residuals=None,
                 month_col=month_col, segment_col=segment_col, method="mint_shrink"
             )
         elif method == "ols":
@@ -427,53 +428,8 @@ def reconcile_forecasts(
             )
         else:
             raise ValueError(f"Unknown method: {method}")
-    
+
     return result
-
-
-def compute_coherency_error(
-    forecasts: pd.DataFrame,
-    segment_meta: pd.DataFrame,
-    kpi_col: str,
-    month_col: str = "pred_month",
-    segment_col: str = "segment_id",
-) -> Dict[str, float]:
-    """
-    계층 일관성 오차 계산.
-    
-    각 상위 수준에서 하위 합산과의 차이를 측정.
-    
-    Args:
-        forecasts: 예측 데이터
-        segment_meta: 세그먼트 메타데이터
-        kpi_col: KPI 컬럼
-        month_col: 월 컬럼
-        segment_col: 세그먼트 ID 컬럼
-        
-    Returns:
-        수준별 일관성 오차 (RMSE)
-    """
-    merged = forecasts.merge(segment_meta, on=segment_col, how="left")
-    
-    errors = {}
-    
-    for level in HIERARCHY_LEVELS[:-1]:  # 마지막(bottom) 제외
-        level_keys = level.keys if level.keys else []
-        
-        if level.name == "total":
-            # 전체 합과 비교
-            for month in merged[month_col].unique():
-                month_data = merged[merged[month_col] == month]
-                total = month_data[kpi_col].sum()
-                # Total은 기준이므로 오차 0
-            errors[level.name] = 0.0
-        else:
-            # 상위 그룹 합과 하위 세그먼트 합 비교
-            group_sums = merged.groupby(level_keys + [month_col])[kpi_col].sum()
-            # 이 수준에서는 자체 일관성이므로 오차 0
-            errors[level.name] = 0.0
-    
-    return errors
 
 
 def evaluate_reconciliation(
@@ -508,28 +464,28 @@ def evaluate_reconciliation(
             how="inner",
             suffixes=("_pred", "_actual")
         )
-        
+
         if merged.empty:
             return {"rmse": np.nan, "mape": np.nan, "mae": np.nan}
-        
+
         y_true = merged[f"{kpi_col}_actual"].values
         y_pred = merged[f"{kpi_col}_pred"].values
-        
+
         rmse = np.sqrt(np.mean((y_true - y_pred) ** 2))
         mae = np.mean(np.abs(y_true - y_pred))
-        
+
         # MAPE (0 제외)
         mask = y_true != 0
         if mask.any():
             mape = np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
         else:
             mape = np.nan
-        
+
         return {"rmse": rmse, "mape": mape, "mae": mae}
-    
+
     base_metrics = calc_metrics(base_forecasts, actuals)
     reconciled_metrics = calc_metrics(reconciled_forecasts, actuals)
-    
+
     return {
         "base": base_metrics,
         "reconciled": reconciled_metrics,

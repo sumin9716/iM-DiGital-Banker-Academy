@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from typing import List
 import pandas as pd
 
 from reportlab.lib.pagesizes import A4
@@ -44,7 +43,7 @@ def generate_monthly_onepager(
         cols = [col for col in df.columns if col not in {"sev_rank"}][:6]
         show = df[cols].head(max_rows)
 
-        for i, (_, r) in enumerate(show.iterrows()):
+        for _, r in show.iterrows():
             line = " | ".join([f"{col}:{str(r[col])}" for col in cols])
             if len(line) > 120:
                 line = line[:120] + "..."

@@ -3,7 +3,7 @@
 <div align="center">
   <b>세그먼트 기반 KPI 예측 및 조기경보 플랫폼</b>
   <br/>
-  <i>발표일: 2025.01.22 | 발표 시간: 25분</i>
+  <i>발표일: 2026.01.22 | 발표 시간: 25분</i>
 </div>
 
 ---
@@ -56,7 +56,7 @@
 | 제목 | **iM ONEderful Segment Radar** |
 | 부제 | 세그먼트 기반 KPI 예측 및 조기경보 플랫폼 |
 | 슬로건 | "예측 → 조기경보 → 원인설명 → 액션추천" |
-| 날짜 | 2025.01.22 |
+| 날짜 | 2026.01.22 |
 | 팀명 | iM ONEderful Team |
 
 ```
@@ -70,7 +70,7 @@
 │                                                 │
 │   "예측 → 조기경보 → 원인설명 → 액션추천"         │
 │                                                 │
-│   2025.01.22                                   │
+│   2026.01.22                                   │
 │   iM ONEderful Team                            │
 │                                                 │
 └─────────────────────────────────────────────────┘
@@ -644,7 +644,7 @@ pytest tests/ -v
 │              감사합니다! 🙏                      │
 │                                                 │
 │         iM ONEderful Team                      │
-│         2025.01.22                             │
+│         2026.01.22                             │
 │                                                 │
 │  GitHub: github.com/sumin9716/iM-DiGital-Banker │
 │                                                 │
@@ -694,5 +694,5 @@ pytest tests/ -v
 <div align="center">
   <b>Made with ❤️ by iM ONEderful Team</b>
   <br/><br/>
-  <i>Last Updated: 2025-01-15</i>
+  <i>Last Updated: 2026-01-15</i>
 </div>

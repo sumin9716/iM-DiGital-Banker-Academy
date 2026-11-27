@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional
 import pandas as pd
-import numpy as np
 
 
 def generate_performance_summary_html(
@@ -26,7 +25,7 @@ def generate_performance_summary_html(
     프로젝트 전체 성과 종합 대시보드 HTML 생성
     """
     html_parts = []
-    
+
     # 헤더
     html_parts.append("""
 <!DOCTYPE html>
@@ -211,7 +210,7 @@ def generate_performance_summary_html(
 <body>
 <div class="container">
     """)
-    
+
     # 헤더
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     html_parts.append(f"""
@@ -223,14 +222,14 @@ def generate_performance_summary_html(
         </div>
     </div>
     """)
-    
-    # ========== 1. 핵심 성과 요약 ==========
+
+    # 1. 핵심 성과 요약
     html_parts.append("""
     <div class="section">
         <h2>🎯 핵심 성과 요약</h2>
         <div class="metrics-grid">
     """)
-    
+
     # 예측 모델 최고 R²
     best_r2 = 0.0
     best_model = "N/A"
@@ -239,7 +238,7 @@ def generate_performance_summary_html(
             best_idx = forecast_metrics['r2'].idxmax()
             best_r2 = forecast_metrics.loc[best_idx, 'r2']
             best_model = f"{forecast_metrics.loc[best_idx, 'kpi']} (h={forecast_metrics.loc[best_idx, 'horizon']})"
-    
+
     r2_class = "excellent" if best_r2 >= 0.9 else ("good" if best_r2 >= 0.8 else ("warning" if best_r2 >= 0.6 else "poor"))
     html_parts.append(f"""
         <div class="metric-card {r2_class}">
@@ -248,7 +247,7 @@ def generate_performance_summary_html(
             <div class="subvalue">{best_model}</div>
         </div>
     """)
-    
+
     # 딥러닝 최고 R²
     dl_best_r2 = 0.0
     dl_best_model = "N/A"
@@ -259,7 +258,7 @@ def generate_performance_summary_html(
                 dl_best_idx = dl_positive['r2'].idxmax()
                 dl_best_r2 = dl_positive.loc[dl_best_idx, 'r2']
                 dl_best_model = dl_positive.loc[dl_best_idx, 'model']
-    
+
     dl_class = "excellent" if dl_best_r2 >= 0.9 else ("good" if dl_best_r2 >= 0.8 else ("warning" if dl_best_r2 >= 0.6 else "poor"))
     html_parts.append(f"""
         <div class="metric-card {dl_class}">
@@ -268,7 +267,7 @@ def generate_performance_summary_html(
             <div class="subvalue">{dl_best_model}</div>
         </div>
     """)
-    
+
     # 추천 액션 수
     action_count = len(actions) if actions is not None else 0
     html_parts.append(f"""
@@ -278,7 +277,7 @@ def generate_performance_summary_html(
             <div class="subvalue">세그먼트별 맞춤 NBA</div>
         </div>
     """)
-    
+
     # 유사 세그먼트 분석
     sim_count = len(similarity_report) if similarity_report is not None else 0
     html_parts.append(f"""
@@ -288,7 +287,7 @@ def generate_performance_summary_html(
             <div class="subvalue">세그먼트 페어</div>
         </div>
     """)
-    
+
     # 리스크 알림
     alert_count = len(watchlist) if watchlist is not None else 0
     html_parts.append(f"""
@@ -298,15 +297,15 @@ def generate_performance_summary_html(
             <div class="subvalue">Watchlist 세그먼트</div>
         </div>
     """)
-    
+
     html_parts.append("</div></div>")
-    
-    # ========== 2. 모델별 상세 성능 ==========
+
+    # 2. 모델별 상세 성능
     html_parts.append("""
     <div class="section">
         <h2>📊 모델별 상세 성능</h2>
     """)
-    
+
     # LightGBM 기본 모델
     if forecast_metrics is not None and not forecast_metrics.empty:
         html_parts.append("""
@@ -321,12 +320,12 @@ def generate_performance_summary_html(
                 <th>RMSE</th>
             </tr>
         """)
-        
+
         for _, row in forecast_metrics.iterrows():
             r2 = row.get('r2', 0)
             r2_pct = max(0, min(100, r2 * 100))
             r2_class = "r2-excellent" if r2 >= 0.9 else ("r2-good" if r2 >= 0.8 else ("r2-warning" if r2 >= 0.6 else "r2-poor"))
-            
+
             html_parts.append(f"""
             <tr>
                 <td><strong>{row.get('kpi', '')}</strong></td>
@@ -341,9 +340,9 @@ def generate_performance_summary_html(
                 <td>{row.get('rmse', 0):.3f}</td>
             </tr>
             """)
-        
+
         html_parts.append("</table>")
-    
+
     # 딥러닝 모델
     if deep_learning_results is not None and not deep_learning_results.empty:
         html_parts.append("""
@@ -358,12 +357,12 @@ def generate_performance_summary_html(
                 <th>평가</th>
             </tr>
         """)
-        
+
         for _, row in deep_learning_results.iterrows():
             r2 = row.get('r2', 0)
             r2_pct = max(0, min(100, r2 * 100)) if r2 > 0 else 0
             r2_class = "r2-excellent" if r2 >= 0.9 else ("r2-good" if r2 >= 0.8 else ("r2-warning" if r2 >= 0.6 else "r2-poor"))
-            
+
             if r2 >= 0.95:
                 eval_text = "🏆 최우수"
             elif r2 >= 0.9:
@@ -374,7 +373,7 @@ def generate_performance_summary_html(
                 eval_text = "⚠️ 개선필요"
             else:
                 eval_text = "❌ 실패"
-            
+
             html_parts.append(f"""
             <tr>
                 <td><strong>{row.get('kpi', '')}</strong></td>
@@ -389,18 +388,18 @@ def generate_performance_summary_html(
                 <td>{eval_text}</td>
             </tr>
             """)
-        
+
         html_parts.append("</table>")
-    
+
     html_parts.append("</div>")
-    
-    # ========== 3. 최고 모델 비교 ==========
+
+    # 3. 최고 모델 비교
     html_parts.append("""
     <div class="section">
         <h2>🏆 KPI별 최고 모델</h2>
         <div class="comparison-grid">
     """)
-    
+
     # 예금총잔액
     html_parts.append("""
         <div class="comparison-card">
@@ -410,7 +409,7 @@ def generate_performance_summary_html(
             <div style="color: #888; font-size: 12px; margin-top: 5px;">R² Score</div>
         </div>
     """)
-    
+
     # 순유입
     html_parts.append("""
         <div class="comparison-card">
@@ -420,7 +419,7 @@ def generate_performance_summary_html(
             <div style="color: #888; font-size: 12px; margin-top: 5px;">R² Score</div>
         </div>
     """)
-    
+
     # FX총액
     html_parts.append("""
         <div class="comparison-card">
@@ -430,10 +429,10 @@ def generate_performance_summary_html(
             <div style="color: #888; font-size: 12px; margin-top: 5px;">R² Score</div>
         </div>
     """)
-    
+
     html_parts.append("</div></div>")
-    
-    # ========== 4. 추천 시스템 개선사항 ==========
+
+    # 4. 추천 시스템 개선사항
     html_parts.append("""
     <div class="section">
         <h2>🚀 추천 시스템 개선사항</h2>
@@ -483,8 +482,8 @@ def generate_performance_summary_html(
         </div>
     </div>
     """)
-    
-    # ========== 5. 종합 평가 ==========
+
+    # 5. 종합 평가
     html_parts.append("""
     <div class="section">
         <h2>📋 종합 평가</h2>
@@ -508,7 +507,7 @@ def generate_performance_summary_html(
         </div>
     </div>
     """)
-    
+
     # 푸터
     html_parts.append("""
     <div style="text-align: center; padding: 30px; color: #666; font-size: 12px;">
@@ -518,51 +517,34 @@ def generate_performance_summary_html(
 </body>
 </html>
     """)
-    
+
     # 파일 저장
     os.makedirs(out_dir, exist_ok=True)
     html_path = os.path.join(out_dir, "06_performance_summary.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write("\n".join(html_parts))
-    
+
     return html_path
+
+
+def _read_csv_if_exists(path: str) -> Optional[pd.DataFrame]:
+    """선택 산출물 CSV를 읽는다. 해당 단계를 실행하지 않아 파일이 없으면 None."""
+    if not os.path.exists(path):
+        return None
+    return pd.read_csv(path)
 
 
 def generate_all_performance_reports(out_dir: str) -> str:
     """
     모든 성과 데이터를 로드하고 종합 대시보드 생성
     """
-    # 데이터 로드
-    try:
-        forecast_metrics = pd.read_csv(os.path.join(out_dir, "forecast_metrics.csv"))
-    except:
-        forecast_metrics = None
-    
-    try:
-        deep_learning_results = pd.read_csv(os.path.join(out_dir, "deep_learning", "deep_learning_results.csv"))
-    except:
-        deep_learning_results = None
-    
-    try:
-        advanced_results = pd.read_csv(os.path.join(out_dir, "advanced_models", "advanced_model_results.csv"))
-    except:
-        advanced_results = None
-    
-    try:
-        actions = pd.read_csv(os.path.join(out_dir, "actions_top.csv"))
-    except:
-        actions = None
-    
-    try:
-        similarity_report = pd.read_csv(os.path.join(out_dir, "segment_similarity_report.csv"))
-    except:
-        similarity_report = None
-    
-    try:
-        watchlist = pd.read_csv(os.path.join(out_dir, "watchlist_alerts.csv"))
-    except:
-        watchlist = None
-    
+    forecast_metrics = _read_csv_if_exists(os.path.join(out_dir, "forecast_metrics.csv"))
+    deep_learning_results = _read_csv_if_exists(os.path.join(out_dir, "deep_learning", "deep_learning_results.csv"))
+    advanced_results = _read_csv_if_exists(os.path.join(out_dir, "advanced_models", "advanced_model_results.csv"))
+    actions = _read_csv_if_exists(os.path.join(out_dir, "actions_top.csv"))
+    similarity_report = _read_csv_if_exists(os.path.join(out_dir, "segment_similarity_report.csv"))
+    watchlist = _read_csv_if_exists(os.path.join(out_dir, "watchlist_alerts.csv"))
+
     # 대시보드 생성
     html_path = generate_performance_summary_html(
         out_dir=os.path.join(out_dir, "dashboard"),
@@ -573,7 +555,7 @@ def generate_all_performance_reports(out_dir: str) -> str:
         similarity_report=similarity_report,
         watchlist=watchlist,
     )
-    
+
     return html_path
 
 
@@ -582,6 +564,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--out_dir", default="outputs")
     args = parser.parse_args()
-    
+
     html_path = generate_all_performance_reports(args.out_dir)
     print(f"Generated: {html_path}")

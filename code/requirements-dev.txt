@@ -1,0 +1,4 @@
+# 테스트와 정적 검사
+-r requirements.txt
+pytest>=7.4
+ruff>=0.4

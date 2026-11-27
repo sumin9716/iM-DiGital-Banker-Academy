@@ -14,7 +14,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Tuple, Union
 from pathlib import Path
-import pickle
 import warnings
 
 import numpy as np
@@ -22,7 +21,8 @@ import pandas as pd
 
 warnings.filterwarnings('ignore')
 
-# PyTorch 관련 import (설치 필요)
+# torch와 pytorch-forecasting은 선택 의존성이다(requirements-optional.txt).
+# 없으면 import 시점에는 플래그만 끄고, 학습 함수를 호출할 때 ImportError를 낸다.
 try:
     import torch
     import torch.nn as nn
@@ -30,24 +30,18 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-    print("⚠️ PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요")
 
-# pytorch-forecasting (TFT 구현체)
 try:
     from pytorch_forecasting import TemporalFusionTransformer, TimeSeriesDataSet
     from pytorch_forecasting.data import GroupNormalizer
-    from pytorch_forecasting.metrics import QuantileLoss, SMAPE, MAE
+    from pytorch_forecasting.metrics import QuantileLoss
     import lightning.pytorch as pl
     TFT_AVAILABLE = True
 except ImportError:
     TFT_AVAILABLE = False
-    print("⚠️ pytorch-forecasting이 설치되지 않았습니다.")
-    print("   `pip install pytorch-forecasting lightning` 실행 필요")
 
 
-# ============================================================================
 # 데이터 클래스
-# ============================================================================
 
 @dataclass
 class TFTConfig:
@@ -55,27 +49,27 @@ class TFTConfig:
     # 시퀀스 길이
     max_encoder_length: int = 12  # 과거 12개월 참조
     max_prediction_length: int = 3  # 최대 3개월 예측
-    
+
     # 모델 아키텍처
     hidden_size: int = 64
     attention_head_size: int = 4
     dropout: float = 0.1
     hidden_continuous_size: int = 32
-    
+
     # 학습 설정
     learning_rate: float = 0.001
     batch_size: int = 64
     max_epochs: int = 50
     gradient_clip_val: float = 0.1
-    
+
     # Quantile 예측 (불확실성)
     quantiles: List[float] = field(default_factory=lambda: [0.1, 0.5, 0.9])
-    
+
     # 조기 종료
     early_stopping_patience: int = 5
 
 
-@dataclass 
+@dataclass
 class TFTForecastModel:
     """TFT 예측 모델 컨테이너"""
     kpi: str
@@ -84,7 +78,7 @@ class TFTForecastModel:
     config: TFTConfig
     feature_importance: Optional[pd.DataFrame] = None
     metrics: Optional[Dict[str, float]] = None
-    
+
     def save(self, path: Path) -> None:
         """모델 저장"""
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -95,7 +89,7 @@ class TFTForecastModel:
             'config': self.config,
             'metrics': self.metrics,
         }, path)
-    
+
     @staticmethod
     def load(path: Path, training_dataset) -> "TFTForecastModel":
         """모델 로드"""
@@ -114,9 +108,7 @@ class TFTForecastModel:
         )
 
 
-# ============================================================================
 # 데이터 준비
-# ============================================================================
 
 def prepare_tft_dataset(
     df: pd.DataFrame,
@@ -150,49 +142,49 @@ def prepare_tft_dataset(
     """
     if not TFT_AVAILABLE:
         raise ImportError("pytorch-forecasting이 필요합니다")
-    
+
     if config is None:
         config = TFTConfig()
-    
+
     data = df.copy()
-    
+
     # 시간 인덱스 생성 (정수형)
     data[time_col] = pd.to_datetime(data[time_col])
     min_date = data[time_col].min()
     data["time_idx"] = ((data[time_col] - min_date).dt.days / 30).astype(int)
-    
+
     # 결측치 처리
     data[target_col] = data[target_col].fillna(0)
-    
+
     # 기본 변수 설정
     if static_categoricals is None:
         static_categoricals = ["업종_중분류", "사업장_시도", "법인_고객등급", "전담고객여부"]
         static_categoricals = [c for c in static_categoricals if c in data.columns]
-    
+
     if time_varying_known_reals is None:
         time_varying_known_reals = ["time_idx"]
         # 계절성 변수 추가
         data["month_num"] = data[time_col].dt.month
         data["quarter"] = data[time_col].dt.quarter
         time_varying_known_reals.extend(["month_num", "quarter"])
-    
+
     if time_varying_unknown_reals is None:
         time_varying_unknown_reals = [target_col]
         # Lag 변수가 있으면 추가
         lag_cols = [c for c in data.columns if "__lag" in c and target_col.split("__")[0] in c]
         time_varying_unknown_reals.extend(lag_cols[:5])  # 상위 5개만
-    
+
     # 범주형 변수 문자열 변환
     for col in static_categoricals:
         data[col] = data[col].astype(str).fillna("unknown")
-    
+
     # 학습/검증 분할
     if training_cutoff is None:
         max_time_idx = data["time_idx"].max()
         training_cutoff_idx = max_time_idx - config.max_prediction_length
     else:
         training_cutoff_idx = int(((training_cutoff - min_date).days / 30))
-    
+
     # TimeSeriesDataSet 생성
     training = TimeSeriesDataSet(
         data[data["time_idx"] <= training_cutoff_idx],
@@ -213,7 +205,7 @@ def prepare_tft_dataset(
         add_target_scales=True,
         add_encoder_length=True,
     )
-    
+
     # 검증 데이터셋
     validation = TimeSeriesDataSet.from_dataset(
         training,
@@ -221,13 +213,11 @@ def prepare_tft_dataset(
         predict=True,
         stop_randomization=True,
     )
-    
+
     return training, validation
 
 
-# ============================================================================
 # 모델 학습
-# ============================================================================
 
 def train_tft_model(
     training_dataset: TimeSeriesDataSet,
@@ -251,10 +241,10 @@ def train_tft_model(
     """
     if not TFT_AVAILABLE:
         raise ImportError("pytorch-forecasting이 필요합니다")
-    
+
     if config is None:
         config = TFTConfig()
-    
+
     # DataLoader 생성
     train_dataloader = training_dataset.to_dataloader(
         train=True,
@@ -266,7 +256,7 @@ def train_tft_model(
         batch_size=config.batch_size,
         num_workers=0,
     )
-    
+
     # TFT 모델 생성
     model = TemporalFusionTransformer.from_dataset(
         training_dataset,
@@ -279,10 +269,10 @@ def train_tft_model(
         loss=QuantileLoss(quantiles=config.quantiles),
         reduce_on_plateau_patience=4,
     )
-    
+
     if verbose:
         print(f"  TFT 모델 파라미터 수: {sum(p.numel() for p in model.parameters()):,}")
-    
+
     # Trainer 설정
     early_stop_callback = pl.callbacks.EarlyStopping(
         monitor="val_loss",
@@ -291,7 +281,7 @@ def train_tft_model(
         verbose=verbose,
         mode="min",
     )
-    
+
     trainer = pl.Trainer(
         max_epochs=config.max_epochs,
         accelerator="auto",
@@ -300,24 +290,24 @@ def train_tft_model(
         enable_progress_bar=verbose,
         logger=False,
     )
-    
+
     # 학습
     if verbose:
         print(f"  TFT 학습 시작 (max_epochs={config.max_epochs})...")
-    
+
     trainer.fit(
         model,
         train_dataloaders=train_dataloader,
         val_dataloaders=val_dataloader,
     )
-    
+
     # 검증 메트릭
     val_metrics = trainer.validate(model, dataloaders=val_dataloader, verbose=False)
     metrics = {"val_loss": val_metrics[0]["val_loss"]}
-    
+
     if verbose:
-        print(f"  ✓ 학습 완료 | Val Loss: {metrics['val_loss']:.4f}")
-    
+        print(f"  학습 완료 | Val Loss: {metrics['val_loss']:.4f}")
+
     return TFTForecastModel(
         kpi=kpi,
         model=model,
@@ -327,9 +317,7 @@ def train_tft_model(
     )
 
 
-# ============================================================================
 # 예측 및 해석
-# ============================================================================
 
 def predict_with_tft(
     model: TFTForecastModel,
@@ -349,7 +337,7 @@ def predict_with_tft(
     """
     if not TFT_AVAILABLE:
         raise ImportError("pytorch-forecasting이 필요합니다")
-    
+
     # 예측용 데이터셋 생성
     predict_dataset = TimeSeriesDataSet.from_dataset(
         model.training_dataset,
@@ -362,14 +350,14 @@ def predict_with_tft(
         batch_size=model.config.batch_size,
         num_workers=0,
     )
-    
+
     # 예측
     predictions = model.model.predict(
         predict_dataloader,
         return_x=True,
         return_index=True,
     )
-    
+
     # 결과 정리
     pred_df = pd.DataFrame({
         "segment_id": predictions.index["segment_id"],
@@ -378,7 +366,7 @@ def predict_with_tft(
         "pred_q50": predictions.output[:, :, 1].numpy().flatten(),  # 50% (median)
         "pred_q90": predictions.output[:, :, 2].numpy().flatten(),  # 90% quantile
     })
-    
+
     if return_attention:
         # Attention 해석
         interpretation = model.model.interpret_output(
@@ -387,7 +375,7 @@ def predict_with_tft(
         )
         attention_df = pd.DataFrame(interpretation["attention"])
         return pred_df, attention_df
-    
+
     return pred_df
 
 
@@ -400,7 +388,7 @@ def get_tft_feature_importance(model: TFTForecastModel) -> pd.DataFrame:
     """
     if not TFT_AVAILABLE:
         raise ImportError("pytorch-forecasting이 필요합니다")
-    
+
     # Variable importance 추출
     interpretation = model.model.interpret_output(
         model.model.predict(
@@ -409,20 +397,18 @@ def get_tft_feature_importance(model: TFTForecastModel) -> pd.DataFrame:
         ).output,
         reduction="sum",
     )
-    
+
     importance_df = pd.DataFrame({
-        "feature": list(interpretation["static_variables"].keys()) + 
+        "feature": list(interpretation["static_variables"].keys()) +
                    list(interpretation["encoder_variables"].keys()),
         "importance": list(interpretation["static_variables"].values()) +
                       list(interpretation["encoder_variables"].values()),
     }).sort_values("importance", ascending=False).reset_index(drop=True)
-    
+
     return importance_df
 
 
-# ============================================================================
 # 앙상블: LightGBM + TFT
-# ============================================================================
 
 def ensemble_lgbm_tft(
     lgbm_pred: np.ndarray,
@@ -444,9 +430,7 @@ def ensemble_lgbm_tft(
     return w_lgbm * lgbm_pred + w_tft * tft_pred
 
 
-# ============================================================================
 # 간단한 LSTM 대안 (pytorch-forecasting 없이도 동작)
-# ============================================================================
 
 if TORCH_AVAILABLE:
     class SimpleLSTMForecaster(nn.Module):
@@ -454,7 +438,7 @@ if TORCH_AVAILABLE:
         간단한 LSTM 기반 예측 모델
         pytorch-forecasting 없이도 사용 가능
         """
-        
+
         def __init__(
             self,
             input_size: int,
@@ -464,81 +448,81 @@ if TORCH_AVAILABLE:
             dropout: float = 0.1,
         ):
             super().__init__()
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        
-        self.lstm = nn.LSTM(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0,
-        )
-        
-        self.fc = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_size, output_size),
-        )
-    
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            x: (batch, seq_len, input_size)
-        Returns:
-            (batch, output_size)
-        """
-        lstm_out, (h_n, c_n) = self.lstm(x)
-        # 마지막 hidden state 사용
-        last_hidden = h_n[-1]  # (batch, hidden_size)
-        output = self.fc(last_hidden)
-        return output
+            self.hidden_size = hidden_size
+            self.num_layers = num_layers
+
+            self.lstm = nn.LSTM(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                batch_first=True,
+                dropout=dropout if num_layers > 1 else 0,
+            )
+
+            self.fc = nn.Sequential(
+                nn.Linear(hidden_size, hidden_size),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+                nn.Linear(hidden_size, output_size),
+            )
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            """
+            Args:
+                x: (batch, seq_len, input_size)
+            Returns:
+                (batch, output_size)
+            """
+            lstm_out, (h_n, c_n) = self.lstm(x)
+            # 마지막 hidden state 사용
+            last_hidden = h_n[-1]  # (batch, hidden_size)
+            output = self.fc(last_hidden)
+            return output
 
 
-class SegmentTimeSeriesDataset(Dataset):
-    """세그먼트 시계열 데이터셋"""
-    
-    def __init__(
-        self,
-        df: pd.DataFrame,
-        target_col: str,
-        feature_cols: List[str],
-        group_col: str = "segment_id",
-        seq_length: int = 12,
-        pred_length: int = 3,
-    ):
-        self.df = df
-        self.target_col = target_col
-        self.feature_cols = feature_cols
-        self.group_col = group_col
-        self.seq_length = seq_length
-        self.pred_length = pred_length
-        
-        self.samples = self._create_samples()
-    
-    def _create_samples(self) -> List[Tuple[np.ndarray, np.ndarray]]:
-        samples = []
-        for seg_id, group in self.df.groupby(self.group_col):
-            group = group.sort_values("month")
-            values = group[self.feature_cols].values
-            targets = group[self.target_col].values
-            
-            for i in range(len(group) - self.seq_length - self.pred_length + 1):
-                x = values[i:i + self.seq_length]
-                y = targets[i + self.seq_length:i + self.seq_length + self.pred_length]
-                
-                if not np.isnan(x).any() and not np.isnan(y).any():
-                    samples.append((x.astype(np.float32), y.astype(np.float32)))
-        
-        return samples
-    
-    def __len__(self) -> int:
-        return len(self.samples)
-    
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        x, y = self.samples[idx]
-        return torch.from_numpy(x), torch.from_numpy(y)
+    class SegmentTimeSeriesDataset(Dataset):
+        """세그먼트 시계열 데이터셋"""
+
+        def __init__(
+            self,
+            df: pd.DataFrame,
+            target_col: str,
+            feature_cols: List[str],
+            group_col: str = "segment_id",
+            seq_length: int = 12,
+            pred_length: int = 3,
+        ):
+            self.df = df
+            self.target_col = target_col
+            self.feature_cols = feature_cols
+            self.group_col = group_col
+            self.seq_length = seq_length
+            self.pred_length = pred_length
+
+            self.samples = self._create_samples()
+
+        def _create_samples(self) -> List[Tuple[np.ndarray, np.ndarray]]:
+            samples = []
+            for _, group in self.df.groupby(self.group_col):
+                group = group.sort_values("month")
+                values = group[self.feature_cols].values
+                targets = group[self.target_col].values
+
+                for i in range(len(group) - self.seq_length - self.pred_length + 1):
+                    x = values[i:i + self.seq_length]
+                    y = targets[i + self.seq_length:i + self.seq_length + self.pred_length]
+
+                    if not np.isnan(x).any() and not np.isnan(y).any():
+                        samples.append((x.astype(np.float32), y.astype(np.float32)))
+
+            return samples
+
+        def __len__(self) -> int:
+            return len(self.samples)
+
+        def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+            x, y = self.samples[idx]
+            return torch.from_numpy(x), torch.from_numpy(y)
 
 
 def train_simple_lstm(
@@ -574,28 +558,28 @@ def train_simple_lstm(
     """
     if not TORCH_AVAILABLE:
         raise ImportError("PyTorch가 필요합니다")
-    
+
     # 데이터셋 준비
     dataset = SegmentTimeSeriesDataset(
         df, target_col, feature_cols, group_col, seq_length, pred_length
     )
-    
+
     train_size = int(len(dataset) * 0.8)
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(
         dataset, [train_size, val_size]
     )
-    
+
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-    
+
     # 모델 생성
     model = SimpleLSTMForecaster(
         input_size=len(feature_cols),
         hidden_size=hidden_size,
         output_size=pred_length,
     )
-    
+
     # MPS/CUDA/CPU 디바이스 선택
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -603,18 +587,18 @@ def train_simple_lstm(
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
-    
+
     model = model.to(device)
-    
+
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.MSELoss()
-    
+
     if verbose:
         print(f"  LSTM 학습 시작 (epochs={num_epochs}, device={device})")
         print(f"  Train samples: {train_size}, Val samples: {val_size}")
-    
+
     best_val_loss = float('inf')
-    
+
     for epoch in range(num_epochs):
         # Training
         model.train()
@@ -627,7 +611,7 @@ def train_simple_lstm(
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-        
+
         # Validation
         model.eval()
         val_loss = 0
@@ -636,31 +620,29 @@ def train_simple_lstm(
                 x, y = x.to(device), y.to(device)
                 pred = model(x)
                 val_loss += criterion(pred, y).item()
-        
+
         train_loss /= len(train_loader)
         val_loss /= len(val_loader)
-        
+
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-        
+
         if verbose and (epoch + 1) % 10 == 0:
             print(f"    Epoch {epoch+1}/{num_epochs} | Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f}")
-    
+
     metrics = {
         "train_loss": train_loss,
         "val_loss": best_val_loss,
         "rmse": np.sqrt(best_val_loss),
     }
-    
+
     if verbose:
-        print(f"  ✓ LSTM 학습 완료 | Best Val RMSE: {metrics['rmse']:.4f}")
-    
+        print(f"  LSTM 학습 완료 | Best Val RMSE: {metrics['rmse']:.4f}")
+
     return model, metrics
 
 
-# ============================================================================
 # 메인 함수
-# ============================================================================
 
 def train_deep_forecast(
     df: pd.DataFrame,
@@ -686,7 +668,7 @@ def train_deep_forecast(
         return train_simple_lstm(df, target_col, feature_cols, **kwargs)
     elif model_type == "tft":
         if not TFT_AVAILABLE:
-            print("⚠️ TFT 사용 불가, LSTM으로 대체")
+            print("[경고] TFT 사용 불가, LSTM으로 대체")
             return train_simple_lstm(df, target_col, feature_cols, **kwargs)
         # TFT 학습 로직
         config = TFTConfig(**{k: v for k, v in kwargs.items() if hasattr(TFTConfig, k)})

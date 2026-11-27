@@ -86,38 +86,38 @@ class RadarConfig:
     # Forecast horizons (months ahead)
     horizons: List[int] = field(default_factory=lambda: [1, 2, 3])
 
-    # ============== Model Hyperparameters ==============
+    # Model Hyperparameters
     lgbm_n_estimators: int = 800
     lgbm_learning_rate: float = 0.05
     lgbm_num_leaves: int = 63
     lgbm_subsample: float = 0.9
     lgbm_colsample_bytree: float = 0.9
     lgbm_random_state: int = 42
-    
-    # Regularization parameters (NEW)
+
+    # Regularization parameters
     lgbm_min_child_samples: int = 20
     lgbm_reg_alpha: float = 0.1  # L1 regularization
     lgbm_reg_lambda: float = 0.1  # L2 regularization
     lgbm_early_stopping_rounds: int = 50
     lgbm_max_depth: int = -1  # -1 means no limit
 
-    # ============== Alert Thresholds ==============
+    # Alert Thresholds
     alert_down_threshold_pct: float = -0.20
     alert_up_threshold_pct: float = 0.20
     alert_severity_critical: float = 0.50
     alert_severity_high: float = 0.30
     alert_severity_medium: float = 0.20
 
-    # ============== Recommendation Thresholds ==============
+    # Recommendation Thresholds
     liquidity_stress_util_threshold: float = 0.70
     digital_onboard_threshold: float = 0.40
     auto_transfer_threshold: float = 0.15
 
-    # ============== Feature Engineering ==============
+    # Feature Engineering
     lag_periods: List[int] = field(default_factory=lambda: [1, 2, 3, 6, 12])
     rolling_windows: List[int] = field(default_factory=lambda: [3, 6])
 
-    # ============== Grade/Dedicated Weights for Scoring ==============
+    # Grade/Dedicated Weights for Scoring
     grade_weights: Dict[str, float] = field(default_factory=lambda: {
         "최우수": 1.25, "우수": 1.10, "일반": 1.00
     })
@@ -125,7 +125,7 @@ class RadarConfig:
         "Y": 1.20, "N": 1.00
     })
 
-    # ============== External Data Configuration ==============
+    # External Data Configuration
     # 외부 데이터 파일명 설정
     external_data_files: Dict[str, str] = field(default_factory=lambda: {
         "esi": "ESI.csv",
@@ -172,7 +172,7 @@ class RadarConfig:
     # 거시경제 변수 Lag 기간
     macro_lag_periods: List[int] = field(default_factory=lambda: [1, 2, 3])
 
-    # ============== P1 외부 데이터 파일 설정 (확장) ==============
+    # P1 외부 데이터 파일 설정 (확장)
     external_data_files_extended: Dict[str, str] = field(default_factory=lambda: {
         # 기존 파일
         "esi": "ESI.csv",

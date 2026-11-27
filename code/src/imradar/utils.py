@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import re
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
 import pandas as pd
 
-# ============== Logging Setup ==============
+if TYPE_CHECKING:
+    import torch
+
+# Logging Setup
 logger = logging.getLogger("imradar")
 
 
@@ -20,7 +23,7 @@ def setup_logging(level: int = logging.INFO) -> None:
     )
 
 
-# ============== Device Selection (MPS/CUDA/CPU) ==============
+# Device Selection (MPS/CUDA/CPU)
 def get_device(verbose: bool = True) -> "torch.device":
     """
     최적의 가속 디바이스 선택
@@ -35,22 +38,22 @@ def get_device(verbose: bool = True) -> "torch.device":
     """
     try:
         import torch
-    except ImportError:
-        raise ImportError("PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요")
-    
+    except ImportError as exc:
+        raise ImportError("PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요") from exc
+
     if torch.cuda.is_available():
         device = torch.device("cuda")
         if verbose:
-            print(f"🚀 CUDA 가속 활성화: {torch.cuda.get_device_name(0)}")
+            print(f"CUDA 가속 활성화: {torch.cuda.get_device_name(0)}")
     elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
         device = torch.device("mps")
         if verbose:
-            print("🍎 MPS (Apple Silicon) 가속 활성화")
+            print("MPS (Apple Silicon) 가속 활성화")
     else:
         device = torch.device("cpu")
         if verbose:
-            print("💻 CPU 모드로 실행")
-    
+            print("CPU 모드로 실행")
+
     return device
 
 
@@ -68,13 +71,15 @@ def get_device_str() -> str:
         return "cpu"
 
 
-# ============== Date/Time Utilities ==============
-def to_month_start(yyyymm: int) -> pd.Timestamp:
+# Date/Time Utilities
+def to_month_start(yyyymm: Union[int, str]) -> pd.Timestamp:
     """
-    Convert YYYYMM integer to month-start Timestamp.
+    Convert a YYYYMM integer or string to month-start Timestamp.
     
     Example:
         >>> to_month_start(202412)
+        Timestamp('2024-12-01 00:00:00')
+        >>> to_month_start("202412")
         Timestamp('2024-12-01 00:00:00')
     """
     y = int(yyyymm) // 100
@@ -93,20 +98,7 @@ def month_add(m: pd.Timestamp, k: int) -> pd.Timestamp:
     return (m.to_period("M") + k).to_timestamp()
 
 
-def yyyymm_to_ts(yyyymm: str) -> pd.Timestamp:
-    """
-    Convert YYYYMM string to Timestamp.
-    
-    Example:
-        >>> yyyymm_to_ts("202412")
-        Timestamp('2024-12-01 00:00:00')
-    """
-    y = int(yyyymm) // 100
-    m = int(yyyymm) % 100
-    return pd.Timestamp(year=y, month=m, day=1)
-
-
-# ============== Value Transformations ==============
+# Value Transformations
 def signed_log1p(x: np.ndarray) -> np.ndarray:
     """Signed log1p transformation for values that can be negative."""
     return np.sign(x) * np.log1p(np.abs(x))
@@ -127,7 +119,7 @@ def inverse_log1p(y: np.ndarray) -> np.ndarray:
     return np.expm1(np.maximum(y, 0.0))
 
 
-# ============== Korean Bucket Parsing ==============
+# Korean Bucket Parsing
 
 
 def parse_bucket_kor_to_number(s: str) -> Optional[float]:

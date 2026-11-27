@@ -50,7 +50,7 @@ __all__ = [
     "build_segment_profile",
     "generate_recommended_actions_for_segment",
     "generate_action_reason",
-    
+
     # Cause Analyzer
     "CauseAnalysis",
     "analyze_cause",
@@ -60,4 +60,13 @@ __all__ = [
     "enrich_watchlist_with_drivers",
     "format_feature_name",
     "interpret_contribution",
+
+    # Embedding Recommender
+    "ALSEmbedder",
+    "SegmentSimilarityEngine",
+    "HybridRecommender",
+    "SimilarSegment",
+    "SegmentEmbedding",
+    "compute_segment_similarity_report",
+    "enrich_actions_with_collaborative",
 ]
