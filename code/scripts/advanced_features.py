@@ -9,7 +9,6 @@
 5. 액션 ROI 추정 (예상 효과 금액)
 6. 다중 시나리오 분석 (Best/Base/Worst Case)
 7. 외부 데이터 확장 (ESI, KASI 등 추가 통합)
-8. Unit Test 커버리지 (pytest 기반)
 
 Author: iM ONEderful Team
 Date: 2026-01-14
@@ -656,202 +655,6 @@ class ExternalDataIntegrator:
 
 
 # ============================================================================
-# 8. Unit Test 프레임워크
-# ============================================================================
-
-class TestRunner:
-    """Unit Test 실행기 (pytest 기반)"""
-    
-    @staticmethod
-    def create_test_file(output_dir: Path) -> Path:
-        """테스트 파일 생성"""
-        test_content = '''"""
-Unit Tests for iM ONEderful Segment Radar
-
-pytest 실행: pytest tests/ -v
-"""
-
-import pytest
-import pandas as pd
-import numpy as np
-from pathlib import Path
-import sys
-
-# 프로젝트 경로 추가
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-
-class TestDataPreprocess:
-    """데이터 전처리 테스트"""
-    
-    def test_log_transform(self):
-        """log1p 변환 테스트"""
-        data = pd.Series([0, 1, 10, 100, 1000])
-        result = np.log1p(data)
-        assert result[0] == 0  # log1p(0) = 0
-        assert result[1] == pytest.approx(0.693, rel=0.01)
-        
-    def test_slog_transform(self):
-        """signed log 변환 테스트"""
-        data = pd.Series([-100, -1, 0, 1, 100])
-        result = np.sign(data) * np.log1p(np.abs(data))
-        assert result[2] == 0  # slog(0) = 0
-        assert result[4] > 0  # slog(100) > 0
-        assert result[0] < 0  # slog(-100) < 0
-        
-    def test_segment_id_creation(self):
-        """세그먼트 ID 생성 테스트"""
-        df = pd.DataFrame({
-            '업종': ['제조업', '서비스업'],
-            '지역': ['서울', '부산'],
-            '등급': ['우수', '일반'],
-        })
-        df['segment_id'] = df['업종'] + '|' + df['지역'] + '|' + df['등급']
-        assert df['segment_id'].iloc[0] == '제조업|서울|우수'
-
-
-class TestForecast:
-    """예측 모델 테스트"""
-    
-    def test_prediction_shape(self):
-        """예측 출력 형태 테스트"""
-        # Mock prediction
-        n_samples = 100
-        predictions = np.random.randn(n_samples)
-        assert len(predictions) == n_samples
-        
-    def test_r2_score(self):
-        """R² 스코어 계산 테스트"""
-        from sklearn.metrics import r2_score
-        y_true = np.array([1, 2, 3, 4, 5])
-        y_pred = np.array([1.1, 2.0, 2.9, 4.1, 5.0])
-        r2 = r2_score(y_true, y_pred)
-        assert r2 > 0.95  # 매우 좋은 예측
-
-
-class TestRecommendation:
-    """추천 시스템 테스트"""
-    
-    def test_action_score_range(self):
-        """액션 점수 범위 테스트"""
-        scores = [10, 50, 80, 120, 200]
-        for score in scores:
-            assert score >= 0
-            
-    def test_urgency_mapping(self):
-        """긴급도 매핑 테스트"""
-        urgency_map = {
-            'CRITICAL': 4,
-            'HIGH': 3,
-            'MEDIUM': 2,
-            'LOW': 1,
-        }
-        assert urgency_map['CRITICAL'] > urgency_map['LOW']
-
-
-class TestClustering:
-    """클러스터링 테스트"""
-    
-    def test_kmeans_output(self):
-        """K-Means 출력 테스트"""
-        from sklearn.cluster import KMeans
-        X = np.random.randn(100, 5)
-        kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-        labels = kmeans.fit_predict(X)
-        assert len(labels) == 100
-        assert len(set(labels)) == 3
-        
-    def test_silhouette_score(self):
-        """Silhouette Score 테스트"""
-        from sklearn.cluster import KMeans
-        from sklearn.metrics import silhouette_score
-        X = np.random.randn(100, 5)
-        kmeans = KMeans(n_clusters=3, random_state=42, n_init=10)
-        labels = kmeans.fit_predict(X)
-        score = silhouette_score(X, labels)
-        assert -1 <= score <= 1
-
-
-class TestConfidenceInterval:
-    """신뢰구간 테스트"""
-    
-    def test_ci_contains_prediction(self):
-        """CI가 예측값 포함 테스트"""
-        predicted = 100
-        ci_lower = 80
-        ci_upper = 120
-        assert ci_lower <= predicted <= ci_upper
-        
-    def test_ci_width_positive(self):
-        """CI 폭 양수 테스트"""
-        ci_lower = 80
-        ci_upper = 120
-        assert ci_upper - ci_lower > 0
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
-'''
-        
-        test_dir = output_dir / "tests"
-        test_dir.mkdir(exist_ok=True)
-        
-        test_file = test_dir / "test_core.py"
-        with open(test_file, 'w', encoding='utf-8') as f:
-            f.write(test_content)
-        
-        # pytest.ini 생성
-        pytest_ini = output_dir / "pytest.ini"
-        with open(pytest_ini, 'w', encoding='utf-8') as f:
-            f.write("""[pytest]
-testpaths = tests
-python_files = test_*.py
-python_functions = test_*
-addopts = -v --tb=short
-""")
-        
-        # conftest.py 생성
-        conftest = test_dir / "conftest.py"
-        with open(conftest, 'w', encoding='utf-8') as f:
-            f.write('''"""
-pytest fixtures
-"""
-
-import pytest
-import pandas as pd
-import numpy as np
-
-
-@pytest.fixture
-def sample_panel():
-    """샘플 패널 데이터"""
-    np.random.seed(42)
-    n = 100
-    return pd.DataFrame({
-        "segment_id": [f"seg_{i % 10}" for i in range(n)],
-        "month": pd.date_range("2024-01-01", periods=n, freq="D"),
-        "예금총잔액": np.random.randn(n) * 100 + 1000,
-        "대출총잔액": np.random.randn(n) * 50 + 500,
-        "순유입": np.random.randn(n) * 20,
-    })
-
-
-@pytest.fixture
-def sample_actions():
-    """샘플 액션 데이터"""
-    return pd.DataFrame({
-        "segment_id": ["seg_1", "seg_2", "seg_3"],
-        "action_type": ["DEPOSIT_GROWTH", "CHURN_PREVENTION", "LIQUIDITY_STRESS"],
-        "score": [80, 120, 95],
-        "urgency": ["HIGH", "CRITICAL", "HIGH"],
-    })
-''')
-        
-        print(f"  ✓ 테스트 파일 생성: {test_file}")
-        return test_file
-
-
-# ============================================================================
 # Main 실행
 # ============================================================================
 
@@ -1053,13 +856,6 @@ def main():
         print(f"  ⚠️ 외부 데이터 디렉토리 없음: {external_dir}")
     
     # ========================================================================
-    # Unit Test 생성
-    # ========================================================================
-    print("\n[보너스] Unit Test 생성...")
-    
-    TestRunner.create_test_file(base_dir)
-    
-    # ========================================================================
     # 결과 요약
     # ========================================================================
     print("\n" + "=" * 70)
@@ -1072,9 +868,6 @@ def main():
         if f.is_file():
             print(f"  - {f.name}")
     
-    print("\n🧪 테스트 실행:")
-    print("  pytest tests/ -v")
-    
     print("\n🔍 개선 요약:")
     print("  1. Horizon 3개월: 트렌드/모멘텀 피처 추가")
     print("  2. XAI: SHAP 기반 Feature 기여도 준비")
@@ -1083,7 +876,6 @@ def main():
     print("  5. ROI: 액션별 예상 효과 금액")
     print("  6. 시나리오: Best/Base/Worst Case")
     print("  7. 외부 데이터: ESI, KASI 등 통합")
-    print("  8. Unit Test: pytest 기반 테스트")
 
 
 if __name__ == "__main__":
