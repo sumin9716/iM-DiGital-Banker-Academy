@@ -19,8 +19,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
-from sklearn.preprocessing import StandardScaler, RobustScaler
+from torch.utils.data import Dataset, DataLoader
+from sklearn.preprocessing import RobustScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 warnings.filterwarnings('ignore')
@@ -653,7 +653,7 @@ def run_hyperparameter_tuning(train_samples, train_targets, val_samples, val_tar
         show_progress_bar=True
     )
     
-    print(f"\n✅ 최적 하이퍼파라미터:")
+    print("\n✅ 최적 하이퍼파라미터:")
     for key, value in study.best_params.items():
         print(f"   {key}: {value}")
     print(f"\n   최적 R²: {study.best_value:.4f}")
@@ -809,7 +809,7 @@ def main():
     )
     baseline_metrics = evaluate_model(baseline_model, test_samples, test_targets)
     
-    print(f"\n  ✅ 기존 Transformer 결과:")
+    print("\n  ✅ 기존 Transformer 결과:")
     print(f"     R² = {baseline_metrics['r2']:.4f}")
     print(f"     SMAPE = {baseline_metrics['smape']:.2f}%")
     
@@ -842,7 +842,7 @@ def main():
     )
     aug_metrics = evaluate_model(aug_model, test_samples, test_targets)
     
-    print(f"\n  ✅ 증강 Transformer 결과:")
+    print("\n  ✅ 증강 Transformer 결과:")
     print(f"     R² = {aug_metrics['r2']:.4f}")
     print(f"     SMAPE = {aug_metrics['smape']:.2f}%")
     
@@ -904,7 +904,7 @@ def main():
         )
         tuned_metrics = evaluate_model(tuned_model, test_samples, test_targets)
         
-        print(f"\n  ✅ 튜닝된 Transformer 결과:")
+        print("\n  ✅ 튜닝된 Transformer 결과:")
         print(f"     R² = {tuned_metrics['r2']:.4f}")
         print(f"     SMAPE = {tuned_metrics['smape']:.2f}%")
         

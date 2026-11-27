@@ -9,8 +9,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple, Callable
-from pathlib import Path
+from typing import List, Dict, Optional, Callable
 import warnings
 
 import numpy as np

@@ -10,10 +10,9 @@ Features:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from enum import Enum
 import pandas as pd
-import numpy as np
 
 
 class ActionCategory(Enum):
@@ -196,7 +195,7 @@ class ActionEngine:
                     action_text="정기예금 만기 연장 우대 및 적립식 펀드 안내",
                     category=ActionCategory.GROWTH,
                     urgency=Urgency.LOW,
-                    reason=f"예금잔액 증가 - 잉여자금 활용 기회",
+                    reason="예금잔액 증가 - 잉여자금 활용 기회",
                     expected_impact="고객 수익 증대 및 충성도 향상",
                     score=60,
                 ))
@@ -234,7 +233,7 @@ class ActionEngine:
                     action_text="주택담보대출 갈아타기 또는 신용대출 한도 안내",
                     category=ActionCategory.GROWTH,
                     urgency=Urgency.LOW,
-                    reason=f"대출잔액 감소 - 재유치 기회",
+                    reason="대출잔액 감소 - 재유치 기회",
                     expected_impact="여신 포트폴리오 유지",
                     score=55,
                 ))

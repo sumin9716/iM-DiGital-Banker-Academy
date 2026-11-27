@@ -10,9 +10,8 @@ Features:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 import pandas as pd
-import numpy as np
 
 
 # 피처명 → 비즈니스 용어 매핑

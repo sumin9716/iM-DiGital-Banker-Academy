@@ -472,37 +472,37 @@ def generate_narrative_report(
     
     # 리포트 작성
     report_lines = [
-        f"=== 세그먼트 분석 리포트 ===",
-        f"",
+        "=== 세그먼트 분석 리포트 ===",
+        "",
         f"■ 세그먼트: {segment_id}",
         f"■ 분석 월: {target_month.strftime('%Y년 %m월')}",
-        f"",
-        f"■ 성과 요약",
+        "",
+        "■ 성과 요약",
         f"  - 실적: {actual:,.0f}",
         f"  - 예측: {predicted:,.0f}",
         f"  - 차이: {residual:+,.0f} ({residual_ratio:+.1f}%)",
         f"  - 방향: 예측 대비 {direction}",
-        f"",
-        f"■ 주요 원인 분석",
+        "",
+        "■ 주요 원인 분석",
     ]
     
     # 내부 요인
     if explanation.get("internal_drivers"):
-        report_lines.append(f"  [내부 요인]")
+        report_lines.append("  [내부 요인]")
         for i, d in enumerate(explanation["internal_drivers"][:3], 1):
             direction_txt = "+" if d["contribution"] > 0 else "-"
             report_lines.append(f"    {i}. {d['display_name']} ({direction_txt}{abs(d['contribution']):.2f})")
     
     # 외부 요인
     if explanation.get("external_drivers"):
-        report_lines.append(f"  [외부 요인]")
+        report_lines.append("  [외부 요인]")
         for i, d in enumerate(explanation["external_drivers"][:3], 1):
             direction_txt = "+" if d["contribution"] > 0 else "-"
             report_lines.append(f"    {i}. {d['display_name']} ({direction_txt}{abs(d['contribution']):.2f})")
     
     # 권고사항
-    report_lines.append(f"")
-    report_lines.append(f"■ 권고사항")
+    report_lines.append("")
+    report_lines.append("■ 권고사항")
     
     recommendations = _generate_recommendations(explanation, residual_ratio)
     for i, rec in enumerate(recommendations[:3], 1):
@@ -624,12 +624,12 @@ def generate_monthly_top_alerts_report(
     
     report_lines = [
         f"{'='*60}",
-        f"월간 세그먼트 경보 리포트",
+        "월간 세그먼트 경보 리포트",
         f"분석 월: {target_month.strftime('%Y년 %m월')}",
         f"{'='*60}",
-        f"",
+        "",
         f"■ 급감 세그먼트 TOP {len(top_drop)}",
-        f"-" * 40,
+        "-" * 40,
     ]
     
     for idx, (_, row) in enumerate(top_drop.iterrows(), 1):
@@ -649,9 +649,9 @@ def generate_monthly_top_alerts_report(
         report_lines.append(f"   드라이버: {driver_txt}")
         report_lines.append("")
     
-    report_lines.append(f"")
+    report_lines.append("")
     report_lines.append(f"■ 급증 세그먼트 TOP {len(top_surge)}")
-    report_lines.append(f"-" * 40)
+    report_lines.append("-" * 40)
     
     for idx, (_, row) in enumerate(top_surge.iterrows(), 1):
         segment_id = row.get("segment_id", "N/A")

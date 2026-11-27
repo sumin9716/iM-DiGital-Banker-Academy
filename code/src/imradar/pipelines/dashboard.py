@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Dict, Optional, List
+from typing import List
 
 import pandas as pd
 import plotly.express as px

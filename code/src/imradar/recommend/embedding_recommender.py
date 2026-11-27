@@ -17,7 +17,6 @@ from dataclasses import dataclass
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import PCA
-from scipy.sparse import csr_matrix
 import warnings
 
 warnings.filterwarnings('ignore')

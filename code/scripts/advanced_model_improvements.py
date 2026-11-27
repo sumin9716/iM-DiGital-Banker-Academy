@@ -26,14 +26,13 @@ import pandas as pd
 import lightgbm as lgb
 import xgboost as xgb
 from catboost import CatBoostRegressor, CatBoostClassifier
-from sklearn.linear_model import Ridge, LogisticRegression
+from sklearn.linear_model import Ridge
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.metrics import (
     mean_absolute_error, mean_squared_error, r2_score,
-    accuracy_score, f1_score, classification_report
+    accuracy_score
 )
 import optuna
-from optuna.samplers import TPESampler
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 from imradar.config import RadarConfig
@@ -73,7 +72,7 @@ class TwoStageNetFlowModel:
         y_sign = (y_train > 0).astype(int)  # 1: 양수, 0: 음수
         
         if verbose:
-            print(f"    [Stage 1] 부호 분류 모델 학습...")
+            print("    [Stage 1] 부호 분류 모델 학습...")
             print(f"      - 양수 비율: {y_sign.mean():.1%}")
         
         self.sign_model = CatBoostClassifier(
@@ -97,7 +96,7 @@ class TwoStageNetFlowModel:
         
         # Stage 2: 크기 회귀 모델 (양수/음수 분리)
         if verbose:
-            print(f"    [Stage 2] 크기 예측 모델 학습...")
+            print("    [Stage 2] 크기 예측 모델 학습...")
         
         # 양수 데이터
         pos_mask = y_train > 0
@@ -242,7 +241,7 @@ class StackingEnsemble:
         
         # Level 2: 메타 모델 학습
         if verbose:
-            print(f"    [Level 2] 메타 모델 학습...")
+            print("    [Level 2] 메타 모델 학습...")
         
         meta_features = np.column_stack([oof_lgbm, oof_xgb, oof_cat])
         
@@ -258,7 +257,7 @@ class StackingEnsemble:
         
         # 전체 데이터로 기본 모델 재학습
         if verbose:
-            print(f"    [Retrain] 전체 데이터로 기본 모델 재학습...")
+            print("    [Retrain] 전체 데이터로 기본 모델 재학습...")
         
         self.base_models['lgbm'] = lgb.LGBMRegressor(
             n_estimators=300, learning_rate=0.05, max_depth=8,
@@ -518,7 +517,7 @@ def main():
         
         # 테스트 데이터가 없으면 스킵
         if len(X_test) < 10:
-            print(f"  ⚠️ 테스트 데이터 부족, 스킵")
+            print("  ⚠️ 테스트 데이터 부족, 스킵")
             continue
         
         # Two-Stage 모델 학습
@@ -529,7 +528,7 @@ def main():
         y_pred_twostage = two_stage.predict(X_test)
         metrics_twostage = compute_metrics(y_test.values, y_pred_twostage)
         
-        print(f"\n  ✅ Two-Stage 결과:")
+        print("\n  ✅ Two-Stage 결과:")
         print(f"     R² = {metrics_twostage['r2']:.4f}")
         print(f"     SMAPE = {metrics_twostage['smape']:.4f}")
         
@@ -542,7 +541,7 @@ def main():
         y_pred_baseline = baseline.predict(X_test)
         metrics_baseline = compute_metrics(y_test.values, y_pred_baseline)
         
-        print(f"\n  📊 기존 모델:")
+        print("\n  📊 기존 모델:")
         print(f"     R² = {metrics_baseline['r2']:.4f}")
         print(f"     SMAPE = {metrics_baseline['smape']:.4f}")
         
@@ -586,7 +585,7 @@ def main():
             
             # 테스트 데이터가 없으면 스킵
             if len(X_test) < 10:
-                print(f"  ⚠️ 테스트 데이터 부족, 스킵")
+                print("  ⚠️ 테스트 데이터 부족, 스킵")
                 continue
             
             # Stacking 학습
@@ -597,7 +596,7 @@ def main():
             y_pred_stack = stacking.predict(X_test)
             metrics_stack = compute_metrics(y_test.values, y_pred_stack)
             
-            print(f"\n  ✅ Stacking 결과:")
+            print("\n  ✅ Stacking 결과:")
             print(f"     R² = {metrics_stack['r2']:.4f}")
             print(f"     SMAPE = {metrics_stack['smape']:.4f}")
             
@@ -635,7 +634,7 @@ def main():
     mask = valid_mask & kpi_df[target_col].notna()
     eval_df = kpi_df.loc[mask].copy()
     
-    print(f"\n[순유입] Expanding Window CV")
+    print("\n[순유입] Expanding Window CV")
     print("-" * 40)
     
     cv = ExpandingWindowCV(initial_train_months=36, test_months=3, step=3)
@@ -657,12 +656,12 @@ def main():
         time_col='month', verbose=True
     )
     
-    print(f"\n  📊 CV 평균 결과:")
+    print("\n  📊 CV 평균 결과:")
     if len(cv_results) > 0 and 'r2' in cv_results.columns:
         print(f"     평균 R² = {cv_results['r2'].mean():.4f} (±{cv_results['r2'].std():.4f})")
         print(f"     평균 SMAPE = {cv_results['smape'].mean():.4f} (±{cv_results['smape'].std():.4f})")
     else:
-        print(f"     ⚠️ CV 결과가 비어있습니다 (데이터 부족 또는 fold 생성 실패)")
+        print("     ⚠️ CV 결과가 비어있습니다 (데이터 부족 또는 fold 생성 실패)")
         cv_results = pd.DataFrame(columns=['fold', 'train_size', 'test_size', 'mae', 'rmse', 'r2', 'smape'])
     
     # ========================================================================

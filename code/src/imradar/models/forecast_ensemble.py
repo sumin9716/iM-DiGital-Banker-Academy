@@ -10,8 +10,8 @@
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Tuple, Union, Any
+from dataclasses import dataclass
+from typing import List, Optional, Dict, Union, Any
 from pathlib import Path
 import pickle
 import warnings
@@ -21,7 +21,6 @@ import pandas as pd
 import lightgbm as lgb
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import TimeSeriesSplit
 from sklearn.feature_selection import SelectFromModel
 
 # xgboost/catboost/optuna는 requirements-optional.txt의 선택 의존성이다.

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Sequence, Optional
+from typing import Sequence, Optional
 import numpy as np
 import pandas as pd
 

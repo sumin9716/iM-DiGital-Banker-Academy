@@ -14,7 +14,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Tuple, Union
 from pathlib import Path
-import pickle
 import warnings
 
 import numpy as np
@@ -36,7 +35,7 @@ except ImportError:
 try:
     from pytorch_forecasting import TemporalFusionTransformer, TimeSeriesDataSet
     from pytorch_forecasting.data import GroupNormalizer
-    from pytorch_forecasting.metrics import QuantileLoss, SMAPE, MAE
+    from pytorch_forecasting.metrics import QuantileLoss
     import lightning.pytorch as pl
     TFT_AVAILABLE = True
 except ImportError:

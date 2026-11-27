@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional
 import pandas as pd
-import numpy as np
 
 
 def generate_performance_summary_html(

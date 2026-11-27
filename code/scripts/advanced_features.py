@@ -17,7 +17,7 @@ Date: 2026-01-14
 import argparse
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 import json
 
@@ -26,8 +26,7 @@ import pandas as pd
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score, r2_score
-import pickle
+from sklearn.metrics import silhouette_score
 
 warnings.filterwarnings('ignore')
 
@@ -787,7 +786,7 @@ def main():
         total_roi = actions_with_roi['estimated_effect_억원'].sum()
         print(f"  ✓ ROI 추정 완료: {len(actions_with_roi)} actions, 총 예상 효과: {total_roi:.1f}억원")
     else:
-        print(f"  ⚠️ actions_enhanced.csv 없음")
+        print("  ⚠️ actions_enhanced.csv 없음")
     
     # ========================================================================
     # 7. 다중 시나리오 분석
@@ -834,7 +833,7 @@ def main():
     with open(output_dir / "scenario_analysis.json", 'w', encoding='utf-8') as f:
         json.dump(scenarios_template, f, ensure_ascii=False, indent=2)
     
-    print(f"  ✓ 시나리오 템플릿 생성: Best/Base/Worst")
+    print("  ✓ 시나리오 템플릿 생성: Best/Base/Worst")
     
     # ========================================================================
     # 8. 외부 데이터 확장

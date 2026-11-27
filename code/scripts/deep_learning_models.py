@@ -14,7 +14,6 @@
 
 import argparse
 import pickle
-import pickle
 import warnings
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -24,7 +23,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 warnings.filterwarnings('ignore')
@@ -639,7 +638,7 @@ def main():
             epochs=args.epochs, lr=0.001, patience=15, verbose=True
         )
         lstm_metrics = evaluate_model(lstm_model, test_loader)
-        print(f"\n  ✅ LSTM 결과:")
+        print("\n  ✅ LSTM 결과:")
         print(f"     R² = {lstm_metrics['r2']:.4f}")
         print(f"     SMAPE = {lstm_metrics['smape']:.4f}")
         
@@ -664,7 +663,7 @@ def main():
             epochs=args.epochs, lr=0.0005, patience=15, verbose=True
         )
         transformer_metrics = evaluate_model(transformer_model, test_loader)
-        print(f"\n  ✅ Transformer 결과:")
+        print("\n  ✅ Transformer 결과:")
         print(f"     R² = {transformer_metrics['r2']:.4f}")
         print(f"     SMAPE = {transformer_metrics['smape']:.4f}")
         
@@ -689,7 +688,7 @@ def main():
             epochs=args.epochs, lr=0.001, patience=15, verbose=True
         )
         tft_metrics = evaluate_model(tft_model, test_loader)
-        print(f"\n  ✅ TFT 결과:")
+        print("\n  ✅ TFT 결과:")
         print(f"     R² = {tft_metrics['r2']:.4f}")
         print(f"     SMAPE = {tft_metrics['smape']:.4f}")
         
@@ -702,8 +701,8 @@ def main():
         if kpi == "순유입":
             # ====== 기존 ML 모델 비교 ======
             print("\n  📊 기존 ML 모델 (CatBoost 앙상블):")
-            print(f"     R² = 0.3403")
-            print(f"     SMAPE = 1.70%")
+            print("     R² = 0.3403")
+            print("     SMAPE = 1.70%")
             
             results.append({
                 'kpi': kpi, 'model': 'ML_Ensemble',

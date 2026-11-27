@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-from typing import List
 import pandas as pd
 
 from reportlab.lib.pagesizes import A4

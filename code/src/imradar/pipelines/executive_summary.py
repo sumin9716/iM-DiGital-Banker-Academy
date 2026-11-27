@@ -12,7 +12,6 @@ from typing import Optional, List, Dict
 from datetime import datetime
 
 import pandas as pd
-import numpy as np
 
 
 def generate_sparkline_svg(values: List[float], width: int = 80, height: int = 24, color: str = "#3b82f6") -> str:
