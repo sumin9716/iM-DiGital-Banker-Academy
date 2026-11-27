@@ -1,0 +1,8 @@
+# 정적 검사 설정. 실행: ruff check .
+target-version = "py310"
+line-length = 120
+
+[lint]
+select = ["F", "E9", "B"]
+# zip(strict=True)를 일괄로 넣으면 길이가 다른 입력의 동작이 바뀌므로 검사에서 제외한다.
+ignore = ["B905"]
