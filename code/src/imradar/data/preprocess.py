@@ -111,7 +111,7 @@ def build_full_panel(segment_month: pd.DataFrame, cfg: RadarConfig) -> PanelBuil
     month_df["t"] = (month_df["month"].dt.to_period("M") - df["month"].min().to_period("M")).apply(lambda p: p.n)
 
     # Cross join segments × months
-    segments = segment_meta[["segment_id"]]
+    segments = segment_meta[["segment_id"]].copy()
     segments["key"] = 1
     month_df["key"] = 1
     panel = segments.merge(month_df, on="key", how="outer").drop(columns=["key"])
