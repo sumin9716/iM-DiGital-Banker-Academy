@@ -640,13 +640,6 @@ def main():
 
     if alert_frames:
         all_alerts = pd.concat(alert_frames, ignore_index=True)
-        
-        # DEBUG: 전체 알림 저장하여 분석
-        all_alerts_debug = all_alerts.merge(panel_res.segment_meta, on="segment_id", how="left")
-        all_alerts_debug_path = os.path.join(args.out_dir, "all_alerts_debug.csv")
-        all_alerts_debug.to_csv(all_alerts_debug_path, index=False, encoding="utf-8-sig")
-        print(f"[DEBUG] Saved all alerts: {all_alerts_debug_path} ({len(all_alerts_debug)} rows)")
-        
         watchlist = build_watchlist(all_alerts, top_n=args.topn_watchlist)
         # Attach segment keys for readability
         meta = panel_res.segment_meta
