@@ -55,7 +55,7 @@ def _require_ensemble_deps() -> None:
 # 2026-01-12 advanced_model_improvements.py 실험 결과 반영
 # - 예금: CatBoost(60.3%) > LGBM(35.2%) > XGB(9.3%)
 # - 대출: LGBM(45.8%) > XGB(31.6%) > CatBoost(25.2%)
-# - 순유입: CatBoost(80.5%) > XGB(9.8%) > LGBM(3.4%)  ★ 핵심 개선
+# - 순유입: CatBoost(80.5%) > XGB(9.8%) > LGBM(3.4%)
 KPI_OPTIMAL_WEIGHTS = {
     '예금총잔액': {'lgbm': 0.352, 'xgb': 0.093, 'catboost': 0.603},
     '대출총잔액': {'lgbm': 0.458, 'xgb': 0.316, 'catboost': 0.252},

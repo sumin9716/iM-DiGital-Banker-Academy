@@ -415,7 +415,8 @@ def reconcile_forecasts(
         elif method in ["mint", "mint_shrink"]:
             result = reconcile_mint(
                 result, segment_meta, kpi_col,
-                historical_residuals=None,  # TODO: 잔차 전달
+                # 과거 잔차를 넘기지 않으므로 공분산 W가 단위행렬이 되어 OLS 조정과 같은 결과가 된다.
+                historical_residuals=None,
                 month_col=month_col, segment_col=segment_col, method="mint_shrink"
             )
         elif method == "ols":
