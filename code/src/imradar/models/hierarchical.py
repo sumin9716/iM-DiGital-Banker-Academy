@@ -352,7 +352,8 @@ def reconcile_mint(
         # 현재 집계값
         y_agg_current = S @ y_bottom
 
-        # 상위 수준 예측이 있다면 사용, 없으면 현재 집계값 사용
+        # 상위 수준의 별도 예측을 받지 않으므로 목표값이 현재 하위 합계와 같다. 따라서 아래 조정량은
+        # 항상 0이고, 실제 효과는 음수 예측을 0으로 바꾸는 것뿐이다.
         y_agg_target = y_agg_current.copy()
 
         # 조정
@@ -415,7 +416,7 @@ def reconcile_forecasts(
         elif method in ["mint", "mint_shrink"]:
             result = reconcile_mint(
                 result, segment_meta, kpi_col,
-                # 과거 잔차를 넘기지 않으므로 공분산 W가 단위행렬이 되어 OLS 조정과 같은 결과가 된다.
+                # 과거 잔차를 넘기지 않아 W가 단위행렬(OLS 가중치)이 된다. 조정량 자체는 reconcile_mint 참고.
                 historical_residuals=None,
                 month_col=month_col, segment_col=segment_col, method="mint_shrink"
             )
