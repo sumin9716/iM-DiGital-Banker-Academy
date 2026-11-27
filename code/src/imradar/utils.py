@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -72,12 +72,14 @@ def get_device_str() -> str:
 
 
 # Date/Time Utilities
-def to_month_start(yyyymm: int) -> pd.Timestamp:
+def to_month_start(yyyymm: Union[int, str]) -> pd.Timestamp:
     """
-    Convert YYYYMM integer to month-start Timestamp.
+    Convert a YYYYMM integer or string to month-start Timestamp.
     
     Example:
         >>> to_month_start(202412)
+        Timestamp('2024-12-01 00:00:00')
+        >>> to_month_start("202412")
         Timestamp('2024-12-01 00:00:00')
     """
     y = int(yyyymm) // 100
@@ -94,19 +96,6 @@ def month_add(m: pd.Timestamp, k: int) -> pd.Timestamp:
         Timestamp('2025-03-01 00:00:00')
     """
     return (m.to_period("M") + k).to_timestamp()
-
-
-def yyyymm_to_ts(yyyymm: str) -> pd.Timestamp:
-    """
-    Convert YYYYMM string to Timestamp.
-    
-    Example:
-        >>> yyyymm_to_ts("202412")
-        Timestamp('2024-12-01 00:00:00')
-    """
-    y = int(yyyymm) // 100
-    m = int(yyyymm) % 100
-    return pd.Timestamp(year=y, month=m, day=1)
 
 
 # Value Transformations

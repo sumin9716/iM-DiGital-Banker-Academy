@@ -15,7 +15,7 @@ sys.path.insert(0, str(SRC_ROOT))
 from imradar.features.kpi import TARGET_COLS
 from imradar.models.forecast_lgbm import ForecastModel, evaluate_forecast
 from imradar.models.forecast_ensemble import EnsembleModel, evaluate_ensemble
-from imradar.utils import yyyymm_to_ts
+from imradar.utils import to_month_start
 
 
 TARGET_TO_KPI = {v: k for k, v in TARGET_COLS.items()}
@@ -41,8 +41,8 @@ def main() -> None:
         raise FileNotFoundError(f"panel_path not found: {panel_path}")
     df = pd.read_parquet(panel_path) if panel_path.suffix == ".parquet" else pd.read_csv(panel_path)
 
-    test_start = yyyymm_to_ts(args.test_start) if args.test_start else None
-    test_end = yyyymm_to_ts(args.test_end) if args.test_end else None
+    test_start = to_month_start(args.test_start) if args.test_start else None
+    test_end = to_month_start(args.test_end) if args.test_end else None
 
     rows = []
     for path in sorted(Path(args.model_dir).glob("*.pkl")):

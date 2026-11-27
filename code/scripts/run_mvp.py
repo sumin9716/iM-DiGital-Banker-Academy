@@ -36,7 +36,7 @@ from imradar.pipelines.dashboard import save_overview_dashboard, save_watchlist_
 from imradar.pipelines.executive_summary import generate_executive_summary_html
 from imradar.pipelines.report_pdf import generate_monthly_onepager
 from imradar.models.fx_regime import compute_fx_regime_from_external, compute_fx_segment_scores
-from imradar.utils import month_add, yyyymm_to_ts
+from imradar.utils import month_add, to_month_start
 
 from imradar.models.forecast_ensemble import (
     ENSEMBLE_DEPS_AVAILABLE as ENSEMBLE_AVAILABLE,
@@ -262,9 +262,9 @@ def main():
         panel_fe.to_csv(panel_csv, index=False, encoding="utf-8-sig")
         print(f"Parquet not available ({e}). Saved panel as CSV: {panel_csv}")
 
-    train_end = yyyymm_to_ts(args.train_end) if args.train_end else None
-    test_start = yyyymm_to_ts(args.test_start) if args.test_start else None
-    test_end = yyyymm_to_ts(args.test_end) if args.test_end else None
+    train_end = to_month_start(args.train_end) if args.train_end else None
+    test_start = to_month_start(args.test_start) if args.test_start else None
+    test_end = to_month_start(args.test_end) if args.test_end else None
     if train_end is None and test_start is not None:
         # Prevent train/test leakage by defaulting train_end before test_start
         train_end = test_start - pd.DateOffset(months=1)

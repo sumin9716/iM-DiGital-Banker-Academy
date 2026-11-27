@@ -10,7 +10,6 @@ from imradar.utils import (
     safe_log1p,
     signed_log1p,
     to_month_start,
-    yyyymm_to_ts,
 )
 
 
@@ -28,7 +27,7 @@ def test_safe_log1p_clips_negative_values_to_zero():
 
 def test_month_helpers():
     assert to_month_start(202412) == pd.Timestamp("2024-12-01")
-    assert yyyymm_to_ts("202401") == pd.Timestamp("2024-01-01")
+    assert to_month_start("202401") == pd.Timestamp("2024-01-01")
     assert month_add(pd.Timestamp("2024-12-01"), 3) == pd.Timestamp("2025-03-01")
     assert month_add(pd.Timestamp("2024-01-01"), -1) == pd.Timestamp("2023-12-01")
 
