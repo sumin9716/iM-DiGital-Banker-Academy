@@ -124,7 +124,7 @@ class XAIExplainer:
             
             return self.shap_values
         except ImportError:
-            print("⚠️ SHAP 라이브러리 미설치. Feature Importance로 대체합니다.")
+            print("[경고] SHAP 라이브러리 미설치. Feature Importance로 대체합니다.")
             return self._compute_fallback_importance(X)
     
     def _compute_fallback_importance(self, X: pd.DataFrame) -> np.ndarray:
@@ -156,7 +156,7 @@ class XAIExplainer:
     def explain_segment(self, X_segment: pd.Series, top_k: int = 5) -> List[FeatureContribution]:
         """특정 세그먼트 예측 설명"""
         if self.shap_values is None:
-            print("⚠️ SHAP 값이 계산되지 않았습니다.")
+            print("[경고] SHAP 값이 계산되지 않았습니다.")
             return []
         
         # 단일 샘플 SHAP (근사)
@@ -209,7 +209,7 @@ class ConfidenceIntervalEstimator:
                 self.quantile_models[q] = model
                 
         except Exception as e:
-            print(f"⚠️ Quantile Regression 실패: {e}")
+            print(f"[경고] Quantile Regression 실패: {e}")
     
     def predict_with_ci(self, X: pd.DataFrame, ci_level: float = 0.90) -> pd.DataFrame:
         """CI 포함 예측"""
@@ -317,7 +317,7 @@ class SegmentClusterer:
         self.kmeans = KMeans(n_clusters=best_k, random_state=42, n_init=10)
         labels = self.kmeans.fit_predict(X_reduced)
         
-        print(f"  ✓ K-Means: {best_k} clusters (Silhouette: {best_score:.4f})")
+        print(f"  K-Means: {best_k} clusters (Silhouette: {best_score:.4f})")
         
         return labels
     
@@ -331,7 +331,7 @@ class SegmentClusterer:
         n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
         n_outliers = (labels == -1).sum()
         
-        print(f"  ✓ DBSCAN: {n_clusters} clusters, {n_outliers} outliers")
+        print(f"  DBSCAN: {n_clusters} clusters, {n_outliers} outliers")
         
         return labels
     
@@ -599,11 +599,11 @@ class ExternalDataIntegrator:
             if filepath.exists():
                 try:
                     self.loaded_data[name] = pd.read_csv(filepath)
-                    print(f"  ✓ 로드: {filename} ({len(self.loaded_data[name])} rows)")
+                    print(f"  로드: {filename} ({len(self.loaded_data[name])} rows)")
                 except Exception as e:
-                    print(f"  ⚠️ 로드 실패: {filename} - {e}")
+                    print(f"  [경고] 로드 실패: {filename} - {e}")
             else:
-                print(f"  ⚠️ 파일 없음: {filename}")
+                print(f"  [경고] 파일 없음: {filename}")
         
         return self.loaded_data
     
@@ -629,7 +629,7 @@ class ExternalDataIntegrator:
                 kasi = kasi.rename(columns={date_col: 'month'})
                 df = df.merge(kasi, on='month', how='left')
         
-        print(f"  ✓ 외부 데이터 통합 완료: {len(df.columns)} features")
+        print(f"  외부 데이터 통합 완료: {len(df.columns)} features")
         
         return df
     
@@ -671,7 +671,7 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     
     print("=" * 70)
-    print("🚀 고급 기능 개선 실행")
+    print("고급 기능 개선 실행")
     print("=" * 70)
     
     # ========================================================================
@@ -687,10 +687,10 @@ def main():
         if panel_csv.exists():
             panel = pd.read_csv(panel_csv, parse_dates=['month'])
         else:
-            print("  ❌ segment_panel 파일을 찾을 수 없습니다.")
+            print("  [실패] segment_panel 파일을 찾을 수 없습니다.")
             return
     
-    print(f"  ✓ 패널 로드: {len(panel):,} rows, {len(panel.columns)} columns")
+    print(f"  패널 로드: {len(panel):,} rows, {len(panel.columns)} columns")
     
     # ========================================================================
     # 2. Horizon 3개월 성능 개선
@@ -701,8 +701,8 @@ def main():
     enhanced_panel = optimizer.create_enhanced_features()
     enhanced_params = optimizer.get_horizon3_optimized_params()
     
-    print(f"  ✓ 강화된 피처 생성: {len(enhanced_panel.columns)} columns")
-    print(f"  ✓ 최적화 파라미터: learning_rate={enhanced_params['learning_rate']}, num_leaves={enhanced_params['num_leaves']}")
+    print(f"  강화된 피처 생성: {len(enhanced_panel.columns)} columns")
+    print(f"  최적화 파라미터: learning_rate={enhanced_params['learning_rate']}, num_leaves={enhanced_params['num_leaves']}")
     
     # ========================================================================
     # 3. XAI - SHAP 시각화
@@ -721,7 +721,7 @@ def main():
     with open(output_dir / "xai_report.json", 'w', encoding='utf-8') as f:
         json.dump(xai_report, f, ensure_ascii=False, indent=2)
     
-    print(f"  ✓ XAI 준비 완료: {len(feature_names)} features 대상")
+    print(f"  XAI 준비 완료: {len(feature_names)} features 대상")
     
     # ========================================================================
     # 4. Confidence Interval
@@ -738,7 +738,7 @@ def main():
     with open(output_dir / "ci_config.json", 'w', encoding='utf-8') as f:
         json.dump(ci_config, f, indent=2)
     
-    print(f"  ✓ CI 설정: {ci_config['ci_level']*100}% level, {ci_config['method']}")
+    print(f"  CI 설정: {ci_config['ci_level']*100}% level, {ci_config['method']}")
     
     # ========================================================================
     # 5. 세그먼트 클러스터링
@@ -762,9 +762,9 @@ def main():
         
         # 저장
         segment_features.to_csv(output_dir / "segment_clusters.csv", index=False)
-        print(f"  ✓ 클러스터링 완료: {len(segment_features)} segments")
+        print(f"  클러스터링 완료: {len(segment_features)} segments")
     else:
-        print(f"  ⚠️ 세그먼트 수 부족: {len(segment_features)}")
+        print(f"  [경고] 세그먼트 수 부족: {len(segment_features)}")
     
     # ========================================================================
     # 6. 액션 ROI 추정
@@ -782,9 +782,9 @@ def main():
         actions_with_roi.to_csv(output_dir / "actions_with_roi.csv", index=False)
         
         total_roi = actions_with_roi['estimated_effect_억원'].sum()
-        print(f"  ✓ ROI 추정 완료: {len(actions_with_roi)} actions, 총 예상 효과: {total_roi:.1f}억원")
+        print(f"  ROI 추정 완료: {len(actions_with_roi)} actions, 총 예상 효과: {total_roi:.1f}억원")
     else:
-        print("  ⚠️ actions_enhanced.csv 없음")
+        print("  [경고] actions_enhanced.csv 없음")
     
     # ========================================================================
     # 7. 다중 시나리오 분석
@@ -831,7 +831,7 @@ def main():
     with open(output_dir / "scenario_analysis.json", 'w', encoding='utf-8') as f:
         json.dump(scenarios_template, f, ensure_ascii=False, indent=2)
     
-    print("  ✓ 시나리오 템플릿 생성: Best/Base/Worst")
+    print("  시나리오 템플릿 생성: Best/Base/Worst")
     
     # ========================================================================
     # 8. 외부 데이터 확장
@@ -848,24 +848,24 @@ def main():
             with open(output_dir / "external_indicators.json", 'w', encoding='utf-8') as f:
                 json.dump(latest_indicators, f, ensure_ascii=False, indent=2)
             
-            print(f"  ✓ 외부 데이터 통합: {len(external_data)} sources, {len(latest_indicators)} indicators")
+            print(f"  외부 데이터 통합: {len(external_data)} sources, {len(latest_indicators)} indicators")
     else:
-        print(f"  ⚠️ 외부 데이터 디렉토리 없음: {external_dir}")
+        print(f"  [경고] 외부 데이터 디렉토리 없음: {external_dir}")
     
     # ========================================================================
     # 결과 요약
     # ========================================================================
     print("\n" + "=" * 70)
-    print("✅ 고급 기능 개선 완료!")
+    print("고급 기능 개선 완료!")
     print("=" * 70)
     
-    print(f"\n📁 출력 디렉토리: {output_dir}")
-    print("\n📊 생성된 파일:")
+    print(f"\n출력 디렉토리: {output_dir}")
+    print("\n생성된 파일:")
     for f in output_dir.glob("*"):
         if f.is_file():
             print(f"  - {f.name}")
     
-    print("\n🔍 개선 요약:")
+    print("\n개선 요약:")
     print("  1. Horizon 3개월: 트렌드/모멘텀 피처 추가")
     print("  2. XAI: SHAP 기반 Feature 기여도 준비")
     print("  3. CI: 90% 신뢰구간 설정")

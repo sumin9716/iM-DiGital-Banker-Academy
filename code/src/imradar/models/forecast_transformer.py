@@ -21,7 +21,8 @@ import pandas as pd
 
 warnings.filterwarnings('ignore')
 
-# PyTorch 관련 import (설치 필요)
+# torch와 pytorch-forecasting은 선택 의존성이다(requirements-optional.txt).
+# 없으면 import 시점에는 플래그만 끄고, 학습 함수를 호출할 때 ImportError를 낸다.
 try:
     import torch
     import torch.nn as nn
@@ -29,9 +30,7 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-    print("⚠️ PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요")
 
-# pytorch-forecasting (TFT 구현체)
 try:
     from pytorch_forecasting import TemporalFusionTransformer, TimeSeriesDataSet
     from pytorch_forecasting.data import GroupNormalizer
@@ -40,8 +39,6 @@ try:
     TFT_AVAILABLE = True
 except ImportError:
     TFT_AVAILABLE = False
-    print("⚠️ pytorch-forecasting이 설치되지 않았습니다.")
-    print("   `pip install pytorch-forecasting lightning` 실행 필요")
 
 
 # ============================================================================
@@ -315,7 +312,7 @@ def train_tft_model(
     metrics = {"val_loss": val_metrics[0]["val_loss"]}
     
     if verbose:
-        print(f"  ✓ 학습 완료 | Val Loss: {metrics['val_loss']:.4f}")
+        print(f"  학습 완료 | Val Loss: {metrics['val_loss']:.4f}")
     
     return TFTForecastModel(
         kpi=kpi,
@@ -652,7 +649,7 @@ def train_simple_lstm(
     }
     
     if verbose:
-        print(f"  ✓ LSTM 학습 완료 | Best Val RMSE: {metrics['rmse']:.4f}")
+        print(f"  LSTM 학습 완료 | Best Val RMSE: {metrics['rmse']:.4f}")
     
     return model, metrics
 
@@ -685,7 +682,7 @@ def train_deep_forecast(
         return train_simple_lstm(df, target_col, feature_cols, **kwargs)
     elif model_type == "tft":
         if not TFT_AVAILABLE:
-            print("⚠️ TFT 사용 불가, LSTM으로 대체")
+            print("[경고] TFT 사용 불가, LSTM으로 대체")
             return train_simple_lstm(df, target_col, feature_cols, **kwargs)
         # TFT 학습 로직
         config = TFTConfig(**{k: v for k, v in kwargs.items() if hasattr(TFTConfig, k)})

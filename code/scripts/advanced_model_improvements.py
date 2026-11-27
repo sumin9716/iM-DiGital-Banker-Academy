@@ -407,7 +407,7 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     
     print("=" * 60)
-    print("🚀 고급 모델 개선 시작")
+    print("고급 모델 개선 시작")
     print("=" * 60)
     
     # ========================================================================
@@ -417,13 +417,13 @@ def main():
     
     cfg = RadarConfig()
     raw_df = load_internal_csv(Path(args.raw_csv), cfg)
-    print(f"  ✓ 원본 데이터: {len(raw_df):,}행")
+    print(f"  원본 데이터: {len(raw_df):,}행")
     
     print("[2/4] 전처리...")
     monthly_df = aggregate_to_segment_month(raw_df, cfg)
     panel_result = build_full_panel(monthly_df, cfg)
     panel_df = panel_result.panel if hasattr(panel_result, 'panel') else panel_result
-    print(f"  ✓ 패널 데이터: {len(panel_df):,}행")
+    print(f"  패널 데이터: {len(panel_df):,}행")
     
     print("[3/4] KPI 및 피처 생성...")
     kpi_df = compute_kpis(panel_df, cfg)
@@ -443,7 +443,7 @@ def main():
     kpi_df = add_lag_features(kpi_df, group_col="segment_id", time_col="month", value_cols=value_cols)
     kpi_df = add_rolling_features(kpi_df, group_col="segment_id", time_col="month", value_cols=value_cols)
     kpi_df = add_change_features(kpi_df, group_col="segment_id", time_col="month", value_cols=value_cols)
-    print(f"  ✓ 최종 데이터: {len(kpi_df):,}행, {len(kpi_df.columns)}개 컬럼")
+    print(f"  최종 데이터: {len(kpi_df):,}행, {len(kpi_df.columns)}개 컬럼")
     
     # ========================================================================
     # 피처 및 타겟 준비
@@ -477,7 +477,7 @@ def main():
     
     categorical_cols = ['age_group', 'job', 'gender', 'region']
     
-    print(f"  ✓ 피처: {len(feature_cols)}개")
+    print(f"  피처: {len(feature_cols)}개")
     
     # Train/Test 분할
     train_end = pd.Timestamp("2024-09-01")
@@ -492,7 +492,7 @@ def main():
     # 1. 순유입 Two-Stage 모델
     # ========================================================================
     print("\n" + "=" * 60)
-    print("📊 1. 순유입 Two-Stage 모델")
+    print("1. 순유입 Two-Stage 모델")
     print("=" * 60)
     
     for horizon in [1, 2, 3]:
@@ -514,7 +514,7 @@ def main():
         
         # 테스트 데이터가 없으면 스킵
         if len(X_test) < 10:
-            print("  ⚠️ 테스트 데이터 부족, 스킵")
+            print("  [경고] 테스트 데이터 부족, 스킵")
             continue
         
         # Two-Stage 모델 학습
@@ -525,7 +525,7 @@ def main():
         y_pred_twostage = two_stage.predict(X_test)
         metrics_twostage = compute_metrics(y_test.values, y_pred_twostage)
         
-        print("\n  ✅ Two-Stage 결과:")
+        print("\n  Two-Stage 결과:")
         print(f"     R² = {metrics_twostage['r2']:.4f}")
         print(f"     SMAPE = {metrics_twostage['smape']:.4f}")
         
@@ -538,12 +538,12 @@ def main():
         y_pred_baseline = baseline.predict(X_test)
         metrics_baseline = compute_metrics(y_test.values, y_pred_baseline)
         
-        print("\n  📊 기존 모델:")
+        print("\n  기존 모델:")
         print(f"     R² = {metrics_baseline['r2']:.4f}")
         print(f"     SMAPE = {metrics_baseline['smape']:.4f}")
         
         improvement = (metrics_twostage['r2'] - metrics_baseline['r2']) / max(abs(metrics_baseline['r2']), 0.001) * 100
-        print(f"\n  🎯 R² 개선: {improvement:+.1f}%")
+        print(f"\n  R² 개선: {improvement:+.1f}%")
         
         results.append({
             'kpi': '순유입',
@@ -559,7 +559,7 @@ def main():
     # 2. Stacking 앙상블 (주요 KPI)
     # ========================================================================
     print("\n" + "=" * 60)
-    print("📊 2. Stacking 앙상블")
+    print("2. Stacking 앙상블")
     print("=" * 60)
     
     for kpi in ['예금총잔액', '대출총잔액', '순유입']:
@@ -582,7 +582,7 @@ def main():
             
             # 테스트 데이터가 없으면 스킵
             if len(X_test) < 10:
-                print("  ⚠️ 테스트 데이터 부족, 스킵")
+                print("  [경고] 테스트 데이터 부족, 스킵")
                 continue
             
             # Stacking 학습
@@ -593,7 +593,7 @@ def main():
             y_pred_stack = stacking.predict(X_test)
             metrics_stack = compute_metrics(y_test.values, y_pred_stack)
             
-            print("\n  ✅ Stacking 결과:")
+            print("\n  Stacking 결과:")
             print(f"     R² = {metrics_stack['r2']:.4f}")
             print(f"     SMAPE = {metrics_stack['smape']:.4f}")
             
@@ -607,7 +607,7 @@ def main():
             metrics_baseline = compute_metrics(y_test.values, y_pred_baseline)
             
             improvement = (metrics_stack['r2'] - metrics_baseline['r2']) / max(abs(metrics_baseline['r2']), 0.001) * 100
-            print(f"\n  🎯 R² 개선: {improvement:+.1f}%")
+            print(f"\n  R² 개선: {improvement:+.1f}%")
             
             results.append({
                 'kpi': kpi,
@@ -623,7 +623,7 @@ def main():
     # 3. 시계열 CV 평가
     # ========================================================================
     print("\n" + "=" * 60)
-    print("📊 3. 시계열 교차검증 (Expanding Window)")
+    print("3. 시계열 교차검증 (Expanding Window)")
     print("=" * 60)
     
     # 순유입에 대해 Expanding Window CV 수행
@@ -653,12 +653,12 @@ def main():
         time_col='month', verbose=True
     )
     
-    print("\n  📊 CV 평균 결과:")
+    print("\n  CV 평균 결과:")
     if len(cv_results) > 0 and 'r2' in cv_results.columns:
         print(f"     평균 R² = {cv_results['r2'].mean():.4f} (±{cv_results['r2'].std():.4f})")
         print(f"     평균 SMAPE = {cv_results['smape'].mean():.4f} (±{cv_results['smape'].std():.4f})")
     else:
-        print("     ⚠️ CV 결과가 비어있습니다 (데이터 부족 또는 fold 생성 실패)")
+        print("     [경고] CV 결과가 비어있습니다 (데이터 부족 또는 fold 생성 실패)")
         cv_results = pd.DataFrame(columns=['fold', 'train_size', 'test_size', 'mae', 'rmse', 'r2', 'smape'])
     
     # ========================================================================
@@ -669,13 +669,13 @@ def main():
     cv_results.to_csv(output_dir / "cv_results.csv", index=False)
     
     print("\n" + "=" * 60)
-    print("✅ 고급 모델 개선 완료!")
+    print("고급 모델 개선 완료!")
     print("=" * 60)
     
-    print("\n📊 최종 결과 요약:")
+    print("\n최종 결과 요약:")
     print(results_df.to_string(index=False))
     
-    print(f"\n💾 결과 저장: {output_dir}")
+    print(f"\n결과 저장: {output_dir}")
 
 
 if __name__ == "__main__":

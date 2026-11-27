@@ -412,7 +412,7 @@ def train_ensemble_forecast(
     val_scores['lgbm'] = _rmse(y_val, lgbm_model.predict(X_val))
     
     if verbose:
-        print(f"    ✓ LightGBM RMSE: {val_scores['lgbm']:.4f}")
+        print(f"    LightGBM RMSE: {val_scores['lgbm']:.4f}")
     
     # ====== XGBoost ======
     if verbose:
@@ -438,7 +438,7 @@ def train_ensemble_forecast(
     val_scores['xgb'] = _rmse(y_val, xgb_model.predict(X_val_xgb))
     
     if verbose:
-        print(f"    ✓ XGBoost RMSE: {val_scores['xgb']:.4f}")
+        print(f"    XGBoost RMSE: {val_scores['xgb']:.4f}")
     
     # ====== CatBoost ======
     if verbose:
@@ -477,7 +477,7 @@ def train_ensemble_forecast(
     val_scores['catboost'] = _rmse(y_val, cat_model.predict(X_val_cat))
     
     if verbose:
-        print(f"    ✓ CatBoost RMSE: {val_scores['catboost']:.4f}")
+        print(f"    CatBoost RMSE: {val_scores['catboost']:.4f}")
     
     # ====== 앙상블 가중치 계산 ======
     # KPI별 최적 가중치가 있으면 사용, 없으면 RMSE 기반 계산
@@ -487,7 +487,7 @@ def train_ensemble_forecast(
         # Stacking 실험 결과 반영된 최적 가중치 사용
         weights = KPI_OPTIMAL_WEIGHTS[kpi_name].copy()
         if verbose:
-            print(f"\n  📌 [{kpi_name}] 최적 가중치 적용:")
+            print(f"\n  [{kpi_name}] 최적 가중치 적용:")
             print(f"      LightGBM={weights['lgbm']:.3f}, XGBoost={weights['xgb']:.3f}, CatBoost={weights['catboost']:.3f}")
     else:
         # RMSE 기반 가중치 계산 (기본값)
@@ -512,7 +512,7 @@ def train_ensemble_forecast(
     ensemble_r2 = r2_score(y_val, y_pred_ensemble)
     
     if verbose:
-        print(f"\n  ★ 앙상블 RMSE: {ensemble_rmse:.4f} | R²: {ensemble_r2:.4f}")
+        print(f"\n  앙상블 RMSE: {ensemble_rmse:.4f} | R²: {ensemble_r2:.4f}")
     
     # 잔차 표준편차 계산
     train_residual_std = float(np.std(y_val - y_pred_ensemble))

@@ -44,15 +44,15 @@ def get_device(verbose: bool = True) -> "torch.device":
     if torch.cuda.is_available():
         device = torch.device("cuda")
         if verbose:
-            print(f"🚀 CUDA 가속 활성화: {torch.cuda.get_device_name(0)}")
+            print(f"CUDA 가속 활성화: {torch.cuda.get_device_name(0)}")
     elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
         device = torch.device("mps")
         if verbose:
-            print("🍎 MPS (Apple Silicon) 가속 활성화")
+            print("MPS (Apple Silicon) 가속 활성화")
     else:
         device = torch.device("cpu")
         if verbose:
-            print("💻 CPU 모드로 실행")
+            print("CPU 모드로 실행")
     
     return device
 

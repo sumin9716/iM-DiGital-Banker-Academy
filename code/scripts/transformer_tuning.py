@@ -640,7 +640,7 @@ def run_hyperparameter_tuning(train_samples, train_targets, val_samples, val_tar
     """하이퍼파라미터 튜닝 실행"""
     import optuna
     
-    print("\n📊 Optuna 하이퍼파라미터 튜닝 시작...")
+    print("\nOptuna 하이퍼파라미터 튜닝 시작...")
     print(f"   시도 횟수: {n_trials}")
     
     study = optuna.create_study(direction='maximize', sampler=optuna.samplers.TPESampler(seed=SEED))
@@ -652,7 +652,7 @@ def run_hyperparameter_tuning(train_samples, train_targets, val_samples, val_tar
         show_progress_bar=True
     )
     
-    print("\n✅ 최적 하이퍼파라미터:")
+    print("\n최적 하이퍼파라미터:")
     for key, value in study.best_params.items():
         print(f"   {key}: {value}")
     print(f"\n   최적 R²: {study.best_value:.4f}")
@@ -721,7 +721,7 @@ def main():
     args = parser.parse_args()
     
     print("=" * 70)
-    print("🚀 Transformer 모델 개선: 데이터 증강 + 하이퍼파라미터 튜닝")
+    print("Transformer 모델 개선: 데이터 증강 + 하이퍼파라미터 튜닝")
     print("=" * 70)
     
     # 경로 설정
@@ -740,7 +740,7 @@ def main():
     # 데이터 로드
     print("\n[1/6] 데이터 로드...")
     raw = load_internal_csv(Path(args.raw_csv))
-    print(f"  ✓ 원본 데이터: {len(raw):,}행")
+    print(f"  원본 데이터: {len(raw):,}행")
     
     # 전처리
     print("[2/6] 전처리...")
@@ -748,7 +748,7 @@ def main():
     panel_result = build_full_panel(agg, cfg)
     panel = panel_result.panel if hasattr(panel_result, 'panel') else panel_result
     panel = compute_kpis(panel, cfg)
-    print(f"  ✓ 패널 데이터: {len(panel):,}행")
+    print(f"  패널 데이터: {len(panel):,}행")
     
     # 피처 엔지니어링
     print("[3/6] 피처 엔지니어링...")
@@ -761,7 +761,7 @@ def main():
     feature_cols = [c for c in panel.columns 
                    if panel[c].dtype in ['float64', 'float32', 'int64', 'int32']
                    and c not in exclude_cols]
-    print(f"  ✓ 피처: {len(feature_cols)}개")
+    print(f"  피처: {len(feature_cols)}개")
     
     # 타겟 설정
     target_col = '순유입'
@@ -774,9 +774,9 @@ def main():
         prepare_sequence_data(panel, feature_cols, target_col, 
                              'segment_id', 'month', seq_len=args.seq_len)
     
-    print(f"  ✓ Train: {len(train_samples):,} sequences")
-    print(f"  ✓ Test: {len(test_samples):,} sequences")
-    print(f"  ✓ Input dim: {train_samples.shape[2]}")
+    print(f"  Train: {len(train_samples):,} sequences")
+    print(f"  Test: {len(test_samples):,} sequences")
+    print(f"  Input dim: {train_samples.shape[2]}")
     
     input_dim = train_samples.shape[2]
     
@@ -790,7 +790,7 @@ def main():
     # 기존 Transformer (베이스라인)
     # ========================================================================
     print("\n" + "=" * 70)
-    print("📌 1. 기존 Transformer (베이스라인)")
+    print("1. 기존 Transformer (베이스라인)")
     print("=" * 70)
     
     baseline_model = ImprovedTransformerModel(
@@ -808,7 +808,7 @@ def main():
     )
     baseline_metrics = evaluate_model(baseline_model, test_samples, test_targets)
     
-    print("\n  ✅ 기존 Transformer 결과:")
+    print("\n  기존 Transformer 결과:")
     print(f"     R² = {baseline_metrics['r2']:.4f}")
     print(f"     SMAPE = {baseline_metrics['smape']:.2f}%")
     
@@ -823,7 +823,7 @@ def main():
     # 데이터 증강만 적용
     # ========================================================================
     print("\n" + "=" * 70)
-    print("📌 2. 데이터 증강 적용")
+    print("2. 데이터 증강 적용")
     print("=" * 70)
     
     aug_model = ImprovedTransformerModel(
@@ -841,7 +841,7 @@ def main():
     )
     aug_metrics = evaluate_model(aug_model, test_samples, test_targets)
     
-    print("\n  ✅ 증강 Transformer 결과:")
+    print("\n  증강 Transformer 결과:")
     print(f"     R² = {aug_metrics['r2']:.4f}")
     print(f"     SMAPE = {aug_metrics['smape']:.2f}%")
     
@@ -857,7 +857,7 @@ def main():
     # ========================================================================
     if not args.skip_tuning:
         print("\n" + "=" * 70)
-        print("📌 3. 하이퍼파라미터 튜닝 (Optuna)")
+        print("3. 하이퍼파라미터 튜닝 (Optuna)")
         print("=" * 70)
         
         # 검증용 데이터 분할
@@ -903,7 +903,7 @@ def main():
         )
         tuned_metrics = evaluate_model(tuned_model, test_samples, test_targets)
         
-        print("\n  ✅ 튜닝된 Transformer 결과:")
+        print("\n  튜닝된 Transformer 결과:")
         print(f"     R² = {tuned_metrics['r2']:.4f}")
         print(f"     SMAPE = {tuned_metrics['smape']:.2f}%")
         
@@ -928,7 +928,7 @@ def main():
     results_df = pd.DataFrame(results)
     results_df.to_csv(output_dir / "transformer_tuning_results.csv", index=False)
     
-    print("\n📊 모델 비교:")
+    print("\n모델 비교:")
     print("-" * 60)
     for _, row in results_df.iterrows():
         print(f"  {row['model']:25s}: R²={row['r2']:7.4f}, SMAPE={row['smape']:6.2f}%")
@@ -938,11 +938,11 @@ def main():
     best_row = results_df.loc[results_df['r2'].idxmax()]
     improvement = (best_row['r2'] - baseline_r2) / abs(baseline_r2) * 100
     
-    print(f"\n🏆 최적 모델: {best_row['model']}")
+    print(f"\n최적 모델: {best_row['model']}")
     print(f"   R² 개선율: {improvement:+.1f}%")
     
-    print(f"\n💾 결과 저장: {output_dir}")
-    print("\n✅ 완료!")
+    print(f"\n결과 저장: {output_dir}")
+    print("\n완료!")
 
 
 if __name__ == "__main__":

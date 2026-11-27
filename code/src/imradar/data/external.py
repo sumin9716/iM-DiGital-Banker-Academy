@@ -751,9 +751,9 @@ def load_housing_data(
                 national["housing_price_yoy"] = national["housing_price_idx"].pct_change(12) * 100
                 
                 result = national
-                _log(f"  ✓ 주택가격지수 로드 완료: {len(national)}행")
+                _log(f"  주택가격지수 로드 완료: {len(national)}행")
         except Exception as e:
-            _log(f"  ✗ 주택가격지수 로드 실패: {e}")
+            _log(f"  주택가격지수 로드 실패: {e}")
     
     # 2. 전세지수
     jeonse_path = data_dir / "전세지수_아파트.csv"
@@ -775,9 +775,9 @@ def load_housing_data(
                     result = result.merge(national, on="month", how="outer")
                 else:
                     result = national
-                _log(f"  ✓ 전세지수 로드 완료: {len(national)}행")
+                _log(f"  전세지수 로드 완료: {len(national)}행")
         except Exception as e:
-            _log(f"  ✗ 전세지수 로드 실패: {e}")
+            _log(f"  전세지수 로드 실패: {e}")
     
     # 3. 아파트 거래량
     volume_path = data_dir / "거래량_아파트.csv"
@@ -800,9 +800,9 @@ def load_housing_data(
                 result = result.merge(monthly, on="month", how="outer")
             else:
                 result = monthly
-            _log(f"  ✓ 아파트 거래량 로드 완료: {len(monthly)}행")
+            _log(f"  아파트 거래량 로드 완료: {len(monthly)}행")
         except Exception as e:
-            _log(f"  ✗ 아파트 거래량 로드 실패: {e}")
+            _log(f"  아파트 거래량 로드 실패: {e}")
     
     if result is not None:
         result = result.sort_values("month").reset_index(drop=True)
@@ -867,9 +867,9 @@ def load_all_external_data(
         try:
             esi = load_esi(esi_path)
             merged = esi if merged is None else merged.merge(esi, on="month", how="outer")
-            _log(f"  ✓ ESI 로드 완료: {len(esi)}행")
+            _log(f"  ESI 로드 완료: {len(esi)}행")
         except Exception as e:
-            _log(f"  ✗ ESI 로드 실패: {e}")
+            _log(f"  ESI 로드 실패: {e}")
     
     # Fed 금리 로드
     fed_path = data_dir / default_config["fed_rate"]
@@ -877,9 +877,9 @@ def load_all_external_data(
         try:
             fed = load_fed_rate(fed_path, use_derived=True)
             merged = fed if merged is None else merged.merge(fed, on="month", how="outer")
-            _log(f"  ✓ Fed 금리 로드 완료: {len(fed)}행")
+            _log(f"  Fed 금리 로드 완료: {len(fed)}행")
         except Exception as e:
-            _log(f"  ✗ Fed 금리 로드 실패: {e}")
+            _log(f"  Fed 금리 로드 실패: {e}")
     
     # USD/KRW 환율 로드
     fx_path = data_dir / default_config["usd_krw"]
@@ -887,9 +887,9 @@ def load_all_external_data(
         try:
             fx = load_usd_krw_daily(fx_path)
             merged = fx if merged is None else merged.merge(fx, on="month", how="outer")
-            _log(f"  ✓ USD/KRW 환율 로드 완료: {len(fx)}행")
+            _log(f"  USD/KRW 환율 로드 완료: {len(fx)}행")
         except Exception as e:
-            _log(f"  ✗ USD/KRW 환율 로드 실패: {e}")
+            _log(f"  USD/KRW 환율 로드 실패: {e}")
     
     # 유가 로드
     oil_path = data_dir / default_config["oil"]
@@ -897,9 +897,9 @@ def load_all_external_data(
         try:
             oil = load_oil_price(oil_path, use_derived=True)
             merged = oil if merged is None else merged.merge(oil, on="month", how="outer")
-            _log(f"  ✓ 유가 로드 완료: {len(oil)}행")
+            _log(f"  유가 로드 완료: {len(oil)}행")
         except Exception as e:
-            _log(f"  ✗ 유가 로드 실패: {e}")
+            _log(f"  유가 로드 실패: {e}")
     
     # 무역 데이터 로드 (총계 제거 포함)
     trade_path = data_dir / default_config["trade"]
@@ -907,9 +907,9 @@ def load_all_external_data(
         try:
             trade = load_trade_data_clean(trade_path)
             merged = trade if merged is None else merged.merge(trade, on="month", how="outer")
-            _log(f"  ✓ 무역 데이터 로드 완료: {len(trade)}행")
+            _log(f"  무역 데이터 로드 완료: {len(trade)}행")
         except Exception as e:
-            _log(f"  ✗ 무역 데이터 로드 실패: {e}")
+            _log(f"  무역 데이터 로드 실패: {e}")
     
     # KASI 캘린더 로드
     kasi_path = data_dir / default_config["kasi"]
@@ -917,9 +917,9 @@ def load_all_external_data(
         try:
             kasi = load_kasi_calendar(kasi_path)
             merged = kasi if merged is None else merged.merge(kasi, on="month", how="outer")
-            _log(f"  ✓ KASI 캘린더 로드 완료: {len(kasi)}행")
+            _log(f"  KASI 캘린더 로드 완료: {len(kasi)}행")
         except Exception as e:
-            _log(f"  ✗ KASI 캘린더 로드 실패: {e}")
+            _log(f"  KASI 캘린더 로드 실패: {e}")
     
     # 국내 금리 로드
     kr_rate_path = data_dir / default_config["kr_rate"]
@@ -927,9 +927,9 @@ def load_all_external_data(
         try:
             kr_rate = load_kr_interest_rate(kr_rate_path)
             merged = kr_rate if merged is None else merged.merge(kr_rate, on="month", how="outer")
-            _log(f"  ✓ 국내 금리 로드 완료: {len(kr_rate)}행")
+            _log(f"  국내 금리 로드 완료: {len(kr_rate)}행")
         except Exception as e:
-            _log(f"  ✗ 국내 금리 로드 실패: {e}")
+            _log(f"  국내 금리 로드 실패: {e}")
     
     # ========== 새로 추가된 P1 데이터 ==========
     
@@ -939,9 +939,9 @@ def load_all_external_data(
         try:
             cpi = load_cpi(cpi_path)
             merged = cpi if merged is None else merged.merge(cpi, on="month", how="outer")
-            _log(f"  ✓ CPI 로드 완료: {len(cpi)}행")
+            _log(f"  CPI 로드 완료: {len(cpi)}행")
         except Exception as e:
-            _log(f"  ✗ CPI 로드 실패: {e}")
+            _log(f"  CPI 로드 실패: {e}")
     
     # PPI (생산자물가지수) 로드
     ppi_path = data_dir / default_config["ppi"]
@@ -949,9 +949,9 @@ def load_all_external_data(
         try:
             ppi = load_ppi(ppi_path)
             merged = ppi if merged is None else merged.merge(ppi, on="month", how="outer")
-            _log(f"  ✓ PPI 로드 완료: {len(ppi)}행")
+            _log(f"  PPI 로드 완료: {len(ppi)}행")
         except Exception as e:
-            _log(f"  ✗ PPI 로드 실패: {e}")
+            _log(f"  PPI 로드 실패: {e}")
     
     # 고용/실업률 로드
     unemp_path = data_dir / default_config["unemployment"]
@@ -964,9 +964,9 @@ def load_all_external_data(
             )
             if not employment.empty:
                 merged = employment if merged is None else merged.merge(employment, on="month", how="outer")
-                _log(f"  ✓ 고용 데이터 로드 완료: {len(employment)}행")
+                _log(f"  고용 데이터 로드 완료: {len(employment)}행")
         except Exception as e:
-            _log(f"  ✗ 고용 데이터 로드 실패: {e}")
+            _log(f"  고용 데이터 로드 실패: {e}")
     
     # 소매판매지수 로드
     retail_path = data_dir / default_config["retail"]
@@ -974,9 +974,9 @@ def load_all_external_data(
         try:
             retail = load_retail_sales(retail_path)
             merged = retail if merged is None else merged.merge(retail, on="month", how="outer")
-            _log(f"  ✓ 소매판매지수 로드 완료: {len(retail)}행")
+            _log(f"  소매판매지수 로드 완료: {len(retail)}행")
         except Exception as e:
-            _log(f"  ✗ 소매판매지수 로드 실패: {e}")
+            _log(f"  소매판매지수 로드 실패: {e}")
     
     # 산업/규모별 기업지수 로드 (연->월 확장)
     industry_path = data_dir / default_config["industry"]
@@ -984,22 +984,22 @@ def load_all_external_data(
         try:
             industry = load_industry_index(industry_path)
             merged = industry if merged is None else merged.merge(industry, on="month", how="outer")
-            _log(f"  ✓ 산업지수 로드 완료: {len(industry)}행")
+            _log(f"  산업지수 로드 완료: {len(industry)}행")
         except Exception as e:
-            _log(f"  ✗ 산업지수 로드 실패: {e}")
+            _log(f"  산업지수 로드 실패: {e}")
     
     # ========== 부동산 데이터 (신규 추가) ==========
     try:
         housing = load_housing_data(data_dir, verbose=False)
         if housing is not None and not housing.empty:
             merged = housing if merged is None else merged.merge(housing, on="month", how="outer")
-            _log(f"  ✓ 부동산 데이터 로드 완료: {len(housing)}행")
+            _log(f"  부동산 데이터 로드 완료: {len(housing)}행")
     except Exception as e:
-        _log(f"  ✗ 부동산 데이터 로드 실패: {e}")
+        _log(f"  부동산 데이터 로드 실패: {e}")
     
     if merged is not None:
         merged = merged.sort_values("month").reset_index(drop=True)
-        _log(f"\n  ★ 외부 데이터 병합 완료: {len(merged)}행, {len(merged.columns)}개 컬럼")
+        _log(f"\n  외부 데이터 병합 완료: {len(merged)}행, {len(merged.columns)}개 컬럼")
     
     return merged
 

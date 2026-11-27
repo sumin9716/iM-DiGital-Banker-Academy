@@ -545,7 +545,7 @@ def main():
     args = parser.parse_args()
     
     print("=" * 60)
-    print("🚀 딥러닝 모델 개선 시작")
+    print("딥러닝 모델 개선 시작")
     print("=" * 60)
     
     # 경로 설정
@@ -564,7 +564,7 @@ def main():
     # 데이터 로드
     print("\n[1/5] 데이터 로드...")
     raw = load_internal_csv(Path(args.raw_csv))
-    print(f"  ✓ 원본 데이터: {len(raw):,}행")
+    print(f"  원본 데이터: {len(raw):,}행")
     
     # 전처리
     print("[2/5] 전처리...")
@@ -572,7 +572,7 @@ def main():
     panel_result = build_full_panel(agg, cfg)
     panel = panel_result.panel if hasattr(panel_result, 'panel') else panel_result
     panel = compute_kpis(panel, cfg)
-    print(f"  ✓ 패널 데이터: {len(panel):,}행")
+    print(f"  패널 데이터: {len(panel):,}행")
     
     # 피처 엔지니어링
     print("[3/5] 피처 엔지니어링...")
@@ -588,7 +588,7 @@ def main():
     feature_cols = [c for c in panel.columns 
                    if panel[c].dtype in ['float64', 'float32', 'int64', 'int32']
                    and c not in exclude_cols]
-    print(f"  ✓ 피처: {len(feature_cols)}개")
+    print(f"  피처: {len(feature_cols)}개")
     
     # 결과 저장
     results = []
@@ -598,7 +598,7 @@ def main():
     kpis = [k.strip() for k in args.kpis.split(",") if k.strip()]
     for kpi in kpis:
         print("\n" + "=" * 60)
-        print(f"📊 {kpi} 딥러닝 모델 학습")
+        print(f"{kpi} 딥러닝 모델 학습")
         print("=" * 60)
         
         target_col = kpi
@@ -606,7 +606,7 @@ def main():
             target_col = "slog1p_순유입"
         
         if target_col not in panel.columns:
-            print(f"  ⚠️ KPI 컬럼 없음: {kpi} (스킵)")
+            print(f"  [경고] KPI 컬럼 없음: {kpi} (스킵)")
             continue
         
         # 데이터 준비
@@ -617,15 +617,15 @@ def main():
             seq_len=args.seq_len
         )
         
-        print(f"  ✓ Train: {len(train_dataset):,} sequences")
-        print(f"  ✓ Test: {len(test_dataset):,} sequences")
+        print(f"  Train: {len(train_dataset):,} sequences")
+        print(f"  Test: {len(test_dataset):,} sequences")
         
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
         
         # ====== LSTM 모델 ======
         print("\n[5/5] 모델 학습...")
-        print("\n  📌 LSTM 모델 학습 중...")
+        print("\n  LSTM 모델 학습 중...")
         lstm_model = LSTMModel(
             input_dim=len(feature_cols),
             hidden_dim=128,
@@ -638,7 +638,7 @@ def main():
             epochs=args.epochs, lr=0.001, patience=15, verbose=True
         )
         lstm_metrics = evaluate_model(lstm_model, test_loader)
-        print("\n  ✅ LSTM 결과:")
+        print("\n  LSTM 결과:")
         print(f"     R² = {lstm_metrics['r2']:.4f}")
         print(f"     SMAPE = {lstm_metrics['smape']:.4f}")
         
@@ -649,7 +649,7 @@ def main():
         })
         
         # ====== Transformer 모델 ======
-        print("\n  📌 Transformer 모델 학습 중...")
+        print("\n  Transformer 모델 학습 중...")
         transformer_model = TransformerModel(
             input_dim=len(feature_cols),
             d_model=128,
@@ -663,7 +663,7 @@ def main():
             epochs=args.epochs, lr=0.0005, patience=15, verbose=True
         )
         transformer_metrics = evaluate_model(transformer_model, test_loader)
-        print("\n  ✅ Transformer 결과:")
+        print("\n  Transformer 결과:")
         print(f"     R² = {transformer_metrics['r2']:.4f}")
         print(f"     SMAPE = {transformer_metrics['smape']:.4f}")
         
@@ -674,7 +674,7 @@ def main():
         })
         
         # ====== TFT 모델 ======
-        print("\n  📌 Temporal Fusion Transformer 학습 중...")
+        print("\n  Temporal Fusion Transformer 학습 중...")
         tft_model = TemporalFusionTransformer(
             num_features=len(feature_cols),
             hidden_dim=64,
@@ -688,7 +688,7 @@ def main():
             epochs=args.epochs, lr=0.001, patience=15, verbose=True
         )
         tft_metrics = evaluate_model(tft_model, test_loader)
-        print("\n  ✅ TFT 결과:")
+        print("\n  TFT 결과:")
         print(f"     R² = {tft_metrics['r2']:.4f}")
         print(f"     SMAPE = {tft_metrics['smape']:.4f}")
         
@@ -700,7 +700,7 @@ def main():
         
         if kpi == "순유입":
             # ====== 기존 ML 모델 비교 ======
-            print("\n  📊 기존 ML 모델 (CatBoost 앙상블):")
+            print("\n  기존 ML 모델 (CatBoost 앙상블):")
             print("     R² = 0.3403")
             print("     SMAPE = 1.70%")
             
@@ -768,17 +768,17 @@ def main():
     results_df.to_csv(output_dir / "deep_learning_results.csv", index=False)
     
     print("\n" + "=" * 60)
-    print("✅ 딥러닝 모델 개선 완료!")
+    print("딥러닝 모델 개선 완료!")
     print("=" * 60)
     
-    print("\n📊 모델 비교 결과:")
+    print("\n모델 비교 결과:")
     print(results_df.to_string(index=False))
     
     # 최적 모델 선택
     best_model = results_df.loc[results_df['r2'].idxmax()]
-    print(f"\n🏆 최적 모델: {best_model['model']} (R² = {best_model['r2']:.4f})")
-    print(f"\n💾 결과 저장: {output_dir}")
-    print("  ✓ 모델/아티팩트 저장 완료")
+    print(f"\n최적 모델: {best_model['model']} (R² = {best_model['r2']:.4f})")
+    print(f"\n결과 저장: {output_dir}")
+    print("  모델/아티팩트 저장 완료")
 
 
 if __name__ == "__main__":
