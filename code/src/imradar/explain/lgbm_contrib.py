@@ -359,7 +359,7 @@ def generate_alert_explanation(
 
 # ============== 확장된 SHAP 분석 기능 ==============
 
-def generate_segment_explanation(
+def generate_segment_contrib_detail(
     fm: ForecastModel,
     segment_df: pd.DataFrame,
     segment_id: str,
@@ -460,7 +460,7 @@ def generate_narrative_report(
         서술형 리포트 문자열
     """
     # 기여도 분석
-    explanation = generate_segment_explanation(fm, df, segment_id, target_month)
+    explanation = generate_segment_contrib_detail(fm, df, segment_id, target_month)
     
     if "error" in explanation:
         return f"분석 오류: {explanation['error']}"
