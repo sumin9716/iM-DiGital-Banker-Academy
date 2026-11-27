@@ -200,10 +200,9 @@ def main():
         print("[4.5/8] Load and merge external macro data")
         external_dir = args.external_dir
         if external_dir is None:
-            # 기본 경로: 프로젝트 루트의 '외부 데이터' 폴더
+            # --external_dir가 없으면 저장소 루트의 '외부 데이터', code/data/external 순으로 찾는다.
             potential_paths = [
                 os.path.join(os.path.dirname(REPO_ROOT), "외부 데이터"),
-                os.path.join(REPO_ROOT, "..", "외부 데이터"),
                 os.path.join(REPO_ROOT, "data", "external"),
             ]
             for p in potential_paths:
