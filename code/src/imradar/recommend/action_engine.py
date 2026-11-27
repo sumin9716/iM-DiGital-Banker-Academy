@@ -246,8 +246,6 @@ class ActionEngine:
         
         # 순유출 지속
         if profile.net_inflow < 0:
-            outflow_severity = abs(profile.net_inflow)
-            
             if profile.alert_severity in ["CRITICAL", "HIGH"]:
                 actions.append(RecommendedAction(
                     action_text="긴급 RM 컨택 - 이탈 방지 상담 진행",

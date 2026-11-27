@@ -472,7 +472,6 @@ def compute_segment_risk_score(
     
     # 종합 리스크 점수 계산 (0-100)
     # 구성요소: 평균 잔차비율, 변동성, 이상치 빈도
-    eps = 1e-9
     
     # 정규화
     risk_scores["ratio_score"] = risk_scores["avg_residual_ratio"].abs() * 100

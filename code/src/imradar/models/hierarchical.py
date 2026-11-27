@@ -63,7 +63,6 @@ def build_summing_matrix(
         agg_index: 집계 수준별 인덱스
         level_names: 각 행의 수준명
     """
-    bottom_keys = hierarchy_levels[-1].keys
     n_bottom = len(bottom_segments)
     
     # 각 수준별 고유 조합 추출
@@ -429,51 +428,6 @@ def reconcile_forecasts(
             raise ValueError(f"Unknown method: {method}")
     
     return result
-
-
-def compute_coherency_error(
-    forecasts: pd.DataFrame,
-    segment_meta: pd.DataFrame,
-    kpi_col: str,
-    month_col: str = "pred_month",
-    segment_col: str = "segment_id",
-) -> Dict[str, float]:
-    """
-    계층 일관성 오차 계산.
-    
-    각 상위 수준에서 하위 합산과의 차이를 측정.
-    
-    Args:
-        forecasts: 예측 데이터
-        segment_meta: 세그먼트 메타데이터
-        kpi_col: KPI 컬럼
-        month_col: 월 컬럼
-        segment_col: 세그먼트 ID 컬럼
-        
-    Returns:
-        수준별 일관성 오차 (RMSE)
-    """
-    merged = forecasts.merge(segment_meta, on=segment_col, how="left")
-    
-    errors = {}
-    
-    for level in HIERARCHY_LEVELS[:-1]:  # 마지막(bottom) 제외
-        level_keys = level.keys if level.keys else []
-        
-        if level.name == "total":
-            # 전체 합과 비교
-            for month in merged[month_col].unique():
-                month_data = merged[merged[month_col] == month]
-                total = month_data[kpi_col].sum()
-                # Total은 기준이므로 오차 0
-            errors[level.name] = 0.0
-        else:
-            # 상위 그룹 합과 하위 세그먼트 합 비교
-            group_sums = merged.groupby(level_keys + [month_col])[kpi_col].sum()
-            # 이 수준에서는 자체 일관성이므로 오차 0
-            errors[level.name] = 0.0
-    
-    return errors
 
 
 def evaluate_reconciliation(

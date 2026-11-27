@@ -104,7 +104,6 @@ class TimeSeriesAugmentation:
         
         # 왜곡된 시간 축 생성
         knot = 4
-        orig_steps = np.linspace(0, seq_len - 1, num=knot)
         random_warps = np.random.normal(loc=1.0, scale=self.time_warp_sigma, size=knot)
         random_warps = np.abs(random_warps)  # 양수 보장
         warp_steps = np.cumsum(random_warps)
@@ -620,7 +619,7 @@ def objective(trial, train_samples, train_targets, val_samples, val_targets, inp
     )
     
     # 학습
-    result = train_with_augmentation(
+    train_with_augmentation(
         model, train_samples, train_targets, val_samples, val_targets,
         epochs=50,  # 튜닝 시에는 짧게
         batch_size=batch_size,
@@ -802,7 +801,7 @@ def main():
         dropout=0.1
     )
     
-    baseline_result = train_with_augmentation(
+    train_with_augmentation(
         baseline_model, train_samples, train_targets, test_samples, test_targets,
         epochs=args.epochs, batch_size=args.batch_size, lr=0.001,
         patience=15, use_augmentation=False, verbose=True
@@ -835,7 +834,7 @@ def main():
         dropout=0.1
     )
     
-    aug_result = train_with_augmentation(
+    train_with_augmentation(
         aug_model, train_samples, train_targets, test_samples, test_targets,
         epochs=args.epochs, batch_size=args.batch_size, lr=0.001,
         patience=15, use_augmentation=True, verbose=True  # 증강 활성화
@@ -893,7 +892,7 @@ def main():
             dropout=best_params.get('dropout', 0.1)
         )
         
-        tuned_result = train_with_augmentation(
+        train_with_augmentation(
             tuned_model, train_samples, train_targets, test_samples, test_targets,
             epochs=args.epochs,
             batch_size=best_params.get('batch_size', 64),

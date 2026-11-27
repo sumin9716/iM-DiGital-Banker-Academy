@@ -165,9 +165,6 @@ class TwoStageNetFlowModel:
         if self.magnitude_model_neg is not None and neg_mask.sum() > 0:
             magnitude[neg_mask] = self.magnitude_model_neg.predict(X[neg_mask])
         
-        # 최종 예측: 부호 * 크기
-        final_pred = np.where(sign_pred == 1, magnitude, -magnitude)
-        
         # Soft prediction (확률 기반)
         # 부호 확률로 가중 평균
         soft_pred = sign_prob * magnitude + (1 - sign_prob) * (-magnitude)
@@ -211,7 +208,7 @@ class StackingEnsemble:
         
         for fold, (train_idx, val_idx) in enumerate(tscv.split(X_train)):
             X_tr, X_vl = X_train.iloc[train_idx], X_train.iloc[val_idx]
-            y_tr, y_vl = y_train.iloc[train_idx], y_train.iloc[val_idx]
+            y_tr = y_train.iloc[train_idx]
             
             # LightGBM
             lgbm = lgb.LGBMRegressor(

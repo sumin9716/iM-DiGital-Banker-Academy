@@ -337,7 +337,6 @@ def generate_alert_explanation(
     
     if include_recommendation:
         # 간단한 규칙 기반 권고사항
-        pos_features = explanation["top_positive_drivers"]
         neg_features = explanation["top_negative_drivers"]
         
         recommendations = []

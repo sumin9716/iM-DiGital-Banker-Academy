@@ -181,13 +181,11 @@ def generate_enhanced_actions(
     cur_net = _safe_float(row.get("순유입", 0))
     cur_card = _safe_float(row.get("카드총사용", 0))
     cur_fx = _safe_float(row.get("FX총액", 0))
-    cur_digital = _safe_float(row.get("디지털거래금액", 0))
     
     # 파생 지표
     util_rate = _safe_float(row.get("한도소진율", 0))
     util_rate = min(max(util_rate, 0.0), 5.0)
     digital_share = _safe_float(row.get("디지털비중", 0))
-    auto_share = _safe_float(row.get("자동이체비중", 0))
     
     # Lag 값들 (추세 계산용)
     dep_lag1 = _safe_float(row.get("예금총잔액_lag1"))
@@ -199,9 +197,7 @@ def generate_enhanced_actions(
     pred_deposit = preds.get("예금총잔액")
     pred_loan = preds.get("대출총잔액")
     pred_net = preds.get("순유입")
-    pred_card = preds.get("카드총사용")
     pred_fx = preds.get("FX총액")
-    pred_digital = preds.get("디지털거래금액")
     
     # 자산 등급
     tier = _classify_tier(cur_deposit)
@@ -218,13 +214,11 @@ def generate_enhanced_actions(
     
     # 알림 정보
     alert_severity = 0.0
-    alert_type = ""
     if alerts is not None and not alerts.empty:
         seg_alerts = alerts[alerts["segment_id"] == segment_id]
         if not seg_alerts.empty:
             worst = seg_alerts.sort_values("residual_pct").iloc[0]
             alert_severity = min(2.0, max(0.0, abs(float(worst["residual_pct"]))))
-            alert_type = str(worst.get("alert_type", ""))
     
     candidates: List[EnhancedAction] = []
     
@@ -572,7 +566,6 @@ def recommend_enhanced_actions(
     
     # 예측 데이터 병합 준비
     pred_kpis = ["예금총잔액", "대출총잔액", "순유입", "카드총사용", "디지털거래금액", "FX총액"]
-    pred_cols = [c for c in preds_df.columns if any(k in c for k in pred_kpis)]
     
     for _, row in latest_panel.iterrows():
         seg_id = row["segment_id"]

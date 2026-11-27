@@ -760,7 +760,6 @@ def generate_executive_summary_html(
     if risk_card_seg:
         seg_id = risk_card_seg.get("segment_id", "Unknown")
         actual = risk_card_seg.get("actual", 0)
-        predicted = risk_card_seg.get("predicted", 0)
         resid_pct = risk_card_seg.get("residual_pct", 0)
         alert_type = risk_card_seg.get("alert_type", "")
         kpi = risk_card_seg.get("kpi", "")

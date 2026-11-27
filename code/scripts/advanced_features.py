@@ -17,7 +17,7 @@ Date: 2026-01-14
 import argparse
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence
 from dataclasses import dataclass
 import json
 
@@ -189,7 +189,7 @@ class ConfidenceIntervalEstimator:
         self.quantile_models = {}
         
     def fit_quantile_regression(self, X_train: pd.DataFrame, y_train: np.ndarray,
-                                 quantiles: List[float] = [0.05, 0.5, 0.95]):
+                                 quantiles: Sequence[float] = (0.05, 0.5, 0.95)):
         """Quantile Regression 기반 CI"""
         try:
             import lightgbm as lgb
@@ -709,8 +709,6 @@ def main():
     # ========================================================================
     print("\n[3/8] XAI SHAP 시각화 준비...")
     
-    # 저장된 모델 로드 시도
-    model_path = data_dir / "models"
     feature_names = [c for c in enhanced_panel.columns if c.startswith('log1p_') or c.startswith('slog1p_')]
     
     # SHAP 설명 샘플 생성

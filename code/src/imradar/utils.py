@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import re
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 import pandas as pd
+
+if TYPE_CHECKING:
+    import torch
 
 # ============== Logging Setup ==============
 logger = logging.getLogger("imradar")
@@ -35,8 +38,8 @@ def get_device(verbose: bool = True) -> "torch.device":
     """
     try:
         import torch
-    except ImportError:
-        raise ImportError("PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요")
+    except ImportError as exc:
+        raise ImportError("PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요") from exc
     
     if torch.cuda.is_available():
         device = torch.device("cuda")

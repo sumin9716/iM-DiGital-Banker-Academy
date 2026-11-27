@@ -89,7 +89,6 @@ def generate_actions_for_row(
     d_dep = delta("예금총잔액")
     d_loan = delta("대출총잔액")
     d_card = delta("카드총사용")
-    d_dig = delta("디지털거래금액")
     d_fx = delta("FX총액")
     
     pct_dep = pct_delta("예금총잔액")
@@ -242,7 +241,6 @@ def generate_fx_actions_for_regime(
     is_uptrend = "Uptrend" in fx_regime
     is_downtrend = "Downtrend" in fx_regime
     is_high_vol = "HighVol" in fx_volatility or "HighVol" in fx_regime
-    is_low_vol = "LowVol" in fx_volatility or "LowVol" in fx_regime
     
     cand: List[FXAction] = []
     
@@ -515,13 +513,11 @@ def recommend_actions(
         # 남은 슬롯 채우기 (전체 score 상위에서)
         remaining = top_n_global - len(out)
         if remaining > 0:
-            used_indices = set(out.index)
             original_sorted = pd.DataFrame(actions).sort_values("score", ascending=False)
             for _, row in original_sorted.iterrows():
                 if len(out) >= top_n_global:
                     break
                 # 중복 방지
-                key = (row.get("segment_id"), row.get("action_type"))
                 existing = out[(out["segment_id"] == row.get("segment_id")) & 
                                (out["action_type"] == row.get("action_type"))]
                 if existing.empty:

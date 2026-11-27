@@ -142,7 +142,6 @@ def add_change_features(
         
         if include_acceleration:
             # 가속도 (2차 차분): 변화율의 변화
-            mom = out[f"{c}__mom"]
             out[f"{c}__accel"] = out.groupby(group_col)[f"{c}__mom"].diff()
     
     return out

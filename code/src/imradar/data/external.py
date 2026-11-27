@@ -12,7 +12,7 @@
 """
 from __future__ import annotations
 
-from typing import Optional, List, Dict, Union
+from typing import Dict, List, Optional, Sequence, Union
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -1047,7 +1047,7 @@ def merge_external_to_panel(
 def add_macro_lag_features(
     df: pd.DataFrame,
     macro_cols: Optional[List[str]] = None,
-    lags: List[int] = [1, 2, 3],
+    lags: Sequence[int] = (1, 2, 3),
 ) -> pd.DataFrame:
     """
     거시경제 변수에 대한 Lag 피처 생성
@@ -1075,9 +1075,6 @@ def add_macro_lag_features(
         ]
     
     out = df.copy()
-    
-    # 월별 유니크 데이터로 Lag 계산 후 다시 조인
-    month_unique = out[["month"]].drop_duplicates().sort_values("month")
     
     for col in macro_cols:
         if col not in out.columns:
