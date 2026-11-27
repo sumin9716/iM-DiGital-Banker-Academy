@@ -464,81 +464,81 @@ if TORCH_AVAILABLE:
             dropout: float = 0.1,
         ):
             super().__init__()
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
+            self.hidden_size = hidden_size
+            self.num_layers = num_layers
         
-        self.lstm = nn.LSTM(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            batch_first=True,
-            dropout=dropout if num_layers > 1 else 0,
-        )
+            self.lstm = nn.LSTM(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                batch_first=True,
+                dropout=dropout if num_layers > 1 else 0,
+            )
         
-        self.fc = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_size, output_size),
-        )
+            self.fc = nn.Sequential(
+                nn.Linear(hidden_size, hidden_size),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+                nn.Linear(hidden_size, output_size),
+            )
     
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Args:
-            x: (batch, seq_len, input_size)
-        Returns:
-            (batch, output_size)
-        """
-        lstm_out, (h_n, c_n) = self.lstm(x)
-        # 마지막 hidden state 사용
-        last_hidden = h_n[-1]  # (batch, hidden_size)
-        output = self.fc(last_hidden)
-        return output
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            """
+            Args:
+                x: (batch, seq_len, input_size)
+            Returns:
+                (batch, output_size)
+            """
+            lstm_out, (h_n, c_n) = self.lstm(x)
+            # 마지막 hidden state 사용
+            last_hidden = h_n[-1]  # (batch, hidden_size)
+            output = self.fc(last_hidden)
+            return output
 
 
-class SegmentTimeSeriesDataset(Dataset):
-    """세그먼트 시계열 데이터셋"""
+    class SegmentTimeSeriesDataset(Dataset):
+        """세그먼트 시계열 데이터셋"""
     
-    def __init__(
-        self,
-        df: pd.DataFrame,
-        target_col: str,
-        feature_cols: List[str],
-        group_col: str = "segment_id",
-        seq_length: int = 12,
-        pred_length: int = 3,
-    ):
-        self.df = df
-        self.target_col = target_col
-        self.feature_cols = feature_cols
-        self.group_col = group_col
-        self.seq_length = seq_length
-        self.pred_length = pred_length
+        def __init__(
+            self,
+            df: pd.DataFrame,
+            target_col: str,
+            feature_cols: List[str],
+            group_col: str = "segment_id",
+            seq_length: int = 12,
+            pred_length: int = 3,
+        ):
+            self.df = df
+            self.target_col = target_col
+            self.feature_cols = feature_cols
+            self.group_col = group_col
+            self.seq_length = seq_length
+            self.pred_length = pred_length
         
-        self.samples = self._create_samples()
+            self.samples = self._create_samples()
     
-    def _create_samples(self) -> List[Tuple[np.ndarray, np.ndarray]]:
-        samples = []
-        for seg_id, group in self.df.groupby(self.group_col):
-            group = group.sort_values("month")
-            values = group[self.feature_cols].values
-            targets = group[self.target_col].values
+        def _create_samples(self) -> List[Tuple[np.ndarray, np.ndarray]]:
+            samples = []
+            for seg_id, group in self.df.groupby(self.group_col):
+                group = group.sort_values("month")
+                values = group[self.feature_cols].values
+                targets = group[self.target_col].values
             
-            for i in range(len(group) - self.seq_length - self.pred_length + 1):
-                x = values[i:i + self.seq_length]
-                y = targets[i + self.seq_length:i + self.seq_length + self.pred_length]
+                for i in range(len(group) - self.seq_length - self.pred_length + 1):
+                    x = values[i:i + self.seq_length]
+                    y = targets[i + self.seq_length:i + self.seq_length + self.pred_length]
                 
-                if not np.isnan(x).any() and not np.isnan(y).any():
-                    samples.append((x.astype(np.float32), y.astype(np.float32)))
+                    if not np.isnan(x).any() and not np.isnan(y).any():
+                        samples.append((x.astype(np.float32), y.astype(np.float32)))
         
-        return samples
+            return samples
     
-    def __len__(self) -> int:
-        return len(self.samples)
+        def __len__(self) -> int:
+            return len(self.samples)
     
-    def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        x, y = self.samples[idx]
-        return torch.from_numpy(x), torch.from_numpy(y)
+        def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
+            x, y = self.samples[idx]
+            return torch.from_numpy(x), torch.from_numpy(y)
 
 
 def train_simple_lstm(
