@@ -84,7 +84,7 @@ def generate_executive_summary_html(
     next_month = (current_month.to_period("M") + 1).to_timestamp()
     next_month_str = next_month.strftime("%Y년 %m월")
     
-    # ========== 데이터 준비 ==========
+    # 데이터 준비
     
     # 1. 전체 KPI 추이
     kpi_cols = ["예금총잔액", "대출총잔액"]
@@ -190,7 +190,7 @@ def generate_executive_summary_html(
         history = get_segment_history(seg_id, "예금총잔액", 6)
         risk_sparkline = generate_sparkline_svg(history, width=100, height=30)
     
-    # ========== HTML 생성 ==========
+    # HTML 생성
     html_parts = []
     
     # 헤더

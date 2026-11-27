@@ -36,9 +36,7 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.ba
 print(f"Using device: {DEVICE}")
 
 
-# ============================================================================
 # 1. 데이터 증강 클래스
-# ============================================================================
 
 class TimeSeriesAugmentation:
     """시계열 데이터 증강 기법"""
@@ -240,9 +238,7 @@ class AugmentedSequenceDataset(Dataset):
         return self.augment
 
 
-# ============================================================================
 # 2. 개선된 Transformer 모델
-# ============================================================================
 
 class LearnablePositionalEncoding(nn.Module):
     """학습 가능한 위치 인코딩"""
@@ -364,9 +360,7 @@ class ImprovedTransformerModel(nn.Module):
         return self.fc(combined)
 
 
-# ============================================================================
 # 3. 학습 관련 유틸리티
-# ============================================================================
 
 class SmoothL1Loss(nn.Module):
     """Smooth L1 Loss (Huber Loss) - 이상치에 강건"""
@@ -588,9 +582,7 @@ def evaluate_model(model: nn.Module, samples: np.ndarray, targets: np.ndarray,
     return {'mae': mae, 'rmse': rmse, 'r2': r2, 'smape': smape}
 
 
-# ============================================================================
 # 4. Optuna 기반 하이퍼파라미터 튜닝
-# ============================================================================
 
 def objective(trial, train_samples, train_targets, val_samples, val_targets, input_dim):
     """Optuna 최적화 목적 함수"""
@@ -660,9 +652,7 @@ def run_hyperparameter_tuning(train_samples, train_targets, val_samples, val_tar
     return study.best_params, study.best_value
 
 
-# ============================================================================
 # 5. 메인 함수
-# ============================================================================
 
 def prepare_sequence_data(df: pd.DataFrame, feature_cols: List[str],
                          target_col: str, group_col: str, time_col: str,
@@ -786,9 +776,7 @@ def main():
     
     results = []
     
-    # ========================================================================
     # 기존 Transformer (베이스라인)
-    # ========================================================================
     print("\n" + "=" * 70)
     print("1. 기존 Transformer (베이스라인)")
     print("=" * 70)
@@ -819,9 +807,7 @@ def main():
         'rmse': baseline_metrics['rmse']
     })
     
-    # ========================================================================
     # 데이터 증강만 적용
-    # ========================================================================
     print("\n" + "=" * 70)
     print("2. 데이터 증강 적용")
     print("=" * 70)
@@ -852,9 +838,7 @@ def main():
         'rmse': aug_metrics['rmse']
     })
     
-    # ========================================================================
     # 하이퍼파라미터 튜닝 (Optuna)
-    # ========================================================================
     if not args.skip_tuning:
         print("\n" + "=" * 70)
         print("3. 하이퍼파라미터 튜닝 (Optuna)")
@@ -918,9 +902,7 @@ def main():
         # 최적 모델 저장
         torch.save(tuned_model.state_dict(), output_dir / "transformer_tuned.pt")
     
-    # ========================================================================
     # 결과 비교
-    # ========================================================================
     print("\n" + "=" * 70)
     print("[6/6] 결과 비교")
     print("=" * 70)

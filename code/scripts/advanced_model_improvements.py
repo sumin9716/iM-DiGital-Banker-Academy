@@ -43,9 +43,7 @@ from imradar.features.lags import add_lag_features, add_rolling_features, add_ch
 from imradar.data.external import load_all_external_data, merge_external_to_panel, add_macro_lag_features
 
 
-# ============================================================================
 # 1. 순유입 부호 분류 모델 (Two-Stage)
-# ============================================================================
 
 class TwoStageNetFlowModel:
     """
@@ -172,9 +170,7 @@ class TwoStageNetFlowModel:
         return soft_pred
 
 
-# ============================================================================
 # 2. Stacking 앙상블
-# ============================================================================
 
 class StackingEnsemble:
     """
@@ -289,9 +285,7 @@ class StackingEnsemble:
         return self.meta_model.predict(meta_features)
 
 
-# ============================================================================
 # 3. 시계열 교차검증 (Expanding Window)
-# ============================================================================
 
 class ExpandingWindowCV:
     """
@@ -373,9 +367,7 @@ class ExpandingWindowCV:
         return pd.DataFrame(all_metrics)
 
 
-# ============================================================================
 # 메트릭 함수
-# ============================================================================
 
 def compute_metrics(y_true, y_pred):
     """모든 메트릭 계산"""
@@ -391,9 +383,7 @@ def compute_metrics(y_true, y_pred):
     return {'mae': mae, 'rmse': rmse, 'r2': r2, 'smape': smape}
 
 
-# ============================================================================
 # 메인 함수
-# ============================================================================
 
 def main():
     parser = argparse.ArgumentParser(description="고급 모델 개선")
@@ -410,9 +400,7 @@ def main():
     print("고급 모델 개선 시작")
     print("=" * 60)
     
-    # ========================================================================
     # 데이터 로드
-    # ========================================================================
     print("\n[1/4] 데이터 로드...")
     
     cfg = RadarConfig()
@@ -445,9 +433,7 @@ def main():
     kpi_df = add_change_features(kpi_df, group_col="segment_id", time_col="month", value_cols=value_cols)
     print(f"  최종 데이터: {len(kpi_df):,}행, {len(kpi_df.columns)}개 컬럼")
     
-    # ========================================================================
     # 피처 및 타겟 준비
-    # ========================================================================
     print("[4/4] 피처 준비...")
     
     # 타겟 컬럼
@@ -488,9 +474,7 @@ def main():
     
     results = []
     
-    # ========================================================================
     # 1. 순유입 Two-Stage 모델
-    # ========================================================================
     print("\n" + "=" * 60)
     print("1. 순유입 Two-Stage 모델")
     print("=" * 60)
@@ -555,9 +539,7 @@ def main():
             'improvement': improvement
         })
     
-    # ========================================================================
     # 2. Stacking 앙상블 (주요 KPI)
-    # ========================================================================
     print("\n" + "=" * 60)
     print("2. Stacking 앙상블")
     print("=" * 60)
@@ -619,9 +601,7 @@ def main():
                 'improvement': improvement
             })
     
-    # ========================================================================
     # 3. 시계열 CV 평가
-    # ========================================================================
     print("\n" + "=" * 60)
     print("3. 시계열 교차검증 (Expanding Window)")
     print("=" * 60)
@@ -661,9 +641,7 @@ def main():
         print("     [경고] CV 결과가 비어있습니다 (데이터 부족 또는 fold 생성 실패)")
         cv_results = pd.DataFrame(columns=['fold', 'train_size', 'test_size', 'mae', 'rmse', 'r2', 'smape'])
     
-    # ========================================================================
     # 결과 저장
-    # ========================================================================
     results_df = pd.DataFrame(results)
     results_df.to_csv(output_dir / "advanced_model_results.csv", index=False)
     cv_results.to_csv(output_dir / "cv_results.csv", index=False)

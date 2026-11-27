@@ -700,9 +700,7 @@ def load_kr_interest_rate(path: Union[str, Path]) -> pd.DataFrame:
     return pd.DataFrame(columns=["month"])
 
 
-# ============================================================================
 # 부동산 데이터 로더
-# ============================================================================
 
 def load_housing_data(
     data_dir: Union[str, Path],
@@ -931,7 +929,7 @@ def load_all_external_data(
         except Exception as e:
             _log(f"  국내 금리 로드 실패: {e}")
     
-    # ========== 새로 추가된 P1 데이터 ==========
+    # 새로 추가된 P1 데이터
     
     # CPI (소비자물가지수) 로드
     cpi_path = data_dir / default_config["cpi"]
@@ -988,7 +986,7 @@ def load_all_external_data(
         except Exception as e:
             _log(f"  산업지수 로드 실패: {e}")
     
-    # ========== 부동산 데이터 (신규 추가) ==========
+    # 부동산 데이터 (신규 추가)
     try:
         housing = load_housing_data(data_dir, verbose=False)
         if housing is not None and not housing.empty:

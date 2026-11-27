@@ -7,7 +7,7 @@ import pandas as pd
 from imradar.models.forecast_lgbm import ForecastModel, predict_with_model
 
 
-# ============== SHAP 기반 피처 기여도 분석 ==============
+# SHAP 기반 피처 기여도 분석
 
 def local_feature_contrib(
     fm: ForecastModel,
@@ -356,7 +356,7 @@ def generate_alert_explanation(
     return explanation
 
 
-# ============== 확장된 SHAP 분석 기능 ==============
+# 확장된 SHAP 분석 기능
 
 def generate_segment_contrib_detail(
     fm: ForecastModel,
@@ -671,7 +671,7 @@ def generate_monthly_top_alerts_report(
     return "\n".join(report_lines)
 
 
-# ============== 자연어 문장형 설명 생성 ==============
+# 자연어 문장형 설명 생성
 
 # 피처-설명 매핑 사전
 FEATURE_DESCRIPTIONS = {

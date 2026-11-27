@@ -25,7 +25,7 @@ class EnhancedAction:
     action_type: str
     title: str
     rationale: str
-    cause_summary: str  # 원인 요약 (NEW)
+    cause_summary: str  # 원인 요약
     score: float
     urgency: str  # CRITICAL, HIGH, MEDIUM, LOW
     category: str  # RETENTION, GROWTH, RISK_MGMT, CROSS_SELL, DIGITAL
@@ -222,7 +222,7 @@ def generate_enhanced_actions(
     
     candidates: List[EnhancedAction] = []
     
-    # ========== 1. 성장 기회 액션 (완화된 조건) ==========
+    # 1. 성장 기회 액션 (완화된 조건)
     
     # 1-1. 예금 성장 기회 (예측값이 현재보다 2% 이상 증가)
     if pred_deposit and pred_deposit > cur_deposit * 1.02:
@@ -258,7 +258,7 @@ def generate_enhanced_actions(
             category="GROWTH",
         ))
     
-    # 1-3. 순유입 양호 → 투자 기회 (NEW!)
+    # 1-3. 순유입 양호 → 투자 기회
     if cur_net > 0 and net_trend > 0:
         score = min(net_trend * 60, 80) * base_weight
         net_eok = cur_net / 1e8
@@ -292,7 +292,7 @@ def generate_enhanced_actions(
             category="GROWTH",
         ))
     
-    # ========== 2. 이탈 방지 / 리텐션 액션 ==========
+    # 2. 이탈 방지 / 리텐션 액션
     
     # 2-1. 이탈 방지 (순유출 + 예금 감소)
     if cur_net < 0 and dep_trend < -0.05:
@@ -345,7 +345,7 @@ def generate_enhanced_actions(
             category="RETENTION",
         ))
     
-    # ========== 3. 리스크 관리 액션 ==========
+    # 3. 리스크 관리 액션
     
     # 3-1. 유동성 스트레스 (조건 완화)
     if util_rate >= 0.6 or (util_rate >= 0.4 and cur_net < 0):
@@ -397,7 +397,7 @@ def generate_enhanced_actions(
             category="RISK_MGMT",
         ))
     
-    # ========== 4. 교차판매 기회 ==========
+    # 4. 교차판매 기회
     
     # 4-1. 대출 교차판매 (예금만 있고 대출 없음)
     if cur_deposit > 5e7 and cur_loan < 1e6:
@@ -463,7 +463,7 @@ def generate_enhanced_actions(
             category="CROSS_SELL",
         ))
     
-    # ========== 5. 디지털 전환 액션 ==========
+    # 5. 디지털 전환 액션
     
     # 5-1. 디지털 전환 유도 (디지털 비중 낮음)
     if digital_share < 0.3 and cur_deposit > 1e7:
@@ -498,7 +498,7 @@ def generate_enhanced_actions(
             category="DIGITAL",
         ))
     
-    # ========== 6. 기본 액션 (다른 조건 미충족 시) ==========
+    # 6. 기본 액션 (다른 조건 미충족 시)
     
     if not candidates:
         # 어떤 조건도 충족하지 않으면 기본 액션 생성

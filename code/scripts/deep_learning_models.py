@@ -33,9 +33,7 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.ba
 print(f"Using device: {DEVICE}")
 
 
-# ============================================================================
 # 데이터셋 클래스
-# ============================================================================
 
 class TimeSeriesDataset(Dataset):
     """시계열 데이터셋"""
@@ -84,9 +82,7 @@ class SequenceDataset(Dataset):
                 torch.FloatTensor([self.targets[idx]]))
 
 
-# ============================================================================
 # LSTM 모델
-# ============================================================================
 
 class LSTMModel(nn.Module):
     """LSTM 기반 시계열 예측 모델"""
@@ -124,9 +120,7 @@ class LSTMModel(nn.Module):
         return self.fc(last_out)
 
 
-# ============================================================================
 # Transformer 모델
-# ============================================================================
 
 class PositionalEncoding(nn.Module):
     """위치 인코딩"""
@@ -190,9 +184,7 @@ class TransformerModel(nn.Module):
         return self.fc(x)
 
 
-# ============================================================================
 # Temporal Fusion Transformer (Simplified)
-# ============================================================================
 
 class GatedResidualNetwork(nn.Module):
     """GRN: Gated Residual Network"""
@@ -317,9 +309,7 @@ class TemporalFusionTransformer(nn.Module):
         return self.output_fc(x)
 
 
-# ============================================================================
 # 학습 및 평가 함수
-# ============================================================================
 
 def train_model(model: nn.Module, train_loader: DataLoader, 
                 val_loader: DataLoader, epochs: int = 100,
@@ -428,9 +418,7 @@ def evaluate_model(model: nn.Module, test_loader: DataLoader) -> Dict:
     return {'mae': mae, 'rmse': rmse, 'r2': r2, 'smape': smape}
 
 
-# ============================================================================
 # 하이브리드 앙상블
-# ============================================================================
 
 class HybridEnsemble:
     """ML + DL 하이브리드 앙상블"""
@@ -489,9 +477,7 @@ class HybridEnsemble:
         return best_weights
 
 
-# ============================================================================
 # 데이터 준비 함수
-# ============================================================================
 
 def prepare_sequence_data(df: pd.DataFrame, feature_cols: List[str],
                          target_col: str, group_col: str, time_col: str,
@@ -530,9 +516,7 @@ def prepare_sequence_data(df: pd.DataFrame, feature_cols: List[str],
     return train_dataset, test_dataset, scaler_X, scaler_y
 
 
-# ============================================================================
 # 메인 함수
-# ============================================================================
 
 def main():
     parser = argparse.ArgumentParser(description='딥러닝 모델 개선')
@@ -623,7 +607,7 @@ def main():
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
         
-        # ====== LSTM 모델 ======
+        # LSTM 모델
         print("\n[5/5] 모델 학습...")
         print("\n  LSTM 모델 학습 중...")
         lstm_model = LSTMModel(
@@ -648,7 +632,7 @@ def main():
             'rmse': lstm_metrics['rmse']
         })
         
-        # ====== Transformer 모델 ======
+        # Transformer 모델
         print("\n  Transformer 모델 학습 중...")
         transformer_model = TransformerModel(
             input_dim=len(feature_cols),
@@ -673,7 +657,7 @@ def main():
             'rmse': transformer_metrics['rmse']
         })
         
-        # ====== TFT 모델 ======
+        # TFT 모델
         print("\n  Temporal Fusion Transformer 학습 중...")
         tft_model = TemporalFusionTransformer(
             num_features=len(feature_cols),
@@ -699,7 +683,7 @@ def main():
         })
         
         if kpi == "순유입":
-            # ====== 기존 ML 모델 비교 ======
+            # 기존 ML 모델 비교
             print("\n  기존 ML 모델 (CatBoost 앙상블):")
             print("     R² = 0.3403")
             print("     SMAPE = 1.70%")
@@ -709,7 +693,7 @@ def main():
                 'r2': 0.3403, 'smape': 1.70, 'rmse': 2.57
             })
         
-        # ====== 모델 저장 ======
+        # 모델 저장
         kpi_tag = kpi
         torch.save(lstm_model.state_dict(), output_dir / f"lstm_model_{kpi_tag}.pt")
         torch.save(transformer_model.state_dict(), output_dir / f"transformer_model_{kpi_tag}.pt")
@@ -761,9 +745,7 @@ def main():
             with open(output_dir / "deep_learning_artifacts.pkl", "wb") as f:
                 pickle.dump(artifacts, f)
     
-    # ========================================================================
     # 결과 저장
-    # ========================================================================
     results_df = pd.DataFrame(results)
     results_df.to_csv(output_dir / "deep_learning_results.csv", index=False)
     

@@ -339,7 +339,7 @@ def build_all_features(
     return out
 
 
-# ============== 거시경제 변수 관련 피처 ==============
+# 거시경제 변수 관련 피처
 
 def add_macro_interaction_features(
     df: pd.DataFrame,

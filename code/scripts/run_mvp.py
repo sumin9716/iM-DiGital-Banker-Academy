@@ -194,7 +194,7 @@ def main():
     print("[4/8] Compute KPIs")
     panel = compute_kpis(panel, cfg)
 
-    # ============== 외부 데이터 로드 및 병합 ==============
+    # 외부 데이터 로드 및 병합
     external_data = None
     if args.use_external or args.external_dir:
         print("[4.5/8] Load and merge external macro data")
@@ -351,7 +351,7 @@ def main():
         metrics_df.to_csv(metrics_csv, index=False, encoding="utf-8-sig")
         print(f"Saved metrics: {metrics_csv}")
 
-    # ============== 세그먼트별 스케일 팩터 계산 ==============
+    # 세그먼트별 스케일 팩터 계산
     # 학습 데이터에서 세그먼트별 평균 규모를 계산하여 예측 시 보정에 활용
     # 원본 KPI 값 (로그 변환 전)을 기준으로 계산
     scale_factors = {}
@@ -368,7 +368,7 @@ def main():
     last_month = panel_fe["month"].max()
     print(f"[7/8] Forecast next horizons from last observed month={last_month.date()}")
 
-    # ============== 딥러닝 순유입 예측 로드 (h=1) ==============
+    # 딥러닝 순유입 예측 로드 (h=1)
     dl_pred_maps: Dict[str, Dict[str, float]] = {}
     dl_model_names: Dict[str, str] = {}
     for kpi in model_targets.keys():
@@ -436,7 +436,7 @@ def main():
             y_hat = _predict_model(model_entry, latest_rows)
             y_raw = inverse_target_transform(kpi, y_hat)
             
-            # ============== 순유입 예측 개선: DL 실제 예측값 반영 (h=1) ==============
+            # 순유입 예측 개선: DL 실제 예측값 반영 (h=1)
             if h == 1 and kpi in dl_pred_maps:
                 use_dl = False
                 if args.prefer_dl_when_close and strategy == "auto":
@@ -476,7 +476,7 @@ def main():
         for t in forecasts[1:]:
             fc = fc.merge(t, on=["segment_id", "pred_month"], how="outer")
         
-        # ============== 전체 합계 레벨 스케일 보정 ==============
+        # 전체 합계 레벨 스케일 보정
         # 예측 합계가 히스토리 합계와 유사하도록 비례 조정
         last_month_data = panel_fe[panel_fe["month"] == last_month]
         for kpi in model_targets.keys():
@@ -503,7 +503,7 @@ def main():
                         fc[kpi_col] *= scale_factor
                         print(f"     {kpi_col}: 스케일 보정 적용 (x{scale_factor:.2f})")
         
-        # ============== Hierarchical Reconciliation (MinT) ==============
+        # Hierarchical Reconciliation (MinT)
         print("  └─ Applying Hierarchical Reconciliation (MinT)...")
         kpi_cols_to_reconcile = [c for c in ["예금총잔액", "대출총잔액", "카드총사용", "디지털거래금액", "FX총액"] if c in fc.columns]
         if kpi_cols_to_reconcile and hasattr(panel_res, 'segment_meta'):
@@ -521,7 +521,7 @@ def main():
             except Exception as e:
                 print(f"     Reconciliation skipped: {e}")
         
-        # ============== 중복 컬럼 정리 (_x, _y 병합) ==============
+        # 중복 컬럼 정리 (_x, _y 병합)
         # merge 과정에서 생성된 중복 컬럼들 정리
         for kpi in model_targets.keys():
             # _x, _y, 원본 컬럼 확인
@@ -703,7 +703,7 @@ def main():
         # Current raw KPIs for last_month
         kpi_cols = [c for c in ["예금총잔액", "대출총잔액", "카드총사용", "디지털거래금액", "순유입", "FX총액"] if c in panel_fe.columns]
 
-        # ============== 기존 액션 생성 (호환성 유지) ==============
+        # 기존 액션 생성 (호환성 유지)
         actions = recommend_actions(
             current_df=panel_fe,
             pred_df=fc1,
@@ -717,7 +717,7 @@ def main():
         actions.to_csv(actions_path, index=False, encoding="utf-8-sig")
         print(f"Saved actions: {actions_path}")
         
-        # ============== 개선된 액션 생성 (NEW!) ==============
+        # 개선된 액션 생성
         print("  └─ Generating enhanced actions with diverse action types...")
         try:
             # 예측값 데이터프레임 준비

@@ -18,7 +18,7 @@ import pandas as pd
 warnings.filterwarnings('ignore')
 
 
-# ============== 평가 지표 함수 ==============
+# 평가 지표 함수
 
 def smape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
@@ -147,7 +147,7 @@ def directional_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.mean(true_direction == pred_direction))
 
 
-# ============== 경보 평가 함수 ==============
+# 경보 평가 함수
 
 def compute_alert_precision_recall(
     alerts_df: pd.DataFrame,
@@ -277,7 +277,7 @@ def compute_alert_lead_time(
     }
 
 
-# ============== 추천 평가 함수 ==============
+# 추천 평가 함수
 
 def compute_recommendation_uplift(
     actions_df: pd.DataFrame,
@@ -352,7 +352,7 @@ def compute_recommendation_uplift(
     }
 
 
-# ============== 롤링 백테스트 ==============
+# 롤링 백테스트
 
 @dataclass
 class BacktestConfig:

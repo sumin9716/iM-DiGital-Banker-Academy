@@ -223,7 +223,7 @@ def generate_performance_summary_html(
     </div>
     """)
     
-    # ========== 1. 핵심 성과 요약 ==========
+    # 1. 핵심 성과 요약
     html_parts.append("""
     <div class="section">
         <h2>🎯 핵심 성과 요약</h2>
@@ -300,7 +300,7 @@ def generate_performance_summary_html(
     
     html_parts.append("</div></div>")
     
-    # ========== 2. 모델별 상세 성능 ==========
+    # 2. 모델별 상세 성능
     html_parts.append("""
     <div class="section">
         <h2>📊 모델별 상세 성능</h2>
@@ -393,7 +393,7 @@ def generate_performance_summary_html(
     
     html_parts.append("</div>")
     
-    # ========== 3. 최고 모델 비교 ==========
+    # 3. 최고 모델 비교
     html_parts.append("""
     <div class="section">
         <h2>🏆 KPI별 최고 모델</h2>
@@ -432,7 +432,7 @@ def generate_performance_summary_html(
     
     html_parts.append("</div></div>")
     
-    # ========== 4. 추천 시스템 개선사항 ==========
+    # 4. 추천 시스템 개선사항
     html_parts.append("""
     <div class="section">
         <h2>🚀 추천 시스템 개선사항</h2>
@@ -483,7 +483,7 @@ def generate_performance_summary_html(
     </div>
     """)
     
-    # ========== 5. 종합 평가 ==========
+    # 5. 종합 평가
     html_parts.append("""
     <div class="section">
         <h2>📋 종합 평가</h2>

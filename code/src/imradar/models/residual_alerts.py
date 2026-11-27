@@ -9,9 +9,7 @@ import pandas as pd
 from imradar.config import RadarConfig
 
 
-# ============================================================================
 # KPI별 맞춤형 임계값 설정
-# ============================================================================
 # KPI 특성에 따라 서로 다른 임계값 적용:
 # - 예금총잔액: 안정적, 작은 변동도 중요
 # - 순유입: 변동성 높음, 더 넓은 임계값
@@ -198,7 +196,7 @@ def score_residual_alerts(
     d["residual_pct"] = d["residual"] / denom
     d["residual_pct"] = d["residual_pct"].clip(-5.0, 5.0)
 
-    # ============== KPI별 맞춤 임계값 적용 ==============
+    # KPI별 맞춤 임계값 적용
     kpi_config = get_kpi_thresholds(kpi)
     
     # 동적 임계값 또는 KPI별 고정 임계값 사용
@@ -330,7 +328,7 @@ def build_watchlist(
     else:
         a = a.sort_values(["residual_pct"], ascending=[True])
     
-    # ============== severity별 균형 선택 추가 ==============
+    # severity별 균형 선택 추가
     # severity 다양성 확보: 각 severity 레벨에서 일정 비율 선택
     severity_levels = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
     available_severities = [s for s in severity_levels if s in a["severity"].values]
@@ -358,7 +356,7 @@ def build_watchlist(
             if "alert_score" in a.columns:
                 a = a.sort_values("alert_score", ascending=False)
     
-    # ============== KPI별로 먼저 분배, 각 KPI 내에서 업종 다양성 보장 ==============
+    # KPI별로 먼저 분배, 각 KPI 내에서 업종 다양성 보장
     if balanced_kpi and "kpi" in a.columns:
         kpis = a["kpi"].unique()
         n_kpis = len(kpis)

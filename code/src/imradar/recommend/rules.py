@@ -176,7 +176,7 @@ def generate_actions_for_row(
     return cand[:top_k]
 
 
-# ============== 레짐 기반 FX 추천 확장 ==============
+# 레짐 기반 FX 추천 확장
 
 @dataclass
 class FXAction:

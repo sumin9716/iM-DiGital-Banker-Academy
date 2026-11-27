@@ -22,9 +22,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-# ============================================================================
 # KPI별 유사도 가중치 설정
-# ============================================================================
 # 중요도에 따라 유사도 계산 시 가중치 부여
 # - 예금, 순유입: 가장 중요 (고객 가치 핵심 지표)
 # - 카드, 디지털: 행동 패턴 지표
@@ -233,7 +231,7 @@ class SegmentSimilarityEngine:
             emb_matrix = np.array([embeddings[s] for s in self.segment_ids])
             self.similarity_matrix = cosine_similarity(emb_matrix)
         else:
-            # ============== 개선된 KPI 기반 유사도 ==============
+            # 개선된 KPI 기반 유사도
             latest_month = panel['month'].max()
             recent = panel[panel['month'] >= latest_month - pd.DateOffset(months=6)]
             

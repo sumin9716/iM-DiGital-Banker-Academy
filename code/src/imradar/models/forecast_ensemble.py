@@ -51,9 +51,7 @@ def _require_ensemble_deps() -> None:
         ) from _OPTIONAL_IMPORT_ERROR
 
 
-# ============================================================================
 # KPI별 최적 앙상블 가중치 (Stacking 실험 결과)
-# ============================================================================
 # 2026-01-12 advanced_model_improvements.py 실험 결과 반영
 # - 예금: CatBoost(60.3%) > LGBM(35.2%) > XGB(9.3%)
 # - 대출: LGBM(45.8%) > XGB(31.6%) > CatBoost(25.2%)
@@ -67,9 +65,7 @@ KPI_OPTIMAL_WEIGHTS = {
     'FX총액': {'lgbm': 0.40, 'xgb': 0.30, 'catboost': 0.30},  # 기본값
 }
 
-# ============================================================================
 # 데이터 클래스
-# ============================================================================
 
 @dataclass
 class EnsembleModel:
@@ -95,9 +91,7 @@ class EnsembleModel:
             return pickle.load(f)
 
 
-# ============================================================================
 # 메트릭 함수
-# ============================================================================
 
 def _smape(y_true: np.ndarray, y_pred: np.ndarray, eps: float = 1e-9) -> float:
     denom = (np.abs(y_true) + np.abs(y_pred)) / 2.0
@@ -109,9 +103,7 @@ def _rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.sqrt(mean_squared_error(y_true, y_pred)))
 
 
-# ============================================================================
 # Optuna 하이퍼파라미터 튜닝
-# ============================================================================
 
 def tune_lgbm(
     X_train: pd.DataFrame,
@@ -247,9 +239,7 @@ def tune_catboost(
     return study.best_params
 
 
-# ============================================================================
 # 피처 선택
-# ============================================================================
 
 def select_features(
     X_train: pd.DataFrame,
@@ -280,9 +270,7 @@ def select_features(
     return [col for col, selected in zip(X_train.columns, selected_mask) if selected]
 
 
-# ============================================================================
 # 앙상블 모델 학습
-# ============================================================================
 
 def train_ensemble_forecast(
     df: pd.DataFrame,
@@ -383,7 +371,7 @@ def train_ensemble_forecast(
     models = {}
     val_scores = {}
     
-    # ====== LightGBM ======
+    # LightGBM
     if verbose:
         print("\n  [1/3] LightGBM 학습...")
     
@@ -414,7 +402,7 @@ def train_ensemble_forecast(
     if verbose:
         print(f"    LightGBM RMSE: {val_scores['lgbm']:.4f}")
     
-    # ====== XGBoost ======
+    # XGBoost
     if verbose:
         print("\n  [2/3] XGBoost 학습...")
     
@@ -440,7 +428,7 @@ def train_ensemble_forecast(
     if verbose:
         print(f"    XGBoost RMSE: {val_scores['xgb']:.4f}")
     
-    # ====== CatBoost ======
+    # CatBoost
     if verbose:
         print("\n  [3/3] CatBoost 학습...")
     
@@ -479,7 +467,7 @@ def train_ensemble_forecast(
     if verbose:
         print(f"    CatBoost RMSE: {val_scores['catboost']:.4f}")
     
-    # ====== 앙상블 가중치 계산 ======
+    # 앙상블 가중치 계산
     # KPI별 최적 가중치가 있으면 사용, 없으면 RMSE 기반 계산
     kpi_name = kpi_col.replace('_target_h1', '').replace('_target_h2', '').replace('_target_h3', '')
     

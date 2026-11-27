@@ -359,7 +359,7 @@ def forecast_regime_probability(
     return {k: float(v) for k, v in probs.items()}
 
 
-# ============== FX Opportunity & Risk Score ==============
+# FX Opportunity & Risk Score
 
 @dataclass
 class FXSegmentScore:
@@ -771,11 +771,11 @@ def generate_fx_recommended_actions(
     job_group = str(segment_row.get("직업군", ""))
     net_inflow = float(segment_row.get("순유입", 0) or 0)
     
-    # ===== 1. 긴급 리스크 대응 =====
+    # 1. 긴급 리스크 대응
     if risk_score >= 80:
         actions.append("🔴 긴급: 담당 RM 즉시 컨택 - 환리스크 긴급 점검 필요")
     
-    # ===== 2. 변동성 확대 국면 =====
+    # 2. 변동성 확대 국면
     if is_high_vol:
         if fx_total > 10000:  # 대규모 FX 고객
             actions.append("🛡️ 환헤지 솔루션(선물환/옵션) 맞춤 설계 제안")
@@ -783,7 +783,7 @@ def generate_fx_recommended_actions(
             actions.append("🛡️ 환리스크 점검 및 헤지 전략 기초 상담 제안")
         actions.append("📊 환율 변동성 모니터링 알림 서비스 등록 안내")
     
-    # ===== 3. 원화 약세 국면 (수입형 기업 부담↑) =====
+    # 3. 원화 약세 국면 (수입형 기업 부담↑)
     if is_uptrend:
         if risk_score > 60:
             if job_group in ["자영업", "소상공인", "제조업"]:
@@ -796,7 +796,7 @@ def generate_fx_recommended_actions(
         else:
             actions.append("💱 중소기업 환율우대 프로그램 안내")
     
-    # ===== 4. 원화 강세 국면 (수출형 기업 기회) =====
+    # 4. 원화 강세 국면 (수출형 기업 기회)
     if is_downtrend:
         actions.append("📈 수출대금 조기 환전/정산 적기 타이밍 안내")
         
@@ -805,22 +805,22 @@ def generate_fx_recommended_actions(
         elif fx_total > 0:
             actions.append("� 무역금융 상품(포페이팅/팩토링) 안내")
     
-    # ===== 5. 디지털 채널 유도 =====
+    # 5. 디지털 채널 유도
     if fx_total > 0 and digital_share < 0.4:
         if age_group in ["20대", "30대", "40대"]:
             actions.append("📱 기업뱅킹 셀프 FX 채널 온보딩 (환율우대+편의성)")
         else:
             actions.append("📱 FX 거래 디지털 채널 1:1 안내 서비스 제공")
     
-    # ===== 6. 순유입 상태 기반 =====
+    # 6. 순유입 상태 기반
     if net_inflow < -500 and "순유입" in str(risk_factors):
         actions.append("⚠️ 자금흐름 이상 감지 - RM 우선 컨택 및 원인 파악 필요")
     
-    # ===== 7. 한도소진율 위험 =====
+    # 7. 한도소진율 위험
     if "한도소진율" in str(risk_factors):
         actions.append("🔴 여신한도 소진 임박 - 긴급 한도 점검 및 증액 검토")
     
-    # ===== 8. 기회 중심 제안 (리스크 낮고 기회 높을 때) =====
+    # 8. 기회 중심 제안 (리스크 낮고 기회 높을 때)
     if risk_score < 30 and opp_score > 60 and not actions:
         if fx_total > 10000:
             actions.append("🌟 VIP FX 고객 전용 프리미엄 서비스 안내")
