@@ -735,9 +735,9 @@ CHANGE_TYPE_DESCRIPTIONS = {
 }
 
 
-def parse_feature_name_v2(feature: str) -> Tuple[str, str, Optional[int]]:
+def parse_feature_name(feature: str) -> Tuple[str, str, Optional[int]]:
     """
-    피처명 파싱 (v2)
+    피처명을 (기본 이름, 변환 종류, 기간)으로 분리
     
     Args:
         feature: 피처명 (예: "usd_krw_mean__lag3", "FX총액__mom_pct")
@@ -796,7 +796,7 @@ def get_readable_feature_name(feature: str) -> str:
     Returns:
         한국어 설명
     """
-    base_name, change_type, period = parse_feature_name_v2(feature)
+    base_name, change_type, period = parse_feature_name(feature)
 
     # 기본 이름 변환
     readable_base = base_name
