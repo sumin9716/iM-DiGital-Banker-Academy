@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
-from pathlib import Path
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
 
 from imradar.config import RadarConfig
-from imradar.utils import parse_bucket_kor_to_number
+from imradar.utils import parse_bucket_kor_to_number, to_month_start
 
 
 @dataclass
@@ -17,32 +16,9 @@ class PanelBuildResult:
     segment_meta: pd.DataFrame
 
 
-def _safe_read_csv(path: Union[str, Path], encoding: Optional[str] = None) -> pd.DataFrame:
-    """여러 인코딩 시도하여 CSV 읽기"""
-    encodings_to_try = [encoding, "cp949", "euc-kr", "utf-8-sig", "utf-8", None]
-    encodings_to_try = [e for e in encodings_to_try if e is not None] + [None]
-    
-    last_err = None
-    for enc in encodings_to_try:
-        try:
-            if enc is None:
-                return pd.read_csv(path)
-            return pd.read_csv(path, encoding=enc)
-        except Exception as e:
-            last_err = e
-            continue
-    raise RuntimeError(f"Failed to read CSV {path}. Last error: {last_err}")
-
-
-def _to_month_start(yyyymm: int) -> pd.Timestamp:
-    y = int(yyyymm) // 100
-    m = int(yyyymm) % 100
-    return pd.Timestamp(year=y, month=m, day=1)
-
-
 def add_time_columns(df: pd.DataFrame, month_col: str = "기준년월") -> pd.DataFrame:
     out = df.copy()
-    out["month"] = out[month_col].apply(_to_month_start)
+    out["month"] = out[month_col].apply(to_month_start)
     out["year"] = out["month"].dt.year
     out["month_num"] = out["month"].dt.month
     # Month index from start

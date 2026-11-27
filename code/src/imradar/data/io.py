@@ -1,26 +1,28 @@
 from __future__ import annotations
 
+from pathlib import Path
+from typing import List, Optional, Union
+
 import pandas as pd
-from typing import Optional, List
+
+# 은행 내부 자료와 공공 데이터 CSV는 cp949로 저장된 경우가 많아 먼저 시도한다.
+_FALLBACK_ENCODINGS = ("cp949", "euc-kr", "utf-8-sig", "utf-8")
 
 
-def load_internal_csv(path: str, encoding: Optional[str] = "cp949") -> pd.DataFrame:
-    """
-    Load internal CSV.
-    - Handles common Korean encodings (cp949/euc-kr/utf-8-sig).
-    """
-    encodings_to_try: List[Optional[str]] = []
-    if encoding:
-        encodings_to_try.append(encoding)
-    encodings_to_try += ["cp949", "euc-kr", "utf-8-sig", None]
+def read_csv_with_fallback(path: Union[str, Path], encoding: Optional[str] = None) -> pd.DataFrame:
+    """주어진 인코딩부터 시작해 한국어 CSV에 흔한 인코딩을 차례로 시도해 읽는다."""
+    candidates: List[str] = [encoding] if encoding else []
+    candidates += [e for e in _FALLBACK_ENCODINGS if e not in candidates]
 
     last_err: Optional[Exception] = None
-    for enc in encodings_to_try:
+    for enc in candidates:
         try:
-            if enc is None:
-                return pd.read_csv(path)
             return pd.read_csv(path, encoding=enc)
-        except Exception as e:
+        except (UnicodeError, pd.errors.ParserError) as e:
             last_err = e
-            continue
-    raise RuntimeError(f"Failed to read CSV with tried encodings={encodings_to_try}. Last error={last_err}")
+    raise RuntimeError(f"Failed to read CSV {path} with encodings={candidates}. Last error={last_err}")
+
+
+def load_internal_csv(path: Union[str, Path], encoding: Optional[str] = "cp949") -> pd.DataFrame:
+    """은행 내부 CSV(iMbank_data.csv.csv)를 읽는다."""
+    return read_csv_with_fallback(path, encoding)

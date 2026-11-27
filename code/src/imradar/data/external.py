@@ -17,22 +17,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-
-def _safe_read_csv(path: Union[str, Path], encoding: Optional[str] = None) -> pd.DataFrame:
-    """여러 인코딩 시도하여 CSV 읽기"""
-    encodings_to_try = [encoding, "cp949", "euc-kr", "utf-8-sig", "utf-8", None]
-    encodings_to_try = [e for e in encodings_to_try if e is not None] + [None]
-    
-    last_err = None
-    for enc in encodings_to_try:
-        try:
-            if enc is None:
-                return pd.read_csv(path)
-            return pd.read_csv(path, encoding=enc)
-        except Exception as e:
-            last_err = e
-            continue
-    raise RuntimeError(f"Failed to read CSV {path}. Last error: {last_err}")
+from imradar.data.io import read_csv_with_fallback
 
 
 def load_esi(path: Union[str, Path]) -> pd.DataFrame:
@@ -42,7 +27,7 @@ def load_esi(path: Union[str, Path]) -> pd.DataFrame:
     입력 컬럼: year, month, ym, ESI
     출력 컬럼: month (datetime), ESI
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # ym 컬럼을 datetime으로 변환
     if "ym" in df.columns:
@@ -70,7 +55,7 @@ def load_fed_rate(path: Union[str, Path], use_derived: bool = True) -> pd.DataFr
         - fed_rate: 연준 금리
         - 파생변수: fed_rate_mom_diff, fed_rate_yoy_pct, fed_rate_ma3, fed_rate_vol_3m, policy_stance 등
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # date 컬럼을 datetime으로 변환 후 월 시작일로 변경
     if "date" in df.columns:
@@ -114,7 +99,7 @@ def load_usd_krw_daily(path: Union[str, Path]) -> pd.DataFrame:
         - usd_krw_eom: 월말 환율
         - usd_krw_mom_pct: 월간 변화율
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     if "date" in df.columns:
         df["date"] = pd.to_datetime(df["date"])
@@ -154,7 +139,7 @@ def load_oil_price(path: Union[str, Path], use_derived: bool = True) -> pd.DataF
         - wti_price, brent_price
         - 파생변수: wti_mom_pct, wti_yoy_pct, wti_ma3, wti_vol_3m 등
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     if "date" in df.columns:
         df["month"] = pd.to_datetime(df["date"]).dt.to_period("M").dt.to_timestamp()
@@ -182,7 +167,7 @@ def load_trade_data(path: Union[str, Path], use_derived: bool = True) -> pd.Data
         - export_amt, import_amt, trade_balance
         - 파생변수: export_mom_pct, export_yoy_pct, export_ma3 등
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # year 컬럼 처리 (2021.06 형식)
     if "year" in df.columns:
@@ -230,7 +215,7 @@ def load_cpi(path: Union[str, Path]) -> pd.DataFrame:
         - cpi_mom: 전월대비 변화율
         - cpi_yoy: 전년동월대비 변화율
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # 멀티헤더 처리: 첫 번째 행이 헤더일 수 있음
     if df.columns[0] in ['시점', 'date', 'ym', '년월']:
@@ -285,7 +270,7 @@ def load_ppi(path: Union[str, Path]) -> pd.DataFrame:
         - ppi_total: 총지수
         - ppi_mom, ppi_yoy: 변화율
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # 날짜 컬럼 찾기
     date_col = None
@@ -351,7 +336,7 @@ def load_employment_data(
     
     # 실업률 로드
     if unemployment_path and Path(unemployment_path).exists():
-        df = _safe_read_csv(unemployment_path)
+        df = read_csv_with_fallback(unemployment_path)
         
         # 멀티헤더 처리 (보통 "계", "남", "여" 등이 있음)
         # 날짜 컬럼 찾기
@@ -381,7 +366,7 @@ def load_employment_data(
     
     # 고용률 로드
     if employment_path and Path(employment_path).exists():
-        df = _safe_read_csv(employment_path)
+        df = read_csv_with_fallback(employment_path)
         
         date_col = None
         for col in ['시점', 'date', 'ym', '년월', 'month']:
@@ -437,7 +422,7 @@ def load_retail_sales(path: Union[str, Path]) -> pd.DataFrame:
         - retail_total: 소매판매지수 총지수
         - retail_mom, retail_yoy: 변화율
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # 날짜 컬럼 찾기
     date_col = None
@@ -490,7 +475,7 @@ def load_industry_index(path: Union[str, Path]) -> pd.DataFrame:
         - industry_index_manufacturing: 제조업
         - industry_index_services: 서비스업
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # 연도 컬럼 찾기
     year_col = None
@@ -551,7 +536,7 @@ def load_trade_data_clean(path: Union[str, Path]) -> pd.DataFrame:
         - export_amt, import_amt, trade_balance
         - export_mom_pct, import_mom_pct, export_yoy_pct, import_yoy_pct
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     # 총계 행 제거 (보통 마지막 행이거나 '합계', '총계' 텍스트 포함)
     text_cols = df.select_dtypes(include=['object']).columns
@@ -614,7 +599,7 @@ def load_kasi_calendar(path: Union[str, Path]) -> pd.DataFrame:
         - seol_cnt, chuseok_cnt (설/추석)
         - holiday_ratio: 공휴일 비율
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     if "ym" in df.columns:
         df["month"] = pd.to_datetime(df["ym"].astype(str), format="%Y%m")
@@ -656,7 +641,7 @@ def load_kr_interest_rate(path: Union[str, Path]) -> pd.DataFrame:
         - credit_spread_aa, credit_spread_bbb: 신용 스프레드
         - call_rate_mom_diff: 콜금리 월간 변동
     """
-    df = _safe_read_csv(path)
+    df = read_csv_with_fallback(path)
     
     if "date" in df.columns:
         df["date"] = pd.to_datetime(df["date"])
@@ -751,7 +736,7 @@ def load_housing_data(
     price_path = data_dir / "주택가격지수_아파트.csv"
     if price_path.exists():
         try:
-            df = _safe_read_csv(price_path)
+            df = read_csv_with_fallback(price_path)
             # 전국 데이터만 추출
             national = df[df["CLS_NM"] == "전국"].copy()
             
@@ -774,7 +759,7 @@ def load_housing_data(
     jeonse_path = data_dir / "전세지수_아파트.csv"
     if jeonse_path.exists():
         try:
-            df = _safe_read_csv(jeonse_path)
+            df = read_csv_with_fallback(jeonse_path)
             national = df[df["CLS_NM"] == "전국"].copy()
             
             if not national.empty:
@@ -798,7 +783,7 @@ def load_housing_data(
     volume_path = data_dir / "거래량_아파트.csv"
     if volume_path.exists():
         try:
-            df = _safe_read_csv(volume_path)
+            df = read_csv_with_fallback(volume_path)
             
             # 전국 합계 계산 (지역별 데이터 합산)
             df["month"] = df["WRTTIME_IDTFR_ID"].apply(_parse_kosis_month)
