@@ -1,0 +1,12 @@
+# 선택 기능용 패키지
+-r requirements.txt
+
+# 앙상블 모델 (forecast_ensemble.py, --model_strategy ensemble/auto, advanced_model_improvements.py)
+xgboost>=2.0
+catboost>=1.2
+optuna>=3.5
+
+# 딥러닝 모델 (deep_learning_models.py, transformer_tuning.py, forecast_transformer.py)
+torch>=2.0
+pytorch-forecasting>=1.0
+lightning>=2.0
