@@ -6,7 +6,7 @@ Features:
 2. 코사인 유사도 기반 유사 세그먼트 탐색
 3. KPI 패턴 기반 협업 필터링
 4. 하이브리드 추천 (Content + Collaborative)
-5. PCA 차원 축소 및 특성 가중치 적용 (NEW)
+5. PCA 차원 축소 및 특성 가중치 적용
 """
 from __future__ import annotations
 
@@ -231,7 +231,7 @@ class SegmentSimilarityEngine:
             emb_matrix = np.array([embeddings[s] for s in self.segment_ids])
             self.similarity_matrix = cosine_similarity(emb_matrix)
         else:
-            # 개선된 KPI 기반 유사도
+            # KPI 기반 유사도
             latest_month = panel['month'].max()
             recent = panel[panel['month'] >= latest_month - pd.DateOffset(months=6)]
 

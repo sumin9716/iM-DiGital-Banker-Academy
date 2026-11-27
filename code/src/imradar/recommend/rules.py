@@ -266,7 +266,7 @@ def generate_fx_actions_for_regime(
             score, fx_regime, fx_volatility, priority
         ))
 
-        # 추가: 환율 모니터링 서비스
+        # 변동성 확대 국면에서는 환율 알림 서비스도 함께 제안한다
         score = 60 * w
         cand.append(FXAction(
             segment_id, month, "FX_MONITORING",

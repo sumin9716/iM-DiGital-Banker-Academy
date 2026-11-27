@@ -716,7 +716,7 @@ def main():
         actions.to_csv(actions_path, index=False, encoding="utf-8-sig")
         print(f"Saved actions: {actions_path}")
 
-        # 개선된 액션 생성
+        # enhanced_rules: 액션 유형을 넓힌 규칙 엔진으로 후보를 추가 생성
         print("  └─ Generating enhanced actions with diverse action types...")
         try:
             # 예측값 데이터프레임 준비
@@ -730,7 +730,6 @@ def main():
             if "regime" not in panel_with_regime.columns:
                 panel_with_regime["regime"] = ""
 
-            # 개선된 액션 생성
             enhanced_actions = recommend_enhanced_actions(
                 panel=panel_with_regime,
                 preds_df=preds_for_enhanced,

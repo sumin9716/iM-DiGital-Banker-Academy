@@ -79,7 +79,6 @@ def save_watchlist_dashboard(
     wl = watchlist.copy()
     wl["month"] = wl["month"].astype(str)
 
-    # 개선된 HTML 대시보드
     html_parts = []
     html_parts.append("""
     <html>

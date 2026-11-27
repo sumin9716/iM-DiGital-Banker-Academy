@@ -319,7 +319,7 @@ def add_driver_analysis(
 
 def _generate_explanation(alert: RiskAlert, top_drivers: pd.Series) -> str:
     """
-    알림에 대한 설명 문장 생성 (개선된 버전)
+    알림에 대한 설명 문장 생성
     
     Args:
         alert: RiskAlert
@@ -328,7 +328,7 @@ def _generate_explanation(alert: RiskAlert, top_drivers: pd.Series) -> str:
     Returns:
         설명 문장
     """
-    # 피처명 포맷팅 (개선된 매핑)
+    # 피처명 → 화면 표시용 이름
     FEATURE_NAMES = {
         "예금총잔액": "예금잔액",
         "대출총잔액": "대출잔액",

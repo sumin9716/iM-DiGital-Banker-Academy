@@ -746,7 +746,7 @@ def generate_fx_recommended_actions(
     risk_factors: List[str],
 ) -> List[str]:
     """
-    레짐 + 세그먼트 상태에 따른 FX 추천 액션 생성 (개선된 버전)
+    레짐 + 세그먼트 상태에 따른 FX 추천 액션 생성
     
     Args:
         opp_score: 기회 점수
