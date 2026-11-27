@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -36,7 +37,7 @@ def main() -> None:
     # 1) Deep learning retrain (순유입)
     _run(
         [
-            "python3",
+            sys.executable,
             str(repo_root / "scripts" / "deep_learning_models.py"),
             "--raw_csv",
             args.raw_csv,
@@ -50,7 +51,7 @@ def main() -> None:
 
     # 2) Main pipeline
     cmd = [
-        "python3",
+        sys.executable,
         str(repo_root / "scripts" / "run_mvp.py"),
         "--raw_csv",
         args.raw_csv,
@@ -77,7 +78,7 @@ def main() -> None:
     # 3) Model evaluation (refresh selection CSV)
     _run(
         [
-            "python3",
+            sys.executable,
             str(repo_root / "scripts" / "evaluate_models.py"),
             "--panel_path",
             str(repo_root / "outputs" / "segment_panel.parquet"),
@@ -92,7 +93,7 @@ def main() -> None:
     # 4) Monitoring report
     _run(
         [
-            "python3",
+            sys.executable,
             str(repo_root / "scripts" / "monitoring_report.py"),
         ],
         env=env,
