@@ -26,12 +26,14 @@ from sklearn.feature_selection import SelectFromModel
 # xgboost/catboost/optuna는 requirements-optional.txt의 선택 의존성이다.
 # 없어도 모듈은 import되도록 해서 LightGBM만 쓰는 스크립트(evaluate_models.py 등)가
 # 기본 설치로 동작하게 하고, 앙상블을 실제로 학습할 때만 오류를 낸다.
+# 설치는 되어 있어도 OpenMP 런타임(macOS의 libomp 등)이 없으면 xgboost는 ImportError가
+# 아니라 XGBoostError(ValueError의 하위 클래스)를 내므로 함께 받는다.
 try:
     import xgboost as xgb
     from catboost import CatBoostRegressor
     import optuna
     from optuna.samplers import TPESampler
-except ImportError as _exc:
+except (ImportError, OSError, ValueError) as _exc:
     xgb = CatBoostRegressor = optuna = TPESampler = None
     _OPTIONAL_IMPORT_ERROR = _exc
 else:
