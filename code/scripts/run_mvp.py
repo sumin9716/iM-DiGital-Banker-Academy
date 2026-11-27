@@ -37,15 +37,12 @@ from imradar.pipelines.executive_summary import generate_executive_summary_html
 from imradar.pipelines.report_pdf import generate_monthly_onepager
 from imradar.models.fx_regime import compute_fx_regime_from_external, compute_fx_segment_scores
 
-try:
-    from imradar.models.forecast_ensemble import (
-        train_ensemble_forecast,
-        evaluate_ensemble,
-        predict_ensemble,
-    )
-    ENSEMBLE_AVAILABLE = True
-except Exception:
-    ENSEMBLE_AVAILABLE = False
+from imradar.models.forecast_ensemble import (
+    ENSEMBLE_DEPS_AVAILABLE as ENSEMBLE_AVAILABLE,
+    train_ensemble_forecast,
+    evaluate_ensemble,
+    predict_ensemble,
+)
 
 
 def _month_add(m: pd.Timestamp, k: int) -> pd.Timestamp:

@@ -19,18 +19,37 @@ import warnings
 import numpy as np
 import pandas as pd
 import lightgbm as lgb
-import xgboost as xgb
-from catboost import CatBoostRegressor
 
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import TimeSeriesSplit
 from sklearn.feature_selection import SelectFromModel
 
-import optuna
-from optuna.samplers import TPESampler
+# xgboost/catboost/optuna는 requirements-optional.txt의 선택 의존성이다.
+# 없어도 모듈은 import되도록 해서 LightGBM만 쓰는 스크립트(evaluate_models.py 등)가
+# 기본 설치로 동작하게 하고, 앙상블을 실제로 학습할 때만 오류를 낸다.
+try:
+    import xgboost as xgb
+    from catboost import CatBoostRegressor
+    import optuna
+    from optuna.samplers import TPESampler
+except ImportError as _exc:
+    xgb = CatBoostRegressor = optuna = TPESampler = None
+    _OPTIONAL_IMPORT_ERROR = _exc
+else:
+    _OPTIONAL_IMPORT_ERROR = None
+    optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+ENSEMBLE_DEPS_AVAILABLE = _OPTIONAL_IMPORT_ERROR is None
 
 warnings.filterwarnings('ignore')
-optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+
+def _require_ensemble_deps() -> None:
+    if _OPTIONAL_IMPORT_ERROR is not None:
+        raise ImportError(
+            "앙상블 모델에는 xgboost, catboost, optuna가 필요합니다. "
+            "`pip install -r requirements-optional.txt`로 설치하세요."
+        ) from _OPTIONAL_IMPORT_ERROR
 
 
 # ============================================================================
@@ -105,6 +124,7 @@ def tune_lgbm(
     timeout: int = 300,
 ) -> Dict:
     """LightGBM 하이퍼파라미터 튜닝"""
+    _require_ensemble_deps()
     
     def objective(trial):
         params = {
@@ -149,6 +169,7 @@ def tune_xgboost(
     timeout: int = 300,
 ) -> Dict:
     """XGBoost 하이퍼파라미터 튜닝"""
+    _require_ensemble_deps()
     
     def objective(trial):
         params = {
@@ -192,6 +213,7 @@ def tune_catboost(
     timeout: int = 300,
 ) -> Dict:
     """CatBoost 하이퍼파라미터 튜닝"""
+    _require_ensemble_deps()
     
     def objective(trial):
         params = {
@@ -297,6 +319,7 @@ def train_ensemble_forecast(
     Returns:
         EnsembleModel
     """
+    _require_ensemble_deps()
     if verbose:
         print(f"\n{'='*50}")
         print(f"앙상블 모델 학습: {kpi_col} (H={horizon})")
