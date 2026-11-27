@@ -27,14 +27,14 @@ def save_overview_dashboard(
 
     # forecast totals
     fc_tot = forecasts.groupby("pred_month")[kpi_cols].sum(numeric_only=True).reset_index().rename(columns={"pred_month": "month"})
-    
+
     # actual의 마지막 점을 forecast의 시작점으로 추가 (연결을 위해)
     last_actual = hist_tot[hist_tot["month"] == hist_tot["month"].max()].copy()
-    
+
     # forecast 시작점에 actual 마지막 값 추가
     fc_with_start = pd.concat([last_actual, fc_tot], axis=0, ignore_index=True)
     fc_with_start["type"] = "forecast"
-    
+
     hist_tot2 = hist_tot.copy()
     hist_tot2["type"] = "actual"
 
@@ -67,7 +67,7 @@ def save_watchlist_dashboard(
     os.makedirs(out_dir, exist_ok=True)
     wl = watchlist.copy()
     wl["month"] = wl["month"].astype(str)
-    
+
     # 개선된 HTML 대시보드
     html_parts = []
     html_parts.append("""
@@ -100,13 +100,13 @@ def save_watchlist_dashboard(
     <body>
     <div class='container'>
     """)
-    
+
     html_parts.append(f"<h1>⚠️ {title}</h1>")
-    
+
     # 요약 통계
     html_parts.append("<div class='summary-grid'>")
     total_alerts = len(wl)
-    
+
     # severity 컬럼이 있으면 분석
     critical = 0
     high = 0
@@ -118,7 +118,7 @@ def save_watchlist_dashboard(
             high = len(wl[(wl['severity_num'] >= 0.5) & (wl['severity_num'] < 0.8)])
         except Exception:
             pass
-    
+
     html_parts.append(f"""
         <div class='summary-card'>
             <div class='value' style='color: #d32f2f;'>{total_alerts}</div>
@@ -134,10 +134,10 @@ def save_watchlist_dashboard(
         </div>
     """)
     html_parts.append("</div>")
-    
+
     # 상세 알림 카드
     html_parts.append("<h2>📋 상세 알림 목록</h2>")
-    
+
     for _, row in wl.iterrows():
         segment = row.get('segment_id', str(row.get('segment', '')))
         month = row.get('month', '')
@@ -150,7 +150,7 @@ def save_watchlist_dashboard(
             severity = 0.0
         explanation = row.get('explanation', row.get('reason', ''))
         driver_summary = row.get('driver_summary', '')
-        
+
         # severity 기반 스타일
         if severity >= 0.8:
             sev_icon = '🚨'
@@ -161,7 +161,7 @@ def save_watchlist_dashboard(
         else:
             sev_icon = '💡'
             sev_text = '참고'
-        
+
         html_parts.append(f"""
         <div class='alert-card'>
             <div class='segment'>{sev_icon} {segment}</div>
@@ -169,26 +169,26 @@ def save_watchlist_dashboard(
                 📅 {month} | 📊 KPI: {kpi} | 심각도: {sev_text} ({severity:.1%})
             </div>
         """)
-        
+
         if explanation:
             html_parts.append(f"""
             <div class='explanation'>
                 <b>📋 핵심 사유:</b> {explanation}
             </div>
             """)
-        
+
         if driver_summary:
             html_parts.append(f"""
             <div class='driver'>
                 <b>💬 원인 분석:</b> {driver_summary}
             </div>
             """)
-        
+
         html_parts.append("</div>")
-    
+
     # 테이블 형태로도 제공
     html_parts.append("<h2>📊 전체 데이터 테이블</h2>")
-    
+
     table = go.Figure(
         data=[go.Table(
             header=dict(values=list(wl.columns), fill_color='#3f51b5', font=dict(color='white')),
@@ -197,7 +197,7 @@ def save_watchlist_dashboard(
     )
     table.update_layout(title="", margin=dict(l=0, r=0, t=0, b=0))
     html_parts.append(table.to_html(full_html=False, include_plotlyjs="cdn"))
-    
+
     html_parts.append("</div></body></html>")
 
     html_path = os.path.join(out_dir, "03_risk_watchlist.html")
@@ -223,10 +223,10 @@ def save_growth_dashboard(
     last_month = panel["month"].max()
     cur = panel[panel["month"] == last_month][["segment_id", kpi]].copy()
     pred_month = (last_month.to_period("M") + horizon).to_timestamp()
-    
+
     # Handle column naming issues from merge (예금총잔액_x, 예금총잔액_y, 예금총잔액)
     fc_subset = forecasts[forecasts["pred_month"] == pred_month].copy()
-    
+
     # Find the correct KPI column based on horizon
     # horizon=1 -> _x suffix, horizon=2 -> _y suffix, horizon=3 -> no suffix
     kpi_col_candidates = [f"{kpi}_x", f"{kpi}_y", kpi]
@@ -235,18 +235,18 @@ def save_growth_dashboard(
         if cand in fc_subset.columns and fc_subset[cand].notna().any():
             kpi_col = cand
             break
-    
+
     if kpi_col is None:
         # fallback: try to find any column containing the kpi name
         for col in fc_subset.columns:
             if kpi in col and fc_subset[col].notna().any():
                 kpi_col = col
                 break
-    
+
     if kpi_col is None:
         print(f"Warning: No valid forecast column found for {kpi}")
         kpi_col = kpi  # fallback
-    
+
     fc = fc_subset[["segment_id", kpi_col]].copy()
     fc = fc.rename(columns={kpi_col: f"{kpi}__pred"})
 
@@ -299,7 +299,7 @@ def save_fx_radar_dashboard(
         HTML 파일 경로
     """
     os.makedirs(out_dir, exist_ok=True)
-    
+
     html_parts = []
     html_parts.append("""
     <html>
@@ -364,16 +364,16 @@ def save_fx_radar_dashboard(
     <div class="container">
         <h1>📈 FX Opportunity & Risk Radar</h1>
     """)
-    
+
     # 1. 레짐 패널
     html_parts.append("<h2>🌐 현재 환율 레짐</h2>")
     html_parts.append("<div class='regime-panel'>")
-    
+
     if fx_regime_result is not None and hasattr(fx_regime_result, 'fx_monthly'):
         fx_df = fx_regime_result.fx_monthly
         if len(fx_df) > 0:
             latest = fx_df.iloc[-1]
-            
+
             # 환율 레벨
             fx_level = latest.get('fx_level', 0)
             html_parts.append(f"""
@@ -383,7 +383,7 @@ def save_fx_radar_dashboard(
                 <div class='subvalue'>월 평균</div>
             </div>
             """)
-            
+
             # 트렌드
             trend = latest.get('fx_trend_regime', 'Range')
             trend_class = 'uptrend' if trend == 'Uptrend' else ('downtrend' if trend == 'Downtrend' else '')
@@ -395,7 +395,7 @@ def save_fx_radar_dashboard(
                 <div class='subvalue'>{'원화 약세' if trend == 'Uptrend' else ('원화 강세' if trend == 'Downtrend' else '횡보')}</div>
             </div>
             """)
-            
+
             # 변동성
             vol = latest.get('fx_vol_regime', 'MedVol')
             vol_class = 'highvol' if vol == 'HighVol' else ''
@@ -407,7 +407,7 @@ def save_fx_radar_dashboard(
                 <div class='subvalue'>{'고변동성 주의' if vol == 'HighVol' else ('안정' if vol == 'LowVol' else '보통')}</div>
             </div>
             """)
-            
+
             # 모멘텀
             mom_pct = latest.get('fx_mom_pct', 0) * 100
             mom_icon = '⬆️' if mom_pct > 0 else '⬇️'
@@ -418,15 +418,15 @@ def save_fx_radar_dashboard(
                 <div class='subvalue'>전월 대비</div>
             </div>
             """)
-    
+
     html_parts.append("</div>")
-    
+
     # 2. FX Opportunity TOP 세그먼트
     html_parts.append("<h2>🎯 FX Opportunity TOP 세그먼트</h2>")
-    
+
     if not fx_scores.empty:
         opp_top = fx_scores.nlargest(top_n, 'opportunity_score')
-        
+
         html_parts.append("<table class='score-table'>")
         html_parts.append("""
         <tr>
@@ -439,7 +439,7 @@ def save_fx_radar_dashboard(
             <th>추천 액션</th>
         </tr>
         """)
-        
+
         for i, (_, row) in enumerate(opp_top.iterrows(), 1):
             grade = row.get('priority_grade', 'C')
             grade_class = f'grade-{grade}'
@@ -447,13 +447,13 @@ def save_fx_radar_dashboard(
             # 단위: 백만원 -> 억원 (/100)
             fx_eok = fx_amt / 100
             fx_display = f"{fx_eok:,.1f}억" if fx_eok >= 1 else f"{fx_amt:,.0f}백만"
-            
+
             # 추천 액션 첫 번째 항목만 추출 (| 구분)
             actions_raw = row.get('recommended_actions', '')
             first_action = actions_raw.split('|')[0].strip() if actions_raw else '-'
             # 80자로 늘림
             action_display = first_action[:80] + ('...' if len(first_action) > 80 else '')
-            
+
             html_parts.append(f"""
             <tr class='{grade_class}'>
                 <td>{i}</td>
@@ -465,17 +465,17 @@ def save_fx_radar_dashboard(
                 <td title='{actions_raw[:200]}'>{action_display}</td>
             </tr>
             """)
-        
+
         html_parts.append("</table>")
     else:
         html_parts.append("<p>FX 활성 세그먼트가 없습니다.</p>")
-    
+
     # 3. FX Risk TOP 세그먼트
     html_parts.append("<h2>⚠️ FX Risk TOP 세그먼트</h2>")
-    
+
     if not fx_scores.empty:
         risk_top = fx_scores.nlargest(top_n, 'risk_score')
-        
+
         html_parts.append("<table class='score-table'>")
         html_parts.append("""
         <tr>
@@ -488,7 +488,7 @@ def save_fx_radar_dashboard(
             <th>리스크 요인</th>
         </tr>
         """)
-        
+
         for i, (_, row) in enumerate(risk_top.iterrows(), 1):
             grade = row.get('priority_grade', 'C')
             grade_class = f'grade-{grade}'
@@ -496,12 +496,12 @@ def save_fx_radar_dashboard(
             # 단위: 백만원 -> 억원 (/100)
             fx_eok = fx_amt / 100
             fx_display = f"{fx_eok:,.1f}억" if fx_eok >= 1 else f"{fx_amt:,.0f}백만"
-            
+
             # 리스크 요인 첫 번째 항목 추출
             risk_factors_raw = row.get('risk_factors', '')
             first_factor = risk_factors_raw.split('|')[0].strip() if risk_factors_raw else '-'
             factor_display = first_factor[:80] + ('...' if len(first_factor) > 80 else '')
-            
+
             html_parts.append(f"""
             <tr class='{grade_class}'>
                 <td>{i}</td>
@@ -513,25 +513,25 @@ def save_fx_radar_dashboard(
                 <td title='{risk_factors_raw[:200]}'>{factor_display}</td>
             </tr>
             """)
-        
+
         html_parts.append("</table>")
-    
+
     # 4. 레짐 기반 추천 액션 카드
     html_parts.append("<h2>💡 레짐 기반 추천 액션 (TOP 10)</h2>")
-    
+
     if not fx_scores.empty:
         action_top = fx_scores[fx_scores['priority_grade'].isin(['A', 'B'])].head(10)
-        
+
         for _, row in action_top.iterrows():
             seg_id = row.get('segment_id', '')[:40]
             actions = row.get('recommended_actions', '')
             opp = row.get('opportunity_score', 0)
             risk = row.get('risk_score', 0)
             grade = row.get('priority_grade', 'C')
-            
+
             # 액션 문자열 파싱 (| 구분)
             action_items = [a.strip() for a in actions.split('|') if a.strip()]
-            
+
             # 긴급도 아이콘에서 urgency 레벨 추출
             def get_urgency_class(action_text):
                 if '🚨' in action_text or '⚡' in action_text:
@@ -542,7 +542,7 @@ def save_fx_radar_dashboard(
                     return 'urgency-medium'
                 else:
                     return 'urgency-low'
-            
+
             html_parts.append(f"""
             <div class='action-card'>
                 <div class='segment'>🏢 {seg_id}</div>
@@ -551,11 +551,11 @@ def save_fx_radar_dashboard(
                 </div>
                 <div class='actions'>
             """)
-            
+
             # 각 액션 아이템 개별 표시
             for action in action_items[:3]:  # 최대 3개
                 urg_class = get_urgency_class(action)
-                urg_label = {'urgency-critical': '긴급', 'urgency-high': '높음', 
+                urg_label = {'urgency-critical': '긴급', 'urgency-high': '높음',
                              'urgency-medium': '중간', 'urgency-low': '낮음'}.get(urg_class, '')
                 html_parts.append(f"""
                     <div class='action-item'>
@@ -563,7 +563,7 @@ def save_fx_radar_dashboard(
                         <span>{action}</span>
                     </div>
                 """)
-            
+
             # 핵심 사유 표시
             reason = row.get('action_reason', row.get('risk_factors', ''))
             if reason:
@@ -572,8 +572,8 @@ def save_fx_radar_dashboard(
                         <b>📋 핵심 사유:</b> {reason[:200]}
                     </div>
                 """)
-            
-            # 원인 요약 표시  
+
+            # 원인 요약 표시
             cause = row.get('cause_summary', row.get('driver_summary', ''))
             if cause:
                 html_parts.append(f"""
@@ -581,20 +581,20 @@ def save_fx_radar_dashboard(
                         💬 {cause[:150]}
                     </div>
                 """)
-            
+
             html_parts.append("</div></div>")
-    
+
     # 5. 요약 통계
     html_parts.append("<h2>📊 FX 세그먼트 요약</h2>")
     html_parts.append("<div class='stat-grid'>")
-    
+
     if not fx_scores.empty:
         total_segments = len(fx_scores)
         grade_a = len(fx_scores[fx_scores['priority_grade'] == 'A'])
         grade_b = len(fx_scores[fx_scores['priority_grade'] == 'B'])
         high_opp = len(fx_scores[fx_scores['opportunity_score'] >= 70])
         high_risk = len(fx_scores[fx_scores['risk_score'] >= 70])
-        
+
         html_parts.append(f"""
         <div class='regime-card'>
             <h3>총 FX 활성 세그먼트</h3>
@@ -617,18 +617,18 @@ def save_fx_radar_dashboard(
             <div class='value' style='color: #d32f2f;'>{high_risk}</div>
         </div>
         """)
-    
+
     html_parts.append("</div>")
-    
+
     # 닫기
     html_parts.append("""
     </div>
     </body>
     </html>
     """)
-    
+
     html_path = os.path.join(out_dir, "05_fx_radar.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write("".join(html_parts))
-    
+
     return html_path

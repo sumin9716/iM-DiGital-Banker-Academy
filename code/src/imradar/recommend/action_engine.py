@@ -42,7 +42,7 @@ class RecommendedAction:
     reason: str
     expected_impact: str
     score: float = 0.0
-    
+
     def to_display(self) -> str:
         """디스플레이용 텍스트"""
         urgency_icons = {
@@ -62,7 +62,7 @@ class SegmentProfile:
     job_group: str = ""
     activity_level: str = ""
     asset_tier: str = ""
-    
+
     # KPI 현황
     deposit_balance: float = 0.0
     loan_balance: float = 0.0
@@ -70,20 +70,20 @@ class SegmentProfile:
     card_usage: float = 0.0
     digital_amount: float = 0.0
     fx_amount: float = 0.0
-    
+
     # 변화율
     deposit_change: float = 0.0
     loan_change: float = 0.0
     net_inflow_change: float = 0.0
     card_usage_change: float = 0.0
     digital_share: float = 0.0
-    
+
     # 위험 지표
     risk_score: float = 0.0
     opportunity_score: float = 0.0
     alert_type: str = ""
     alert_severity: str = ""
-    
+
     # 외부 요인
     current_regime: str = ""
     volatility_regime: str = ""
@@ -92,10 +92,10 @@ class SegmentProfile:
 
 class ActionEngine:
     """추천 액션 엔진"""
-    
+
     def __init__(self):
         self.action_rules = self._initialize_rules()
-    
+
     def _initialize_rules(self) -> Dict:
         """액션 규칙 초기화"""
         return {
@@ -106,7 +106,7 @@ class ActionEngine:
             "fx_rules": self._fx_rules(),
             "cross_sell_rules": self._cross_sell_rules(),
         }
-    
+
     def generate_actions(
         self,
         profile: SegmentProfile,
@@ -123,34 +123,34 @@ class ActionEngine:
             우선순위순 추천 액션 리스트
         """
         all_actions = []
-        
+
         # 1. KPI 기반 액션
         all_actions.extend(self._generate_deposit_actions(profile))
         all_actions.extend(self._generate_loan_actions(profile))
         all_actions.extend(self._generate_net_inflow_actions(profile))
         all_actions.extend(self._generate_digital_actions(profile))
         all_actions.extend(self._generate_fx_actions(profile))
-        
+
         # 2. 교차판매 기회
         all_actions.extend(self._generate_cross_sell_actions(profile))
-        
+
         # 3. 위험 관리 액션
         all_actions.extend(self._generate_risk_actions(profile))
-        
+
         # 4. 점수화 및 정렬
         scored_actions = self._score_and_rank(all_actions, profile)
-        
+
         # 5. 중복 제거 및 상위 N개 반환
         return self._deduplicate(scored_actions)[:max_actions]
-    
+
     def _generate_deposit_actions(self, profile: SegmentProfile) -> List[RecommendedAction]:
         """예금 관련 액션"""
         actions = []
-        
+
         # 예금 감소 시
         if profile.deposit_change < -0.05:
             severity = "급락" if profile.deposit_change < -0.15 else "감소"
-            
+
             if profile.age_group in ["60대", "70대이상"]:
                 actions.append(RecommendedAction(
                     action_text="시니어 맞춤 정기예금 금리 우대 안내",
@@ -178,7 +178,7 @@ class ActionEngine:
                     expected_impact="고객 이탈 방지 및 잔액 안정화",
                     score=75,
                 ))
-        
+
         # 예금 증가 시 - 투자 제안
         if profile.deposit_change > 0.1 and profile.deposit_balance > 10000:
             if profile.asset_tier in ["VIP", "VVIP"]:
@@ -199,13 +199,13 @@ class ActionEngine:
                     expected_impact="고객 수익 증대 및 충성도 향상",
                     score=60,
                 ))
-        
+
         return actions
-    
+
     def _generate_loan_actions(self, profile: SegmentProfile) -> List[RecommendedAction]:
         """대출 관련 액션"""
         actions = []
-        
+
         # 대출 증가 추세
         if profile.loan_change > 0.1:
             actions.append(RecommendedAction(
@@ -216,7 +216,7 @@ class ActionEngine:
                 expected_impact="고객 금융비용 절감 및 만족도 향상",
                 score=65,
             ))
-        
+
         # 대출 급감 (상환) - 재유치
         if profile.loan_change < -0.2:
             if profile.job_group in ["자영업", "소상공인"]:
@@ -237,13 +237,13 @@ class ActionEngine:
                     expected_impact="여신 포트폴리오 유지",
                     score=55,
                 ))
-        
+
         return actions
-    
+
     def _generate_net_inflow_actions(self, profile: SegmentProfile) -> List[RecommendedAction]:
         """순유입 관련 액션"""
         actions = []
-        
+
         # 순유출 지속
         if profile.net_inflow < 0:
             if profile.alert_severity in ["CRITICAL", "HIGH"]:
@@ -273,7 +273,7 @@ class ActionEngine:
                     expected_impact="안정적 자금 유입 구조 구축",
                     score=70,
                 ))
-        
+
         # 순유입 급증 - Cross-sell 기회
         if profile.net_inflow > 0 and profile.net_inflow_change > 0.3:
             actions.append(RecommendedAction(
@@ -284,13 +284,13 @@ class ActionEngine:
                 expected_impact="자산 확대 및 상품 다각화",
                 score=75,
             ))
-        
+
         return actions
-    
+
     def _generate_digital_actions(self, profile: SegmentProfile) -> List[RecommendedAction]:
         """디지털 채널 관련 액션"""
         actions = []
-        
+
         # 디지털 비중 낮음
         if profile.digital_share < 0.3:
             if profile.age_group in ["20대", "30대"]:
@@ -311,7 +311,7 @@ class ActionEngine:
                     expected_impact="점진적 디지털 전환 유도",
                     score=50,
                 ))
-        
+
         # 디지털 활성 고객에게 추가 서비스
         if profile.digital_share > 0.7 and profile.activity_level == "고활성":
             actions.append(RecommendedAction(
@@ -322,20 +322,20 @@ class ActionEngine:
                 expected_impact="고객 충성도 및 만족도 제고",
                 score=55,
             ))
-        
+
         return actions
-    
+
     def _generate_fx_actions(self, profile: SegmentProfile) -> List[RecommendedAction]:
         """FX 관련 액션"""
         actions = []
-        
+
         if profile.fx_amount <= 0:
             return actions
-        
+
         is_high_vol = "HighVol" in profile.volatility_regime
         is_uptrend = "Uptrend" in profile.current_regime  # 원화 약세
         is_downtrend = "Downtrend" in profile.current_regime  # 원화 강세
-        
+
         # 고변동성 시기
         if is_high_vol:
             actions.append(RecommendedAction(
@@ -346,7 +346,7 @@ class ActionEngine:
                 expected_impact="환손실 리스크 축소",
                 score=85,
             ))
-        
+
         # 원화 약세 (수입기업 부담)
         if is_uptrend:
             if profile.risk_score > 60:
@@ -366,7 +366,7 @@ class ActionEngine:
                 expected_impact="평균 환전 비용 절감",
                 score=70,
             ))
-        
+
         # 원화 강세 (수출기업 기회)
         if is_downtrend:
             actions.append(RecommendedAction(
@@ -377,7 +377,7 @@ class ActionEngine:
                 expected_impact="FX 거래량 확대 및 고객 수익 증대",
                 score=75,
             ))
-        
+
         # 디지털 FX 유도
         if profile.digital_share < 0.4 and profile.fx_amount > 0:
             actions.append(RecommendedAction(
@@ -388,13 +388,13 @@ class ActionEngine:
                 expected_impact="운영 효율화 및 비용 절감",
                 score=60,
             ))
-        
+
         return actions
-    
+
     def _generate_cross_sell_actions(self, profile: SegmentProfile) -> List[RecommendedAction]:
         """교차판매 기회"""
         actions = []
-        
+
         # 예금만 있고 대출 없음 → 대출 제안
         if profile.deposit_balance > 5000 and profile.loan_balance == 0:
             if profile.job_group in ["직장인", "공무원"]:
@@ -406,7 +406,7 @@ class ActionEngine:
                     expected_impact="여신 포트폴리오 확대",
                     score=55,
                 ))
-        
+
         # 카드 사용 낮음
         if profile.card_usage < 100 and profile.deposit_balance > 3000:
             actions.append(RecommendedAction(
@@ -417,7 +417,7 @@ class ActionEngine:
                 expected_impact="카드 수수료 수익 및 거래 활성화",
                 score=45,
             ))
-        
+
         # 활성 고객 보험/펀드
         if profile.activity_level == "고활성" and profile.asset_tier in ["VIP", "VVIP"]:
             actions.append(RecommendedAction(
@@ -428,13 +428,13 @@ class ActionEngine:
                 expected_impact="수익 다각화 및 고객 Lock-in",
                 score=60,
             ))
-        
+
         return actions
-    
+
     def _generate_risk_actions(self, profile: SegmentProfile) -> List[RecommendedAction]:
         """위험 관리 액션"""
         actions = []
-        
+
         # CRITICAL 알림
         if profile.alert_severity == "CRITICAL":
             actions.append(RecommendedAction(
@@ -445,7 +445,7 @@ class ActionEngine:
                 expected_impact="위험 조기 차단 및 손실 방지",
                 score=100,
             ))
-        
+
         # 높은 리스크 점수
         if profile.risk_score >= 70:
             actions.append(RecommendedAction(
@@ -456,7 +456,7 @@ class ActionEngine:
                 expected_impact="리스크 요인 해소 및 관계 안정화",
                 score=85,
             ))
-        
+
         # DROP 알림
         if profile.alert_type == "DROP":
             actions.append(RecommendedAction(
@@ -467,9 +467,9 @@ class ActionEngine:
                 expected_impact="고객 이탈 방지",
                 score=80,
             ))
-        
+
         return actions
-    
+
     def _score_and_rank(
         self,
         actions: List[RecommendedAction],
@@ -485,14 +485,14 @@ class ActionEngine:
                 Urgency.LOW: 0.7,
             }
             action.score *= urgency_weights.get(action.urgency, 1.0)
-            
+
             # VIP 가중치
             if profile.asset_tier in ["VIP", "VVIP"]:
                 action.score *= 1.2
-        
+
         # 점수순 정렬
         return sorted(actions, key=lambda x: x.score, reverse=True)
-    
+
     def _deduplicate(self, actions: List[RecommendedAction]) -> List[RecommendedAction]:
         """중복 제거"""
         seen_texts = set()
@@ -503,23 +503,23 @@ class ActionEngine:
                 seen_texts.add(key)
                 unique.append(action)
         return unique
-    
+
     # 규칙 정의 메서드들
     def _deposit_rules(self) -> Dict:
         return {}
-    
+
     def _loan_rules(self) -> Dict:
         return {}
-    
+
     def _net_inflow_rules(self) -> Dict:
         return {}
-    
+
     def _digital_rules(self) -> Dict:
         return {}
-    
+
     def _fx_rules(self) -> Dict:
         return {}
-    
+
     def _cross_sell_rules(self) -> Dict:
         return {}
 
@@ -543,35 +543,35 @@ def build_segment_profile(
             return float(val) if pd.notna(val) else default
         except:
             return default
-    
+
     def safe_str(val, default=""):
         return str(val) if pd.notna(val) else default
-    
+
     return SegmentProfile(
         segment_id=safe_str(row.get("segment_id", "")),
         age_group=safe_str(row.get("연령대", "")),
         job_group=safe_str(row.get("직업군", "")),
         activity_level=safe_str(row.get("거래활성도", "")),
         asset_tier=safe_str(row.get("자산규모", "")),
-        
+
         deposit_balance=safe_float(row.get("예금총잔액", 0)),
         loan_balance=safe_float(row.get("대출총잔액", 0)),
         net_inflow=safe_float(row.get("순유입", 0)),
         card_usage=safe_float(row.get("카드총사용", 0)),
         digital_amount=safe_float(row.get("디지털거래금액", 0)),
         fx_amount=safe_float(row.get("FX총액", 0)),
-        
+
         deposit_change=safe_float(row.get("deposit_pct_chg", row.get("예금총잔액_pct_chg", 0))),
         loan_change=safe_float(row.get("loan_pct_chg", row.get("대출총잔액_pct_chg", 0))),
         net_inflow_change=safe_float(row.get("net_inflow_pct_chg", row.get("순유입_pct_chg", 0))),
         card_usage_change=safe_float(row.get("card_pct_chg", row.get("카드총사용_pct_chg", 0))),
         digital_share=safe_float(row.get("디지털비중", 0)),
-        
+
         risk_score=safe_float(row.get("risk_score", 0)),
         opportunity_score=safe_float(row.get("opportunity_score", 0)),
         alert_type=safe_str(row.get("alert_type", "")),
         alert_severity=safe_str(row.get("severity", "")),
-        
+
         current_regime=safe_str(row.get("regime", row.get("current_regime", ""))),
         volatility_regime=safe_str(row.get("volatility_regime", "")),
         macro_indicators=macro_data or {},
@@ -597,10 +597,10 @@ def generate_recommended_actions_for_segment(
     profile = build_segment_profile(row, macro_data)
     engine = ActionEngine()
     actions = engine.generate_actions(profile, max_actions=max_actions)
-    
+
     if not actions:
         return "현재 특별 권고사항 없음"
-    
+
     return "; ".join([a.to_display() for a in actions])
 
 
@@ -615,21 +615,21 @@ def generate_action_reason(row: pd.Series) -> str:
         핵심 사유 문자열
     """
     reasons = []
-    
+
     # 리스크 관련
     risk_score = float(row.get("risk_score", 0) or 0)
     if risk_score >= 70:
         reasons.append(f"리스크점수 {risk_score:.0f}점 (경고)")
     elif risk_score >= 50:
         reasons.append(f"리스크점수 {risk_score:.0f}점 (주의)")
-    
+
     # 순유입 관련
     net_inflow = float(row.get("순유입", 0) or 0)
     if net_inflow < -500:
         reasons.append("순유출 지속 중")
     elif net_inflow > 500:
         reasons.append("순유입 양호")
-    
+
     # 알림 관련
     alert_type = str(row.get("alert_type", ""))
     severity = str(row.get("severity", ""))
@@ -639,7 +639,7 @@ def generate_action_reason(row: pd.Series) -> str:
         reasons.append(f"급등 알림 ({severity})")
     elif alert_type == "INFLECTION":
         reasons.append("추세 변곡점 감지")
-    
+
     # FX 관련
     regime = str(row.get("regime", row.get("current_regime", "")))
     if "HighVol" in regime:
@@ -648,13 +648,13 @@ def generate_action_reason(row: pd.Series) -> str:
         reasons.append("원화 약세 국면")
     elif "Downtrend" in regime:
         reasons.append("원화 강세 국면")
-    
+
     # 기회 관련
     opp_score = float(row.get("opportunity_score", 0) or 0)
     if opp_score >= 70:
         reasons.append(f"기회점수 {opp_score:.0f}점 (높음)")
-    
+
     if not reasons:
         return "정상 범위 내 - 정기 모니터링"
-    
+
     return " | ".join(reasons)

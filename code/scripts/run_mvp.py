@@ -210,12 +210,12 @@ def main():
                 if os.path.isdir(p):
                     external_dir = p
                     break
-        
+
         if external_dir and os.path.isdir(external_dir):
             print(f"  외부 데이터 디렉토리: {external_dir}")
             try:
                 external_data = load_all_external_data(
-                    external_dir, 
+                    external_dir,
                     file_config=cfg.external_data_files
                 )
                 if external_data is not None and not external_data.empty:
@@ -247,8 +247,8 @@ def main():
         macro_cols_available = [c for c in cfg.macro_feature_cols if c in panel_fe.columns]
         if macro_cols_available:
             panel_fe = add_macro_lag_features(
-                panel_fe, 
-                macro_cols=macro_cols_available, 
+                panel_fe,
+                macro_cols=macro_cols_available,
                 lags=cfg.macro_lag_periods
             )
             print(f"  거시경제 Lag 피처 추가 완료: {len(macro_cols_available)}개 변수 x {len(cfg.macro_lag_periods)}개 Lag")
@@ -435,7 +435,7 @@ def main():
                 continue
             y_hat = _predict_model(model_entry, latest_rows)
             y_raw = inverse_target_transform(kpi, y_hat)
-            
+
             # 순유입 예측 개선: DL 실제 예측값 반영 (h=1)
             if h == 1 and kpi in dl_pred_maps:
                 use_dl = False
@@ -448,7 +448,7 @@ def main():
                     seg_ids = latest_rows["segment_id"].values
                     dl_map = dl_pred_maps.get(kpi, {})
                     y_raw = np.array([dl_map.get(seg_id, y_raw[i]) for i, seg_id in enumerate(seg_ids)])
-            
+
             # 스케일 보정: 예측값이 히스토리 대비 너무 작거나 크면 보정
             if kpi in scale_factors:
                 seg_means = scale_factors[kpi]
@@ -459,10 +459,10 @@ def main():
                             # 예측값이 히스토리 평균의 30% 미만이면 보정
                             if y_raw[i] < hist_mean * 0.3:
                                 y_raw[i] = hist_mean * 0.8  # 히스토리 평균의 80%로 보정
-                            # 예측값이 히스토리 평균의 300% 초과이면 보정  
+                            # 예측값이 히스토리 평균의 300% 초과이면 보정
                             elif y_raw[i] > hist_mean * 3.0:
                                 y_raw[i] = hist_mean * 1.3  # 히스토리 평균의 130%로 보정
-            
+
             pred_month = month_add(last_month, h)
             tmp = pd.DataFrame({
                 "segment_id": latest_rows["segment_id"].values,
@@ -475,7 +475,7 @@ def main():
         fc = forecasts[0]
         for t in forecasts[1:]:
             fc = fc.merge(t, on=["segment_id", "pred_month"], how="outer")
-        
+
         # 전체 합계 레벨 스케일 보정
         # 예측 합계가 히스토리 합계와 유사하도록 비례 조정
         last_month_data = panel_fe[panel_fe["month"] == last_month]
@@ -484,14 +484,14 @@ def main():
             kpi_cols_in_fc = [c for c in fc.columns if c.startswith(kpi)]
             if not kpi_cols_in_fc:
                 continue
-            
+
             # 실제 합계
             actual_sum = last_month_data[kpi].sum()
-            
+
             # 각 컬럼별로 보정
             for kpi_col in kpi_cols_in_fc:
                 pred_sum = fc[kpi_col].sum()
-                
+
                 if pred_sum > 0 and actual_sum > 0:
                     ratio = actual_sum / pred_sum
                     if ratio > 1.3:  # 예측이 너무 낮음
@@ -502,7 +502,7 @@ def main():
                         scale_factor = max(ratio, 0.5) * 1.05
                         fc[kpi_col] *= scale_factor
                         print(f"     {kpi_col}: 스케일 보정 적용 (x{scale_factor:.2f})")
-        
+
         # Hierarchical Reconciliation (MinT)
         print("  └─ Applying Hierarchical Reconciliation (MinT)...")
         kpi_cols_to_reconcile = [c for c in ["예금총잔액", "대출총잔액", "카드총사용", "디지털거래금액", "FX총액"] if c in fc.columns]
@@ -520,7 +520,7 @@ def main():
                 print(f"     Reconciled KPIs: {kpi_cols_to_reconcile}")
             except Exception as e:
                 print(f"     Reconciliation skipped: {e}")
-        
+
         # 중복 컬럼 정리 (_x, _y 병합)
         # merge 과정에서 생성된 중복 컬럼들 정리
         for kpi in model_targets.keys():
@@ -528,7 +528,7 @@ def main():
             cols_x = [c for c in fc.columns if c == f"{kpi}_x"]
             cols_y = [c for c in fc.columns if c == f"{kpi}_y"]
             col_orig = kpi if kpi in fc.columns else None
-            
+
             if cols_x or cols_y:
                 # 모든 관련 컬럼을 합쳐서 하나로 만듦 (NaN이 아닌 값 우선)
                 all_cols = []
@@ -536,7 +536,7 @@ def main():
                     all_cols.append(kpi)
                 all_cols.extend(cols_x)
                 all_cols.extend(cols_y)
-                
+
                 if len(all_cols) > 1:
                     # coalesce: 첫번째 non-NaN 값 사용
                     fc[kpi] = fc[all_cols].bfill(axis=1).iloc[:, 0]
@@ -544,7 +544,7 @@ def main():
                     drop_cols = [c for c in all_cols if c != kpi]
                     fc = fc.drop(columns=drop_cols, errors='ignore')
                     print(f"     Merged {all_cols} → {kpi}")
-        
+
         fc_path = os.path.join(args.out_dir, "forecasts", "segment_forecasts_next.csv")
         fc.to_csv(fc_path, index=False, encoding="utf-8-sig")
         print(f"Saved next forecasts: {fc_path}")
@@ -594,7 +594,7 @@ def main():
             alerts_bad["_industry"] = alerts_bad["segment_id"].apply(
                 lambda x: x.split("|")[0] if isinstance(x, str) and "|" in x else x
             )
-            
+
             # DROP과 SPIKE 각각 업종 다양성 보장하면서 선택
             def select_with_diversity(df, n=30, ascending=True, max_per_ind=3):
                 if df.empty:
@@ -611,14 +611,14 @@ def main():
                     if len(selected) >= n:
                         break
                 return pd.DataFrame(selected)
-            
+
             drop_alerts = alerts_bad[alerts_bad["alert_type"] == "DROP"]
             spike_alerts = alerts_bad[alerts_bad["alert_type"] == "SPIKE"]
-            
+
             top_drop = select_with_diversity(drop_alerts, n=30, ascending=True, max_per_ind=3)
             top_spike = select_with_diversity(spike_alerts, n=30, ascending=False, max_per_ind=3)
             top_bad = pd.concat([top_drop, top_spike], ignore_index=True)
-            
+
             for _, arow in top_bad.iterrows():
                 seg = arow["segment_id"]
                 row_df = prev_rows[prev_rows["segment_id"] == seg].head(1)
@@ -647,7 +647,7 @@ def main():
         watchlist_path = os.path.join(args.out_dir, "watchlist_alerts.csv")
         watchlist.to_csv(watchlist_path, index=False, encoding="utf-8-sig")
         print(f"Saved watchlist: {watchlist_path}")
-        
+
         # watchlist TOP 세그먼트 중 드라이버가 없는 것들 추가 생성
         existing_driver_segs = set(r["segment_id"] for r in driver_rows)
         for _, wrow in watchlist.head(50).iterrows():
@@ -716,7 +716,7 @@ def main():
         actions_path = os.path.join(args.out_dir, "actions_top.csv")
         actions.to_csv(actions_path, index=False, encoding="utf-8-sig")
         print(f"Saved actions: {actions_path}")
-        
+
         # 개선된 액션 생성
         print("  └─ Generating enhanced actions with diverse action types...")
         try:
@@ -725,12 +725,12 @@ def main():
             # __pred 접미사 제거하여 원래 KPI 이름으로 변경
             rename_map = {c: c.replace("__pred", "") for c in preds_for_enhanced.columns if "__pred" in c}
             preds_for_enhanced = preds_for_enhanced.rename(columns=rename_map)
-            
+
             # FX 레짐 정보 추가 (있으면)
             panel_with_regime = panel_fe.copy()
             if "regime" not in panel_with_regime.columns:
                 panel_with_regime["regime"] = ""
-            
+
             # 개선된 액션 생성
             enhanced_actions = recommend_enhanced_actions(
                 panel=panel_with_regime,
@@ -740,11 +740,11 @@ def main():
                 top_k=5,
                 cfg=cfg,
             )
-            
+
             enhanced_path = os.path.join(args.out_dir, "actions_enhanced.csv")
             enhanced_actions.to_csv(enhanced_path, index=False, encoding="utf-8-sig")
             print(f"     Saved enhanced actions: {enhanced_path}")
-            
+
             # 액션 다양성 통계
             if not enhanced_actions.empty:
                 action_type_counts = enhanced_actions["action_type"].value_counts()
@@ -757,20 +757,20 @@ def main():
             print(f"     Enhanced actions generation failed: {e}")
             import traceback
             traceback.print_exc()
-        
+
         # 협업 필터링 기반 유사 세그먼트 정보 추가
         try:
             from imradar.recommend.embedding_recommender import (
                 enrich_actions_with_collaborative,
                 compute_segment_similarity_report
             )
-            
+
             # 액션에 유사 세그먼트 정보 추가
             enriched_actions = enrich_actions_with_collaborative(actions, panel_fe, kpi_cols)
             enriched_path = os.path.join(args.out_dir, "actions_with_similarity.csv")
             enriched_actions.to_csv(enriched_path, index=False, encoding="utf-8-sig")
             print(f"Saved enriched actions: {enriched_path}")
-            
+
             # 유사도 리포트 생성
             target_segments = actions['segment_id'].unique()[:100].tolist()
             similarity_report = compute_segment_similarity_report(panel_fe, kpi_cols, target_segments, top_k=3)
@@ -805,14 +805,14 @@ def main():
             fx_regime = None
             if args.external_dir:
                 fx_regime = compute_fx_regime_from_external(panel_fe, args.external_dir)
-            
+
             # Generate FX segment scores (requires FXRegimeResult)
             if fx_regime is not None:
                 fx_scores = compute_fx_segment_scores(panel_fe, fx_regime)
                 fx_scores_path = os.path.join(args.out_dir, "fx_segment_scores.csv")
                 fx_scores.to_csv(fx_scores_path, index=False, encoding="utf-8-sig")
                 print(f"Saved FX scores: {fx_scores_path}")
-                
+
                 # Generate FX Radar Dashboard
                 fx_html = save_fx_radar_dashboard(
                     fx_scores=fx_scores,
@@ -821,7 +821,7 @@ def main():
                     top_n=30
                 )
                 print(f"Saved dashboard: {fx_html}")
-                
+
                 # Extract FX regime dict for executive summary
                 if hasattr(fx_regime, 'fx_monthly') and len(fx_regime.fx_monthly) > 0:
                     latest = fx_regime.fx_monthly.iloc[-1]
@@ -839,13 +839,13 @@ def main():
     # Executive Summary Dashboard
     try:
         drivers_df = pd.DataFrame(driver_rows) if driver_rows else pd.DataFrame()
-        
+
         # Load FX scores if available
         fx_scores_df = None
         fx_scores_path = os.path.join(args.out_dir, "fx_segment_scores.csv")
         if os.path.exists(fx_scores_path):
             fx_scores_df = pd.read_csv(fx_scores_path)
-        
+
         exec_html = generate_executive_summary_html(
             panel=panel_fe,
             forecasts=fc,

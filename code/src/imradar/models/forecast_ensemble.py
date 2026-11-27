@@ -80,11 +80,11 @@ class EnsembleModel:
     feature_importance: Optional[pd.DataFrame] = None
     cv_scores: Optional[Dict[str, float]] = None
     train_residual_std: float = 0.0
-    
+
     def save(self, path: Path) -> None:
         with open(path, 'wb') as f:
             pickle.dump(self, f)
-    
+
     @staticmethod
     def load(path: Path) -> "EnsembleModel":
         with open(path, 'rb') as f:
@@ -116,7 +116,7 @@ def tune_lgbm(
 ) -> Dict:
     """LightGBM 하이퍼파라미터 튜닝"""
     _require_ensemble_deps()
-    
+
     def objective(trial):
         params = {
             'n_estimators': trial.suggest_int('n_estimators', 200, 1500),
@@ -133,7 +133,7 @@ def tune_lgbm(
             'n_jobs': -1,
             'verbosity': -1,
         }
-        
+
         model = lgb.LGBMRegressor(**params)
         model.fit(
             X_train, y_train,
@@ -141,13 +141,13 @@ def tune_lgbm(
             callbacks=[lgb.early_stopping(50, verbose=False), lgb.log_evaluation(0)],
             categorical_feature=cat_cols if cat_cols else 'auto',
         )
-        
+
         y_pred = model.predict(X_val)
         return _rmse(y_val, y_pred)
-    
+
     study = optuna.create_study(direction='minimize', sampler=TPESampler(seed=42))
     study.optimize(objective, n_trials=n_trials, timeout=timeout, show_progress_bar=False)
-    
+
     return study.best_params
 
 
@@ -161,7 +161,7 @@ def tune_xgboost(
 ) -> Dict:
     """XGBoost 하이퍼파라미터 튜닝"""
     _require_ensemble_deps()
-    
+
     def objective(trial):
         params = {
             'n_estimators': trial.suggest_int('n_estimators', 200, 1500),
@@ -177,20 +177,20 @@ def tune_xgboost(
             'n_jobs': -1,
             'verbosity': 0,
         }
-        
+
         model = xgb.XGBRegressor(**params, early_stopping_rounds=50)
         model.fit(
             X_train, y_train,
             eval_set=[(X_val, y_val)],
             verbose=False,
         )
-        
+
         y_pred = model.predict(X_val)
         return _rmse(y_val, y_pred)
-    
+
     study = optuna.create_study(direction='minimize', sampler=TPESampler(seed=42))
     study.optimize(objective, n_trials=n_trials, timeout=timeout, show_progress_bar=False)
-    
+
     return study.best_params
 
 
@@ -205,7 +205,7 @@ def tune_catboost(
 ) -> Dict:
     """CatBoost 하이퍼파라미터 튜닝"""
     _require_ensemble_deps()
-    
+
     def objective(trial):
         params = {
             'iterations': trial.suggest_int('iterations', 200, 1500),
@@ -218,9 +218,9 @@ def tune_catboost(
             'random_seed': 42,
             'verbose': False,
         }
-        
+
         cat_indices = [X_train.columns.get_loc(c) for c in cat_cols if c in X_train.columns]
-        
+
         model = CatBoostRegressor(**params)
         model.fit(
             X_train, y_train,
@@ -229,13 +229,13 @@ def tune_catboost(
             early_stopping_rounds=50,
             verbose=False,
         )
-        
+
         y_pred = model.predict(X_val)
         return _rmse(y_val, y_pred)
-    
+
     study = optuna.create_study(direction='minimize', sampler=TPESampler(seed=42))
     study.optimize(objective, n_trials=n_trials, timeout=timeout, show_progress_bar=False)
-    
+
     return study.best_params
 
 
@@ -248,12 +248,12 @@ def select_features(
     threshold: str = "0.5*median",
 ) -> List[str]:
     """LightGBM 기반 피처 선택"""
-    
+
     X_temp = X_train.copy()
     for c in cat_cols:
         if c in X_temp.columns:
             X_temp[c] = X_temp[c].astype('category')
-    
+
     selector_model = lgb.LGBMRegressor(
         n_estimators=300,
         learning_rate=0.05,
@@ -263,10 +263,10 @@ def select_features(
         verbosity=-1,
     )
     selector_model.fit(X_temp, y_train, categorical_feature=cat_cols if cat_cols else 'auto')
-    
+
     selector = SelectFromModel(selector_model, prefit=True, threshold=threshold)
     selected_mask = selector.get_support()
-    
+
     return [col for col, selected in zip(X_train.columns, selected_mask) if selected]
 
 
@@ -311,37 +311,37 @@ def train_ensemble_forecast(
         print(f"\n{'='*50}")
         print(f"앙상블 모델 학습: {kpi_col} (H={horizon})")
         print(f"{'='*50}")
-    
+
     data = df.sort_values([group_col, time_col]).copy()
-    
+
     # 타겟 생성
     data[f"target__h{horizon}"] = data.groupby(group_col)[kpi_col].shift(-horizon)
     data = data[(data.get("pre_birth", 0) == 0)].copy()
     data = data.dropna(subset=[f"target__h{horizon}"])
-    
+
     # 학습/검증 분할
     if train_end_month is not None:
         train_mask = data[time_col] <= train_end_month
     else:
         train_mask = np.ones(len(data), dtype=bool)
-    
+
     # 피처 선택
     base_drop = {kpi_col, f"target__h{horizon}"}
     ignore_cols = {time_col, "first_month", group_col}
     exclude = base_drop | ignore_cols
-    
+
     feature_cols = [c for c in data.columns if c not in exclude]
     if categorical_cols is None:
         categorical_cols = []
     feature_cols = [c for c in feature_cols if (c in categorical_cols) or (pd.api.types.is_numeric_dtype(data[c]))]
-    
+
     X_all = data.loc[train_mask, feature_cols].copy()
     y_all = data.loc[train_mask, f"target__h{horizon}"].astype("float64").values
-    
+
     cat_cols = [c for c in categorical_cols if c in X_all.columns]
     for c in cat_cols:
         X_all[c] = X_all[c].astype("category")
-    
+
     # 피처 선택
     if use_feature_selection and len(feature_cols) > 30:
         if verbose:
@@ -353,12 +353,12 @@ def train_ensemble_forecast(
             cat_cols = [c for c in cat_cols if c in feature_cols]
             if verbose:
                 print(f"  → 선택된 피처: {len(feature_cols)}개")
-    
+
     # Train/Val 분할
     split_idx = int(len(X_all) * 0.8)
     X_train, X_val = X_all.iloc[:split_idx], X_all.iloc[split_idx:]
     y_train, y_val = y_all[:split_idx], y_all[split_idx:]
-    
+
     # XGBoost/CatBoost용 데이터 준비 (category → numeric)
     X_train_xgb = X_train.copy()
     X_val_xgb = X_val.copy()
@@ -366,15 +366,15 @@ def train_ensemble_forecast(
         if c in X_train_xgb.columns:
             X_train_xgb[c] = X_train_xgb[c].cat.codes.replace(-1, np.nan)
             X_val_xgb[c] = X_val_xgb[c].cat.codes.replace(-1, np.nan)
-    
+
     best_params = {}
     models = {}
     val_scores = {}
-    
+
     # LightGBM
     if verbose:
         print("\n  [1/3] LightGBM 학습...")
-    
+
     if tune_hyperparams:
         if verbose:
             print(f"    → 하이퍼파라미터 튜닝 중 (n_trials={n_trials})...")
@@ -385,10 +385,10 @@ def train_ensemble_forecast(
             'max_depth': 8, 'min_child_samples': 20, 'subsample': 0.9,
             'colsample_bytree': 0.9, 'reg_alpha': 0.1, 'reg_lambda': 0.1,
         }
-    
+
     lgbm_params.update({'random_state': 42, 'n_jobs': -1, 'verbosity': -1})
     best_params['lgbm'] = lgbm_params
-    
+
     lgbm_model = lgb.LGBMRegressor(**lgbm_params)
     lgbm_model.fit(
         X_train, y_train,
@@ -398,14 +398,14 @@ def train_ensemble_forecast(
     )
     models['lgbm'] = lgbm_model
     val_scores['lgbm'] = _rmse(y_val, lgbm_model.predict(X_val))
-    
+
     if verbose:
         print(f"    LightGBM RMSE: {val_scores['lgbm']:.4f}")
-    
+
     # XGBoost
     if verbose:
         print("\n  [2/3] XGBoost 학습...")
-    
+
     if tune_hyperparams:
         if verbose:
             print(f"    → 하이퍼파라미터 튜닝 중 (n_trials={n_trials})...")
@@ -416,29 +416,29 @@ def train_ensemble_forecast(
             'min_child_weight': 5, 'subsample': 0.9, 'colsample_bytree': 0.9,
             'reg_alpha': 0.1, 'reg_lambda': 0.1, 'gamma': 0.1,
         }
-    
+
     xgb_params.update({'random_state': 42, 'n_jobs': -1, 'verbosity': 0})
     best_params['xgb'] = xgb_params
-    
+
     xgb_model = xgb.XGBRegressor(**xgb_params, early_stopping_rounds=50)
     xgb_model.fit(X_train_xgb, y_train, eval_set=[(X_val_xgb, y_val)], verbose=False)
     models['xgb'] = xgb_model
     val_scores['xgb'] = _rmse(y_val, xgb_model.predict(X_val_xgb))
-    
+
     if verbose:
         print(f"    XGBoost RMSE: {val_scores['xgb']:.4f}")
-    
+
     # CatBoost
     if verbose:
         print("\n  [3/3] CatBoost 학습...")
-    
+
     X_train_cat = X_train.copy()
     X_val_cat = X_val.copy()
     for c in cat_cols:
         if c in X_train_cat.columns:
             X_train_cat[c] = X_train_cat[c].astype(str)
             X_val_cat[c] = X_val_cat[c].astype(str)
-    
+
     if tune_hyperparams:
         if verbose:
             print(f"    → 하이퍼파라미터 튜닝 중 (n_trials={n_trials})...")
@@ -448,10 +448,10 @@ def train_ensemble_forecast(
             'iterations': 800, 'learning_rate': 0.05, 'depth': 8,
             'l2_leaf_reg': 3, 'bagging_temperature': 0.5, 'random_strength': 1,
         }
-    
+
     cat_params.update({'random_seed': 42, 'verbose': False})
     best_params['catboost'] = cat_params
-    
+
     cat_indices = [X_train_cat.columns.get_loc(c) for c in cat_cols if c in X_train_cat.columns]
     cat_model = CatBoostRegressor(**cat_params)
     cat_model.fit(
@@ -463,14 +463,14 @@ def train_ensemble_forecast(
     )
     models['catboost'] = cat_model
     val_scores['catboost'] = _rmse(y_val, cat_model.predict(X_val_cat))
-    
+
     if verbose:
         print(f"    CatBoost RMSE: {val_scores['catboost']:.4f}")
-    
+
     # 앙상블 가중치 계산
     # KPI별 최적 가중치가 있으면 사용, 없으면 RMSE 기반 계산
     kpi_name = kpi_col.replace('_target_h1', '').replace('_target_h2', '').replace('_target_h3', '')
-    
+
     if kpi_name in KPI_OPTIMAL_WEIGHTS:
         # Stacking 실험 결과 반영된 최적 가중치 사용
         weights = KPI_OPTIMAL_WEIGHTS[kpi_name].copy()
@@ -484,34 +484,34 @@ def train_ensemble_forecast(
         weights = {k: v / total_inv for k, v in inv_scores.items()}
         if verbose:
             print(f"\n  앙상블 가중치 (RMSE 기반): LightGBM={weights['lgbm']:.3f}, XGBoost={weights['xgb']:.3f}, CatBoost={weights['catboost']:.3f}")
-    
+
     # 앙상블 예측 검증
     y_pred_lgbm = lgbm_model.predict(X_val)
     y_pred_xgb = xgb_model.predict(X_val_xgb)
     y_pred_cat = cat_model.predict(X_val_cat)
-    
+
     y_pred_ensemble = (
         weights['lgbm'] * y_pred_lgbm +
         weights['xgb'] * y_pred_xgb +
         weights['catboost'] * y_pred_cat
     )
-    
+
     ensemble_rmse = _rmse(y_val, y_pred_ensemble)
     ensemble_r2 = r2_score(y_val, y_pred_ensemble)
-    
+
     if verbose:
         print(f"\n  앙상블 RMSE: {ensemble_rmse:.4f} | R²: {ensemble_r2:.4f}")
-    
+
     # 잔차 표준편차 계산
     train_residual_std = float(np.std(y_val - y_pred_ensemble))
-    
+
     # 피처 중요도 (LightGBM 기준)
     imp_gain = lgbm_model.booster_.feature_importance(importance_type='gain')
     feature_importance = pd.DataFrame({
         'feature': feature_cols,
         'importance': imp_gain,
     }).sort_values('importance', ascending=False).reset_index(drop=True)
-    
+
     cv_scores = {
         'ensemble_rmse': ensemble_rmse,
         'ensemble_r2': ensemble_r2,
@@ -519,7 +519,7 @@ def train_ensemble_forecast(
         'xgb_rmse': val_scores['xgb'],
         'catboost_rmse': val_scores['catboost'],
     }
-    
+
     return EnsembleModel(
         kpi=kpi_col,
         horizon=horizon,
@@ -551,44 +551,44 @@ def predict_ensemble(
         앙상블 예측값 또는 개별 모델 예측값 딕셔너리
     """
     X = df[model.feature_cols].copy()
-    
+
     # LightGBM용
     X_lgbm = X.copy()
     for c in model.categorical_cols:
         if c in X_lgbm.columns:
             X_lgbm[c] = X_lgbm[c].astype("category")
-    
+
     # XGBoost용
     X_xgb = X.copy()
     for c in model.categorical_cols:
         if c in X_xgb.columns:
             X_xgb[c] = pd.Categorical(X_xgb[c]).codes
             X_xgb[c] = X_xgb[c].replace(-1, np.nan)
-    
+
     # CatBoost용
     X_cat = X.copy()
     for c in model.categorical_cols:
         if c in X_cat.columns:
             X_cat[c] = X_cat[c].astype(str)
-    
+
     # 개별 예측
     preds = {
         'lgbm': model.models['lgbm'].predict(X_lgbm),
         'xgb': model.models['xgb'].predict(X_xgb),
         'catboost': model.models['catboost'].predict(X_cat),
     }
-    
+
     # 앙상블 예측
     ensemble_pred = (
         model.weights['lgbm'] * preds['lgbm'] +
         model.weights['xgb'] * preds['xgb'] +
         model.weights['catboost'] * preds['catboost']
     )
-    
+
     if return_individual:
         preds['ensemble'] = ensemble_pred
         return preds
-    
+
     return ensemble_pred
 
 
@@ -607,18 +607,18 @@ def evaluate_ensemble(
     data = df.copy()
     data[f"target__h{horizon}"] = data.groupby(group_col)[kpi_col].shift(-horizon)
     data = data.dropna(subset=[f"target__h{horizon}"])
-    
+
     if test_start_month is not None:
         data = data[data["month"] >= test_start_month]
     if test_end_month is not None:
         data = data[data["month"] <= test_end_month]
-    
+
     if len(data) == 0:
         return {}
-    
+
     y_true = data[f"target__h{horizon}"].values
     y_pred = predict_ensemble(model, data)
-    
+
     return {
         'n': len(data),
         'mae': float(mean_absolute_error(y_true, y_pred)),

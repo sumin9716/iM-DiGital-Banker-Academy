@@ -68,20 +68,20 @@ def compute_residuals(
         잔차 정보가 추가된 DataFrame
     """
     data = df.copy()
-    
+
     # 예측값 생성
     predictions = predict_with_model(fm, data)
     data["predicted"] = predictions
     data["actual"] = data[actual_col]
-    
+
     # 잔차 계산
     eps = 1e-9
     data["residual"] = data["actual"] - data["predicted"]
     data["residual_ratio"] = data["residual"] / (np.abs(data["predicted"]) + eps)
-    
+
     # Signed ratio (예측값이 음수일 수 있으므로)
     data["residual_pct"] = (data["residual"] / (np.abs(data["predicted"]) + eps)) * 100
-    
+
     return data
 
 
@@ -108,21 +108,21 @@ def compute_rolling_zscore(
         z-score가 추가된 DataFrame
     """
     data = df.copy()
-    
+
     # 세그먼트별 rolling 통계
     g = data.groupby(group_col)[value_col]
-    
+
     # 이전 값들의 rolling 평균과 표준편차 (현재 값 제외)
     shifted = g.shift(1)
     rolling_mean = shifted.rolling(window=window, min_periods=min_periods).mean()
     rolling_std = shifted.rolling(window=window, min_periods=min_periods).std()
-    
+
     # Z-score 계산
     eps = 1e-9
     data[f"{value_col}_zscore"] = (data[value_col] - rolling_mean) / (rolling_std + eps)
     data[f"{value_col}_rolling_mean"] = rolling_mean
     data[f"{value_col}_rolling_std"] = rolling_std
-    
+
     return data
 
 
@@ -144,10 +144,10 @@ def determine_severity(
     """
     abs_ratio = abs(residual_ratio)
     abs_zscore = abs(zscore) if not pd.isna(zscore) else 0
-    
+
     # 복합 점수 계산
     score = max(abs_ratio, abs_zscore / 3)  # z-score 3 = ratio 1.0 수준
-    
+
     if score >= cfg.alert_severity_critical:
         return "critical"
     elif score >= cfg.alert_severity_high:
@@ -210,29 +210,29 @@ def generate_alerts(
     """
     if cfg is None:
         cfg = RadarConfig()
-    
+
     data = df.copy()
-    
+
     # 특정 월 필터링
     if target_month is not None:
         data = data[data["month"] == target_month]
-    
+
     alerts = []
-    
+
     for idx, row in data.iterrows():
         residual_ratio = row.get("residual_ratio", 0)
         zscore = row.get("residual_ratio_zscore", np.nan)
-        
+
         alert_type = determine_alert_type(
             residual_ratio, zscore,
             cfg.alert_down_threshold_pct, cfg.alert_up_threshold_pct
         )
-        
+
         if alert_type == "normal" and not include_normal:
             continue
-        
+
         severity = determine_severity(residual_ratio, zscore, cfg)
-        
+
         alert = RiskAlert(
             segment_id=str(row.get("segment_id", "")),
             month=pd.to_datetime(row.get("month")),
@@ -246,11 +246,11 @@ def generate_alerts(
             alert_type=alert_type,
         )
         alerts.append(alert)
-    
+
     # 심각도와 잔차비율 기준 정렬
     severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
     alerts.sort(key=lambda x: (severity_order.get(x.severity, 4), -abs(x.residual_ratio)))
-    
+
     return alerts[:top_n]
 
 
@@ -277,28 +277,28 @@ def add_driver_analysis(
     for c in fm.categorical_cols:
         if c in X.columns:
             X[c] = X[c].astype("category")
-    
+
     # LightGBM pred_contrib 사용
     contribs = fm.model.predict(X, pred_contrib=True)
     contribs = contribs[:, :-1]  # bias 제외
-    
+
     # DataFrame에 인덱스 매핑
     df_indexed = df.reset_index(drop=True)
-    
+
     for alert in alerts:
         # 해당 알림의 행 찾기
         mask = (df_indexed["segment_id"] == alert.segment_id) & \
                (df_indexed["month"] == alert.month)
-        
+
         if mask.sum() == 0:
             continue
-        
+
         row_idx = mask.idxmax()
         row_contrib = contribs[row_idx]
-        
+
         # 상위 드라이버 추출
         contrib_series = pd.Series(row_contrib, index=fm.feature_cols)
-        
+
         if alert.alert_type == "surge":
             # 상승 원인: 양의 기여도 상위
             top_drivers = contrib_series.nlargest(top_k)
@@ -309,11 +309,11 @@ def add_driver_analysis(
             # 이상치: 절대값 기준
             top_drivers = contrib_series.abs().nlargest(top_k)
             top_drivers = contrib_series[top_drivers.index]
-        
+
         alert.drivers = top_drivers.index.tolist()
         alert.driver_contributions = top_drivers.to_dict()
         alert.explanation = _generate_explanation(alert, top_drivers)
-    
+
     return alerts
 
 
@@ -342,10 +342,10 @@ def _generate_explanation(alert: RiskAlert, top_drivers: pd.Series) -> str:
         "esi": "경기전망",
         "apt_price": "부동산",
     }
-    
+
     def _format_feature(f: str) -> str:
         name = f.replace("log1p_", "").replace("__", " ")
-        
+
         # 시점 정보 추출
         time_suffix = ""
         if "lag1" in name:
@@ -369,17 +369,17 @@ def _generate_explanation(alert: RiskAlert, top_drivers: pd.Series) -> str:
         elif "yoy" in name:
             time_suffix = " 전년비"
             name = name.replace("yoy", "").replace("_", " ")
-        
+
         # 매핑된 이름 적용
         for key, display in FEATURE_NAMES.items():
             if key in name:
                 name = name.replace(key, display)
-        
+
         return (name.strip() + time_suffix).strip()
-    
+
     # 알림 유형별 문장 생성
     ratio_pct = abs(alert.residual_ratio * 100)
-    
+
     if alert.alert_type == "surge":
         direction = "급등" if ratio_pct > 20 else "상승"
         icon = "📈"
@@ -389,18 +389,18 @@ def _generate_explanation(alert: RiskAlert, top_drivers: pd.Series) -> str:
     else:
         direction = "이상 변동"
         icon = "⚠️"
-    
+
     # 상위 드라이버 분류
     pos_drivers = [(f, v) for f, v in top_drivers.items() if v > 0]
     neg_drivers = [(f, v) for f, v in top_drivers.items() if v < 0]
-    
+
     explanation_parts = []
-    
+
     # 도입부
     explanation_parts.append(
         f"{icon} 예측 대비 {ratio_pct:.1f}% {direction}"
     )
-    
+
     # 주요 원인 분석
     if alert.alert_type == "surge" and pos_drivers:
         # 상승의 경우 양수 기여 요인이 원인
@@ -420,14 +420,14 @@ def _generate_explanation(alert: RiskAlert, top_drivers: pd.Series) -> str:
         if neg_drivers:
             neg_names = [_format_feature(f) for f, _ in neg_drivers[:1]]
             explanation_parts.append(f"하락 압력: {', '.join(neg_names)}")
-    
+
     # 심각도에 따른 권고 추가
     if hasattr(alert, 'severity'):
         if alert.severity == "CRITICAL":
             explanation_parts.append("→ 즉시 점검 필요")
         elif alert.severity == "HIGH":
             explanation_parts.append("→ 조기 대응 권고")
-    
+
     return " | ".join(explanation_parts)
 
 
@@ -453,7 +453,7 @@ def compute_segment_risk_score(
     max_month = df["month"].max()
     min_month = max_month - pd.DateOffset(months=lookback_months)
     recent = df[df["month"] >= min_month].copy()
-    
+
     # 세그먼트별 집계
     risk_scores = recent.groupby(group_col).agg({
         "residual_ratio": ["mean", "std", "min", "max"],
@@ -461,7 +461,7 @@ def compute_segment_risk_score(
         "actual": "mean",
         "predicted": "mean",
     }).reset_index()
-    
+
     # 컬럼명 정리
     risk_scores.columns = [
         group_col,
@@ -469,22 +469,22 @@ def compute_segment_risk_score(
         "avg_zscore", "std_zscore", "anomaly_count",
         "avg_actual", "avg_predicted",
     ]
-    
+
     # 종합 리스크 점수 계산 (0-100)
     # 구성요소: 평균 잔차비율, 변동성, 이상치 빈도
-    
+
     # 정규화
     risk_scores["ratio_score"] = risk_scores["avg_residual_ratio"].abs() * 100
     risk_scores["volatility_score"] = risk_scores["std_residual_ratio"] * 100
     risk_scores["anomaly_score"] = risk_scores["anomaly_count"] * 10
-    
+
     # 종합 점수 (각 요소 가중 평균)
     risk_scores["risk_score"] = (
         0.4 * risk_scores["ratio_score"] +
         0.3 * risk_scores["volatility_score"] +
         0.3 * risk_scores["anomaly_score"]
     ).clip(0, 100)
-    
+
     # 리스크 등급 부여
     conditions = [
         risk_scores["risk_score"] >= 70,
@@ -493,7 +493,7 @@ def compute_segment_risk_score(
     ]
     choices = ["HIGH", "MEDIUM", "LOW"]
     risk_scores["risk_grade"] = np.select(conditions, choices, default="NORMAL")
-    
+
     return risk_scores.sort_values("risk_score", ascending=False).reset_index(drop=True)
 
 
@@ -518,24 +518,24 @@ def compute_monthly_trend(
         "actual": "sum",
         "predicted": "sum",
     }).reset_index()
-    
+
     monthly.columns = [
         time_col,
         "avg_residual_ratio", "std_residual_ratio",
         "anomaly_count", "segment_count",
         "total_actual", "total_predicted",
     ]
-    
+
     # 전체 오차율
     eps = 1e-9
     monthly["overall_error_pct"] = (
-        (monthly["total_actual"] - monthly["total_predicted"]) / 
+        (monthly["total_actual"] - monthly["total_predicted"]) /
         (monthly["total_predicted"].abs() + eps) * 100
     )
-    
+
     # 이상 비율
     monthly["anomaly_pct"] = monthly["anomaly_count"] / monthly["segment_count"] * 100
-    
+
     return monthly.sort_values(time_col).reset_index(drop=True)
 
 
@@ -565,30 +565,30 @@ def run_risk_radar(
     """
     if cfg is None:
         cfg = RadarConfig()
-    
+
     # 1. 잔차 계산
     data = compute_residuals(panel_df, fm, actual_col)
-    
+
     # 2. Rolling Z-score 계산
     data = compute_rolling_zscore(data)
-    
+
     # 3. 알림 생성
     alerts = generate_alerts(
         data, fm, cfg,
         target_month=target_month,
         top_n=top_alerts
     )
-    
+
     # 4. 드라이버 분석 추가
     if include_drivers and alerts:
         alerts = add_driver_analysis(alerts, data, fm)
-    
+
     # 5. 세그먼트별 리스크 점수
     segment_risk = compute_segment_risk_score(data)
-    
+
     # 6. 월별 트렌드
     monthly_trend = compute_monthly_trend(data)
-    
+
     # 7. 알림 요약 DataFrame
     if alerts:
         summary_df = pd.DataFrame([{
@@ -608,7 +608,7 @@ def run_risk_radar(
         } for a in alerts])
     else:
         summary_df = pd.DataFrame()
-    
+
     return RiskRadarResult(
         alerts=alerts,
         summary_df=summary_df,
@@ -631,7 +631,7 @@ def export_alerts_to_csv(
     if not alerts:
         pd.DataFrame().to_csv(output_path, index=False)
         return
-    
+
     rows = []
     for a in alerts:
         row = {
@@ -647,12 +647,12 @@ def export_alerts_to_csv(
             "alert_type": a.alert_type,
             "explanation": a.explanation,
         }
-        
+
         # 드라이버 추가
         for i, driver in enumerate(a.drivers[:5]):
             row[f"driver_{i+1}"] = driver
             row[f"contrib_{i+1}"] = a.driver_contributions.get(driver, 0)
-        
+
         rows.append(row)
-    
+
     pd.DataFrame(rows).to_csv(output_path, index=False, encoding="utf-8-sig")

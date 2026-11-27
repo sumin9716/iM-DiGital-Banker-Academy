@@ -93,7 +93,7 @@ class RadarConfig:
     lgbm_subsample: float = 0.9
     lgbm_colsample_bytree: float = 0.9
     lgbm_random_state: int = 42
-    
+
     # Regularization parameters
     lgbm_min_child_samples: int = 20
     lgbm_reg_alpha: float = 0.1  # L1 regularization

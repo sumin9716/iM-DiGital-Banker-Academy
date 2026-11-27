@@ -50,7 +50,7 @@ __all__ = [
     "build_segment_profile",
     "generate_recommended_actions_for_segment",
     "generate_action_reason",
-    
+
     # Cause Analyzer
     "CauseAnalysis",
     "analyze_cause",

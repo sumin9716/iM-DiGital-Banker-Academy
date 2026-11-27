@@ -40,7 +40,7 @@ def get_device(verbose: bool = True) -> "torch.device":
         import torch
     except ImportError as exc:
         raise ImportError("PyTorch가 설치되지 않았습니다. `pip install torch` 실행 필요") from exc
-    
+
     if torch.cuda.is_available():
         device = torch.device("cuda")
         if verbose:
@@ -53,7 +53,7 @@ def get_device(verbose: bool = True) -> "torch.device":
         device = torch.device("cpu")
         if verbose:
             print("CPU 모드로 실행")
-    
+
     return device
 
 

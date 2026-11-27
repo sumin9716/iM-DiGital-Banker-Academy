@@ -26,12 +26,12 @@ class ForecastModel:
     feature_importance: Optional[pd.DataFrame] = None
     cv_scores: Optional[Dict[str, List[float]]] = None
     train_residual_std: float = 0.0  # For prediction intervals
-    
+
     def save(self, path: Path) -> None:
         """모델을 파일로 저장"""
         with open(path, 'wb') as f:
             pickle.dump(self, f)
-    
+
     @staticmethod
     def load(path: Path) -> "ForecastModel":
         """파일에서 모델 로드"""
@@ -69,7 +69,7 @@ def get_feature_importance(model: lgb.LGBMRegressor, feature_cols: List[str]) ->
     """피처 중요도 추출 (gain, split 기준)"""
     imp_gain = model.booster_.feature_importance(importance_type='gain')
     imp_split = model.booster_.feature_importance(importance_type='split')
-    
+
     df = pd.DataFrame({
         'feature': feature_cols,
         'importance_gain': imp_gain,
@@ -77,7 +77,7 @@ def get_feature_importance(model: lgb.LGBMRegressor, feature_cols: List[str]) ->
     })
     df['importance_gain_pct'] = df['importance_gain'] / df['importance_gain'].sum() * 100
     df['importance_split_pct'] = df['importance_split'] / df['importance_split'].sum() * 100
-    
+
     return df.sort_values('importance_gain', ascending=False).reset_index(drop=True)
 
 
@@ -121,7 +121,7 @@ def train_lgbm_forecast(
     """
     if cfg is None:
         cfg = RadarConfig()
-    
+
     data = df.sort_values([group_col, time_col]).copy()
 
     # Create shifted target
@@ -168,7 +168,7 @@ def train_lgbm_forecast(
         'n_jobs': -1,
         'verbosity': -1 if not verbose else 1,
     }
-    
+
     # Enhanced regularization parameters
     base_params.update({
         'min_child_samples': cfg.lgbm_min_child_samples,
@@ -177,18 +177,18 @@ def train_lgbm_forecast(
     })
 
     cv_scores = None
-    
+
     # Time-series cross-validation
     if use_cv and len(X_train) >= cv_folds * 10:
         tscv = TimeSeriesSplit(n_splits=cv_folds)
         cv_results = {'mae': [], 'rmse': [], 'smape': [], 'r2': []}
-        
+
         for train_idx, val_idx in tscv.split(X_train):
             X_tr, X_val = X_train.iloc[train_idx], X_train.iloc[val_idx]
             y_tr, y_val = y_train[train_idx], y_train[val_idx]
-            
+
             cv_model = lgb.LGBMRegressor(**base_params)
-            
+
             if use_early_stopping:
                 cv_model.fit(
                     X_tr, y_tr,
@@ -201,13 +201,13 @@ def train_lgbm_forecast(
                 )
             else:
                 cv_model.fit(X_tr, y_tr, categorical_feature=cat_cols)
-            
+
             y_pred = cv_model.predict(X_val)
             cv_results['mae'].append(float(mean_absolute_error(y_val, y_pred)))
             cv_results['rmse'].append(_rmse(y_val, y_pred))
             cv_results['smape'].append(_smape(y_val, y_pred))
             cv_results['r2'].append(float(r2_score(y_val, y_pred)))
-        
+
         cv_scores = cv_results
         if verbose:
             print(f"CV MAE: {np.mean(cv_results['mae']):.4f} ± {np.std(cv_results['mae']):.4f}")
@@ -215,13 +215,13 @@ def train_lgbm_forecast(
 
     # Final model training
     model = lgb.LGBMRegressor(**base_params)
-    
+
     if use_early_stopping:
         # Split for early stopping validation
         split_idx = int(len(X_train) * 0.85)
         X_tr, X_val = X_train.iloc[:split_idx], X_train.iloc[split_idx:]
         y_tr, y_val = y_train[:split_idx], y_train[split_idx:]
-        
+
         model.fit(
             X_tr, y_tr,
             eval_set=[(X_val, y_val)],
@@ -237,7 +237,7 @@ def train_lgbm_forecast(
     # Calculate residual std for prediction intervals
     y_pred_train = model.predict(X_train)
     train_residual_std = float(np.std(y_train - y_pred_train))
-    
+
     # Extract feature importance
     feature_importance = get_feature_importance(model, feature_cols)
 
@@ -254,7 +254,7 @@ def train_lgbm_forecast(
 
 
 def predict_with_model(
-    fm: ForecastModel, 
+    fm: ForecastModel,
     df: pd.DataFrame,
     return_interval: bool = False,
     confidence: float = 0.95,
@@ -275,9 +275,9 @@ def predict_with_model(
     for c in fm.categorical_cols:
         if c in X.columns:
             X[c] = X[c].astype("category")
-    
+
     predictions = fm.model.predict(X)
-    
+
     if return_interval:
         from scipy import stats
         z_score = stats.norm.ppf((1 + confidence) / 2)
@@ -285,7 +285,7 @@ def predict_with_model(
         lower = predictions - margin
         upper = predictions + margin
         return predictions, lower, upper
-    
+
     return predictions
 
 
@@ -309,15 +309,15 @@ def predict_with_uncertainty(
     for c in fm.categorical_cols:
         if c in X.columns:
             X[c] = X[c].astype("category")
-    
+
     base_pred = fm.model.predict(X)
-    
+
     # Add random noise based on training residual std
     all_preds = np.zeros((n_iterations, len(X)))
     for i in range(n_iterations):
         noise = np.random.normal(0, fm.train_residual_std, len(X))
         all_preds[i] = base_pred + noise
-    
+
     return np.mean(all_preds, axis=0), np.std(all_preds, axis=0)
 
 
@@ -348,7 +348,7 @@ def evaluate_forecast(
 
     test = data.loc[mask].copy()
     if test.empty:
-        return {"n": 0, "mae": np.nan, "rmse": np.nan, "mape": np.nan, 
+        return {"n": 0, "mae": np.nan, "rmse": np.nan, "mape": np.nan,
                 "smape": np.nan, "wmape": np.nan, "r2": np.nan}
 
     y_true = test[f"target__h{fm.horizon}"].astype("float64").values
