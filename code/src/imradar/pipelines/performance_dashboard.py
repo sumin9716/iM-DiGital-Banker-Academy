@@ -527,40 +527,23 @@ def generate_performance_summary_html(
     return html_path
 
 
+def _read_csv_if_exists(path: str) -> Optional[pd.DataFrame]:
+    """선택 산출물 CSV를 읽는다. 해당 단계를 실행하지 않아 파일이 없으면 None."""
+    if not os.path.exists(path):
+        return None
+    return pd.read_csv(path)
+
+
 def generate_all_performance_reports(out_dir: str) -> str:
     """
     모든 성과 데이터를 로드하고 종합 대시보드 생성
     """
-    # 데이터 로드
-    try:
-        forecast_metrics = pd.read_csv(os.path.join(out_dir, "forecast_metrics.csv"))
-    except:
-        forecast_metrics = None
-
-    try:
-        deep_learning_results = pd.read_csv(os.path.join(out_dir, "deep_learning", "deep_learning_results.csv"))
-    except:
-        deep_learning_results = None
-
-    try:
-        advanced_results = pd.read_csv(os.path.join(out_dir, "advanced_models", "advanced_model_results.csv"))
-    except:
-        advanced_results = None
-
-    try:
-        actions = pd.read_csv(os.path.join(out_dir, "actions_top.csv"))
-    except:
-        actions = None
-
-    try:
-        similarity_report = pd.read_csv(os.path.join(out_dir, "segment_similarity_report.csv"))
-    except:
-        similarity_report = None
-
-    try:
-        watchlist = pd.read_csv(os.path.join(out_dir, "watchlist_alerts.csv"))
-    except:
-        watchlist = None
+    forecast_metrics = _read_csv_if_exists(os.path.join(out_dir, "forecast_metrics.csv"))
+    deep_learning_results = _read_csv_if_exists(os.path.join(out_dir, "deep_learning", "deep_learning_results.csv"))
+    advanced_results = _read_csv_if_exists(os.path.join(out_dir, "advanced_models", "advanced_model_results.csv"))
+    actions = _read_csv_if_exists(os.path.join(out_dir, "actions_top.csv"))
+    similarity_report = _read_csv_if_exists(os.path.join(out_dir, "segment_similarity_report.csv"))
+    watchlist = _read_csv_if_exists(os.path.join(out_dir, "watchlist_alerts.csv"))
 
     # 대시보드 생성
     html_path = generate_performance_summary_html(

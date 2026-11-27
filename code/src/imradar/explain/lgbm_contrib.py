@@ -641,7 +641,7 @@ def generate_monthly_top_alerts_report(
             contrib = local_feature_contrib(fm, row_df[fm.feature_cols].copy(), top_k=4)
             top_drivers = [_format_feature_name(f) for f in contrib.head(3)["feature"]]
             driver_txt = ", ".join(top_drivers)
-        except:
+        except Exception:
             driver_txt = "분석 불가"
 
         report_lines.append(f"{idx}. {segment_id}: {residual_pct:+.1f}%")
@@ -661,7 +661,7 @@ def generate_monthly_top_alerts_report(
             contrib = local_feature_contrib(fm, row_df[fm.feature_cols].copy(), top_k=4)
             top_drivers = [_format_feature_name(f) for f in contrib.head(3)["feature"]]
             driver_txt = ", ".join(top_drivers)
-        except:
+        except Exception:
             driver_txt = "분석 불가"
 
         report_lines.append(f"{idx}. {segment_id}: {residual_pct:+.1f}%")
@@ -759,7 +759,7 @@ def parse_feature_name_v2(feature: str) -> Tuple[str, str, Optional[int]]:
             change_type = "lag"
             try:
                 period = int(suffix[3:])
-            except:
+            except ValueError:
                 period = None
         elif "mom" in suffix:
             change_type = "mom"
@@ -1101,7 +1101,7 @@ def generate_executive_summary_report(
             for feat, imp in list(drivers["internal"].items())[:3]:
                 lines.append(f"  • {feat}: 중요도 {imp:.1f}%")
             lines.append("")
-    except:
+    except Exception:
         pass
 
     # 경보 요약

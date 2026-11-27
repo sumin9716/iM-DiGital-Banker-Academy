@@ -677,8 +677,8 @@ def main():
                     "driver": drv,
                 })
                 existing_driver_segs.add(seg)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"     드라이버 생성 건너뜀 ({seg}, {kpi}): {e}")
     else:
         all_alerts = pd.DataFrame()
         watchlist = pd.DataFrame()
