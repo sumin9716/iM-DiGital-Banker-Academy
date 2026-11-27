@@ -19,7 +19,7 @@ from imradar.config import RadarConfig
 from imradar.data.io import load_internal_csv
 from imradar.data.preprocess import aggregate_to_segment_month, build_full_panel
 from imradar.data.external import load_all_external_data, merge_external_to_panel, add_macro_lag_features
-from imradar.features.kpi import compute_kpis
+from imradar.features.kpi import TARGET_COLS, compute_kpis, inverse_target_transform
 from imradar.features.lags import add_lag_features, add_rolling_features, add_change_features
 from imradar.models.forecast_lgbm import (
     ForecastModel,
@@ -31,11 +31,12 @@ from imradar.models.residual_alerts import score_residual_alerts, build_watchlis
 from imradar.models.hierarchical import reconcile_forecasts
 from imradar.explain.lgbm_contrib import local_feature_contrib, driver_sentence
 from imradar.recommend.rules import recommend_actions
-from imradar.recommend.enhanced_rules import recommend_enhanced_actions  # NEW: 개선된 액션 엔진
+from imradar.recommend.enhanced_rules import recommend_enhanced_actions
 from imradar.pipelines.dashboard import save_overview_dashboard, save_watchlist_dashboard, save_growth_dashboard, save_fx_radar_dashboard
 from imradar.pipelines.executive_summary import generate_executive_summary_html
 from imradar.pipelines.report_pdf import generate_monthly_onepager
 from imradar.models.fx_regime import compute_fx_regime_from_external, compute_fx_segment_scores
+from imradar.utils import month_add, yyyymm_to_ts
 
 from imradar.models.forecast_ensemble import (
     ENSEMBLE_DEPS_AVAILABLE as ENSEMBLE_AVAILABLE,
@@ -43,19 +44,6 @@ from imradar.models.forecast_ensemble import (
     evaluate_ensemble,
     predict_ensemble,
 )
-
-
-def _month_add(m: pd.Timestamp, k: int) -> pd.Timestamp:
-    return (m.to_period("M") + k).to_timestamp()
-
-
-def inverse_transform(kpi: str, y_hat: np.ndarray) -> np.ndarray:
-    # y_hat is transformed prediction
-    if kpi == "순유입":
-        # signed expm1
-        return np.sign(y_hat) * (np.expm1(np.abs(y_hat)))
-    else:
-        return np.expm1(np.maximum(y_hat, 0.0))
 
 
 def _model_key(kpi: str, horizon: int, model_type: str) -> str:
@@ -238,16 +226,10 @@ def main():
         else:
             print(f"  외부 데이터 디렉토리를 찾을 수 없음: {external_dir}")
 
-    # Select model target columns (transformed)
+    # FX 컬럼은 외환 실적이 없는 데이터에서는 만들어지지 않으므로 있을 때만 학습한다.
     model_targets: Dict[str, str] = {
-        "예금총잔액": "log1p_예금총잔액",
-        "대출총잔액": "log1p_대출총잔액",
-        "카드총사용": "log1p_카드총사용",
-        "디지털거래금액": "log1p_디지털거래금액",
-        "순유입": "slog1p_순유입",
+        kpi: col for kpi, col in TARGET_COLS.items() if kpi != "FX총액" or col in panel.columns
     }
-    if "log1p_FX총액" in panel.columns:
-        model_targets["FX총액"] = "log1p_FX총액"
 
     # Feature engineering on transformed KPI columns (better behaved)
     value_cols = list(model_targets.values()) + ["한도소진율", "디지털비중", "자동이체비중", "customer_count"]
@@ -281,15 +263,9 @@ def main():
         panel_fe.to_csv(panel_csv, index=False, encoding="utf-8-sig")
         print(f"Parquet not available ({e}). Saved panel as CSV: {panel_csv}")
 
-    # Time boundaries
-    def _to_ts(yyyymm: str) -> pd.Timestamp:
-        y = int(yyyymm) // 100
-        m = int(yyyymm) % 100
-        return pd.Timestamp(year=y, month=m, day=1)
-
-    train_end = _to_ts(args.train_end) if args.train_end else None
-    test_start = _to_ts(args.test_start) if args.test_start else None
-    test_end = _to_ts(args.test_end) if args.test_end else None
+    train_end = yyyymm_to_ts(args.train_end) if args.train_end else None
+    test_start = yyyymm_to_ts(args.test_start) if args.test_start else None
+    test_end = yyyymm_to_ts(args.test_end) if args.test_end else None
     if train_end is None and test_start is not None:
         # Prevent train/test leakage by defaulting train_end before test_start
         train_end = test_start - pd.DateOffset(months=1)
@@ -458,7 +434,7 @@ def main():
             if model_entry is None:
                 continue
             y_hat = _predict_model(model_entry, latest_rows)
-            y_raw = inverse_transform(kpi, y_hat)
+            y_raw = inverse_target_transform(kpi, y_hat)
             
             # ============== 순유입 예측 개선: DL 실제 예측값 반영 (h=1) ==============
             if h == 1 and kpi in dl_pred_maps:
@@ -487,7 +463,7 @@ def main():
                             elif y_raw[i] > hist_mean * 3.0:
                                 y_raw[i] = hist_mean * 1.3  # 히스토리 평균의 130%로 보정
             
-            pred_month = _month_add(last_month, h)
+            pred_month = month_add(last_month, h)
             tmp = pd.DataFrame({
                 "segment_id": latest_rows["segment_id"].values,
                 "pred_month": pred_month,
@@ -576,7 +552,7 @@ def main():
         fc = pd.DataFrame()
 
     # Residual alerting for the last month using h=1 predictions from previous month
-    prev_month = _month_add(last_month, -1)
+    prev_month = month_add(last_month, -1)
     prev_rows = panel_fe[panel_fe["month"] == prev_month].copy()
     cur_rows = panel_fe[panel_fe["month"] == last_month].copy()
 
@@ -591,7 +567,7 @@ def main():
             continue
         tgt_col = model_targets[kpi]
         y_hat = _predict_model(model_entry, prev_rows)
-        y_pred_raw = inverse_transform(kpi, y_hat)
+        y_pred_raw = inverse_target_transform(kpi, y_hat)
 
         pred_df = pd.DataFrame({
             "segment_id": prev_rows["segment_id"].values,
@@ -725,7 +701,7 @@ def main():
     # Next Best Action recommendations for last month (use next-month forecasts from last_month)
     if not fc.empty:
         # Use predictions for last_month + 1
-        next_month = _month_add(last_month, 1)
+        next_month = month_add(last_month, 1)
         fc1 = fc[fc["pred_month"] == next_month].copy()
         # Add suffix '__pred' for merging
         pred_cols = [c for c in fc1.columns if c not in {"segment_id", "pred_month"}]
@@ -900,7 +876,7 @@ def main():
         # Growth proxy: segments with highest predicted deposit increase (next month)
         top_growth = pd.DataFrame()
         if not fc.empty and "예금총잔액" in fc.columns:
-            fc1 = fc[fc["pred_month"] == _month_add(last_month, 1)].copy()
+            fc1 = fc[fc["pred_month"] == month_add(last_month, 1)].copy()
             cur = panel_fe[panel_fe["month"] == last_month][["segment_id", "예금총잔액"]].copy()
             tmp = cur.merge(fc1[["segment_id", "예금총잔액"]], on="segment_id", how="left", suffixes=("", "__pred"))
             tmp["delta"] = tmp["예금총잔액__pred"] - tmp["예금총잔액"]
