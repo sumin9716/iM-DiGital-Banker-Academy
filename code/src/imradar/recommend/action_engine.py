@@ -541,7 +541,7 @@ def build_segment_profile(
     def safe_float(val, default=0.0):
         try:
             return float(val) if pd.notna(val) else default
-        except:
+        except (TypeError, ValueError):
             return default
 
     def safe_str(val, default=""):
