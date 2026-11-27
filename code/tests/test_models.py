@@ -75,7 +75,7 @@ def test_generate_segment_explanation_returns_sentence(tiny_model):
 
 @pytest.mark.parametrize(
     ("raw", "expected"),
-    [("CRITICAL", "긴급"), ("HIGH", "주의"), ("MEDIUM", "참고"), ("LOW", "참고"), (0.9, "긴급"), (0.6, "주의"), (0.1, "참고")],
+    [("CRITICAL", "긴급"), ("HIGH", "주의"), ("MEDIUM", "참고"), ("LOW", "참고"), (" critical ", "긴급"), (None, "참고")],
 )
-def test_watchlist_severity_level_accepts_labels_and_scores(raw, expected):
+def test_watchlist_severity_level_maps_alert_grades(raw, expected):
     assert severity_level(raw) == expected

@@ -7,28 +7,16 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+_SEVERITY_LEVELS = {"CRITICAL": "긴급", "HIGH": "주의"}
 _SEVERITY_ICONS = {"긴급": "🚨", "주의": "⚠️", "참고": "💡"}
 
 
 def severity_level(raw: object) -> str:
-    """watchlist 심각도를 화면 표시 단계(긴급/주의/참고)로 바꾼다.
+    """score_residual_alerts의 심각도 등급(CRITICAL/HIGH/MEDIUM/LOW)을 화면 표시 단계로 바꾼다.
 
-    build_watchlist는 CRITICAL/HIGH/MEDIUM/LOW 문자열을 주고, 예전 형식은 0~1 점수를 준다.
+    MEDIUM, LOW와 알 수 없는 값은 모두 '참고'로 표시한다.
     """
-    label = str(raw).strip().upper()
-    if label == "CRITICAL":
-        return "긴급"
-    if label == "HIGH":
-        return "주의"
-    try:
-        score = float(raw)
-    except (TypeError, ValueError):
-        return "참고"
-    if score >= 0.8:
-        return "긴급"
-    if score >= 0.5:
-        return "주의"
-    return "참고"
+    return _SEVERITY_LEVELS.get(str(raw).strip().upper(), "참고")
 
 
 def save_overview_dashboard(
