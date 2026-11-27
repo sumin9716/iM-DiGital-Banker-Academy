@@ -61,7 +61,7 @@ class SequenceDataset(Dataset):
         self.targets = []
 
         # 그룹별로 시퀀스 생성
-        for group_id, group_df in data.groupby(group_col):
+        for _, group_df in data.groupby(group_col):
             group_df = group_df.sort_values(time_col)
             X = group_df[feature_cols].values
             y = group_df[target_col].values

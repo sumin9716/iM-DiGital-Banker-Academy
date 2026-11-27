@@ -503,7 +503,7 @@ if TORCH_AVAILABLE:
 
         def _create_samples(self) -> List[Tuple[np.ndarray, np.ndarray]]:
             samples = []
-            for seg_id, group in self.df.groupby(self.group_col):
+            for _, group in self.df.groupby(self.group_col):
                 group = group.sort_values("month")
                 values = group[self.feature_cols].values
                 targets = group[self.target_col].values

@@ -219,7 +219,7 @@ def generate_alerts(
 
     alerts = []
 
-    for idx, row in data.iterrows():
+    for _, row in data.iterrows():
         residual_ratio = row.get("residual_ratio", 0)
         zscore = row.get("residual_ratio_zscore", np.nan)
 

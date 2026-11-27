@@ -428,7 +428,7 @@ def main():
 
     latest_rows = panel_fe[panel_fe["month"] == last_month].copy()
     forecasts = []
-    for kpi, tgt_col in model_targets.items():
+    for kpi in model_targets:
         for h in cfg.horizons:
             model_entry = model_registry.get((kpi, h))
             if model_entry is None:

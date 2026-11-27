@@ -147,7 +147,7 @@ class ALSEmbedder:
         U = np.random.normal(0, 0.1, (n_segments, k))
         V = np.random.normal(0, 0.1, (n_kpis, k))
 
-        for iteration in range(n_iter):
+        for _ in range(n_iter):
             # Fix V, solve for U
             for i in range(n_segments):
                 U[i] = np.linalg.solve(

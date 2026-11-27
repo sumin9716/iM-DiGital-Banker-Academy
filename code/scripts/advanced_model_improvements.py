@@ -202,7 +202,7 @@ class StackingEnsemble:
         oof_xgb = np.zeros(len(X_train))
         oof_cat = np.zeros(len(X_train))
 
-        for fold, (train_idx, val_idx) in enumerate(tscv.split(X_train)):
+        for train_idx, val_idx in tscv.split(X_train):
             X_tr, X_vl = X_train.iloc[train_idx], X_train.iloc[val_idx]
             y_tr = y_train.iloc[train_idx]
 

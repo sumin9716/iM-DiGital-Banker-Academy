@@ -676,7 +676,7 @@ def prepare_sequence_data(df: pd.DataFrame, feature_cols: List[str],
     samples = []
     targets = []
 
-    for group_id, group_df in df_scaled.groupby(group_col):
+    for _, group_df in df_scaled.groupby(group_col):
         group_df = group_df.sort_values(time_col)
         X = group_df[feature_cols].values
         y = group_df[target_col].values
