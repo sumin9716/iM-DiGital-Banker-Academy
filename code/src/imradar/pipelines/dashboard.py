@@ -7,6 +7,29 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
+_SEVERITY_ICONS = {"긴급": "🚨", "주의": "⚠️", "참고": "💡"}
+
+
+def severity_level(raw: object) -> str:
+    """watchlist 심각도를 화면 표시 단계(긴급/주의/참고)로 바꾼다.
+
+    build_watchlist는 CRITICAL/HIGH/MEDIUM/LOW 문자열을 주고, 예전 형식은 0~1 점수를 준다.
+    """
+    label = str(raw).strip().upper()
+    if label == "CRITICAL":
+        return "긴급"
+    if label == "HIGH":
+        return "주의"
+    try:
+        score = float(raw)
+    except (TypeError, ValueError):
+        return "참고"
+    if score >= 0.8:
+        return "긴급"
+    if score >= 0.5:
+        return "주의"
+    return "참고"
+
 
 def save_overview_dashboard(
     panel: pd.DataFrame,
@@ -107,17 +130,12 @@ def save_watchlist_dashboard(
     html_parts.append("<div class='summary-grid'>")
     total_alerts = len(wl)
 
-    # severity 컬럼이 있으면 분석
     critical = 0
     high = 0
     if 'severity' in wl.columns:
-        # severity를 numeric으로 변환 시도
-        try:
-            wl['severity_num'] = pd.to_numeric(wl['severity'], errors='coerce').fillna(0)
-            critical = len(wl[wl['severity_num'] >= 0.8])
-            high = len(wl[(wl['severity_num'] >= 0.5) & (wl['severity_num'] < 0.8)])
-        except Exception:
-            pass
+        levels = wl['severity'].map(severity_level)
+        critical = int((levels == "긴급").sum())
+        high = int((levels == "주의").sum())
 
     html_parts.append(f"""
         <div class='summary-card'>
@@ -142,31 +160,17 @@ def save_watchlist_dashboard(
         segment = row.get('segment_id', str(row.get('segment', '')))
         month = row.get('month', '')
         kpi = row.get('kpi', row.get('target', ''))
-        severity_raw = row.get('severity', 0)
-        # severity를 float로 변환
-        try:
-            severity = float(severity_raw) if severity_raw is not None else 0.0
-        except (ValueError, TypeError):
-            severity = 0.0
+        severity_raw = row.get('severity', '')
+        sev_text = severity_level(severity_raw)
+        sev_icon = _SEVERITY_ICONS[sev_text]
         explanation = row.get('explanation', row.get('reason', ''))
         driver_summary = row.get('driver_summary', '')
-
-        # severity 기반 스타일
-        if severity >= 0.8:
-            sev_icon = '🚨'
-            sev_text = '긴급'
-        elif severity >= 0.5:
-            sev_icon = '⚠️'
-            sev_text = '주의'
-        else:
-            sev_icon = '💡'
-            sev_text = '참고'
 
         html_parts.append(f"""
         <div class='alert-card'>
             <div class='segment'>{sev_icon} {segment}</div>
             <div class='meta'>
-                📅 {month} | 📊 KPI: {kpi} | 심각도: {sev_text} ({severity:.1%})
+                📅 {month} | 📊 KPI: {kpi} | 심각도: {sev_text} ({severity_raw})
             </div>
         """)
 

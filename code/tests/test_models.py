@@ -8,6 +8,7 @@ from imradar.explain.lgbm_contrib import generate_narrative_report, generate_seg
 from imradar.models.forecast_lgbm import ForecastModel
 from imradar.models.residual_alerts import score_residual_alerts
 from imradar.ops.monitoring import summarize_drift
+from imradar.pipelines.dashboard import severity_level
 
 
 def test_score_residual_alerts_uses_kpi_thresholds():
@@ -70,3 +71,11 @@ def test_generate_segment_explanation_returns_sentence(tiny_model):
     text = generate_segment_explanation(fm, df.iloc[[0]], "예금총잔액", residual_pct=25.0)
     assert isinstance(text, str)
     assert "급증" in text
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [("CRITICAL", "긴급"), ("HIGH", "주의"), ("MEDIUM", "참고"), ("LOW", "참고"), (0.9, "긴급"), (0.6, "주의"), (0.1, "참고")],
+)
+def test_watchlist_severity_level_accepts_labels_and_scores(raw, expected):
+    assert severity_level(raw) == expected
